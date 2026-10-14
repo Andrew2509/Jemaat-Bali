@@ -195,4 +195,65 @@ class AdminAccessManagementTest extends TestCase
         $response->assertSee(route('admin.roles.index'));
         $response->assertSee(route('admin.permissions.index'));
     }
+
+    public function test_user_with_restricted_role_cannot_access_unauthorized_routes(): void
+    {
+        $bendaharaRole = Role::where('name', 'bendahara')->first();
+
+        $bendaharaUser = User::create([
+            'name' => 'Staf Bendahara',
+            'email' => 'bendahara.uji@jemaatbali.or.id',
+            'password' => Hash::make('password123'),
+            'role_id' => $bendaharaRole->id,
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        // Bendahara boleh akses Donasi dan Pengeluaran
+        $this->actingAs($bendaharaUser)->get(route('admin.donations'))->assertStatus(200);
+        $this->actingAs($bendaharaUser)->get(route('admin.expenses.index'))->assertStatus(200);
+
+        // Bendahara DITOLAK saat mencoba akses Koleksi Kaos, Pesanan, atau Modul Akses
+        $this->actingAs($bendaharaUser)->get(route('admin.designs'))->assertStatus(403);
+        $this->actingAs($bendaharaUser)->get(route('admin.orders'))->assertStatus(403);
+        $this->actingAs($bendaharaUser)->get(route('admin.users.index'))->assertStatus(403);
+        $this->actingAs($bendaharaUser)->get(route('admin.roles.index'))->assertStatus(403);
+        $this->actingAs($bendaharaUser)->get(route('admin.permissions.index'))->assertStatus(403);
+    }
+
+    public function test_user_with_restricted_role_sees_only_allowed_sidebar_menus(): void
+    {
+        $operatorRole = Role::where('name', 'operator')->first();
+
+        $operatorUser = User::create([
+            'name' => 'Staf Operator',
+            'email' => 'operator.uji@jemaatbali.or.id',
+            'password' => Hash::make('password123'),
+            'role_id' => $operatorRole->id,
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($operatorUser)->get(route('admin.dashboard'));
+
+        $response->assertStatus(200);
+        // Menu yang diizinkan untuk Operator:
+        $response->assertSee('Pesanan Kaos');
+        $response->assertSee('Koleksi Kaos');
+        $response->assertSee('Pengelolaan Konten');
+
+        // Menu yang TIDAK diizinkan untuk Operator tidak boleh tampak di sidebar:
+        $response->assertDontSee('Verifikasi Pembayaran');
+        $response->assertDontSee('Laporan Dana');
+        $response->assertDontSee('Dana Pengeluaran');
+        $response->assertDontSee('PENGGUNA & HAK AKSES', false);
+    }
+
+    public function test_super_admin_can_run_system_setup_database(): void
+    {
+        $response = $this->actingAs($this->superAdmin)->get(route('admin.system.setup-database'));
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertSessionHas('success');
+    }
 }

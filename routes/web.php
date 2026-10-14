@@ -41,62 +41,121 @@ Route::post('/pesan-kaos/{order}/pembayaran', [CheckoutController::class, 'bayar
 Route::get('/pesan-kaos/{order}/menunggu', [CheckoutController::class, 'menunggu'])->name('checkout.menunggu');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [OrderController::class, 'dashboard'])->name('dashboard');
-    Route::get('/verifikasi', [AdminController::class, 'verification'])->name('verification');
-    Route::get('/verifikasi/{id}/{tipe}', [AdminController::class, 'verificationShow'])->name('verification.show');
-    Route::post('/verifikasi/{id}/{tipe}/aksi', [AdminController::class, 'verificationAction'])->name('verification.action');
-    Route::post('/verifikasi/{id}/{tipe}/kirim-wa', [AdminController::class, 'resendVerificationWa'])->name('verification.resend_wa');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::post('/orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
-    Route::get('/koleksi-kaos', [AdminDesignController::class, 'index'])->name('designs');
-    Route::get('/koleksi-kaos/tambah', [AdminDesignController::class, 'create'])->name('designs.create');
-    Route::post('/koleksi-kaos/tambah', [AdminDesignController::class, 'store'])->name('designs.store');
-    Route::get('/koleksi-kaos/{design}/edit', [AdminDesignController::class, 'edit'])->name('designs.edit');
-    Route::post('/koleksi-kaos/{design}/simpan', [AdminDesignController::class, 'update'])->name('designs.update');
-    Route::post('/koleksi-kaos/{design}/toggle', [AdminDesignController::class, 'toggleStatus'])->name('designs.toggle');
-    Route::post('/koleksi-kaos/{design}/hapus', [AdminDesignController::class, 'destroy'])->name('designs.destroy');
-    Route::get('/donasi', [AdminController::class, 'donations'])->name('donations');
-    Route::get('/donasi/{donation}', [AdminController::class, 'donationShow'])->name('donations.show');
-    Route::post('/donasi/{donation}/aksi', [AdminController::class, 'donationAction'])->name('donations.action');
-    Route::get('/laporan', [AdminController::class, 'reports'])->name('reports');
-    Route::get('/laporan/export/{format}', [AdminController::class, 'reportExport'])->name('reports.export');
-    Route::get('/pengeluaran', [ExpenseController::class, 'index'])->name('expenses.index');
-    Route::post('/pengeluaran', [ExpenseController::class, 'store'])->name('expenses.store');
-    Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
-    Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
-    Route::get('/konten', [AdminController::class, 'content'])->name('content');
-    Route::get('/konten/progres/baru', [AdminController::class, 'contentCreate'])->name('content.create');
-    Route::get('/konten/progres/{id}/edit', [AdminController::class, 'contentEdit'])->name('content.edit');
-    Route::post('/konten/progres/{id}/simpan', [AdminController::class, 'contentUpdate'])->name('content.update');
-    Route::post('/konten/progres/tambah', [AdminController::class, 'contentStore'])->name('content.store');
-    Route::post('/konten/progres/{id}/hapus', [AdminController::class, 'contentDestroy'])->name('content.destroy');
-    Route::post('/konten/convert-video', [AdminController::class, 'convertVideo'])->name('content.convert-video');
-    Route::post('/konten/proposal', [ProposalController::class, 'upload'])->name('content.proposal');
-    Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
+    // 1. Dashboard
+    Route::get('/', [OrderController::class, 'dashboard'])->middleware('permission:dashboard.view')->name('dashboard');
 
-    // Provider WhatsApp (Fonnte API)
-    Route::get('/provider', [ProviderController::class, 'index'])->name('provider');
-    Route::post('/provider', [ProviderController::class, 'update'])->name('provider.update');
-    Route::post('/provider/check', [ProviderController::class, 'checkStatus'])->name('provider.check');
-    Route::post('/provider/test', [ProviderController::class, 'testSend'])->name('provider.test');
+    // 2. Verifikasi Pembayaran
+    Route::middleware('permission:verification.view')->group(function () {
+        Route::get('/verifikasi', [AdminController::class, 'verification'])->name('verification');
+        Route::get('/verifikasi/{id}/{tipe}', [AdminController::class, 'verificationShow'])->name('verification.show');
+    });
+    Route::middleware('permission:verification.manage')->group(function () {
+        Route::post('/verifikasi/{id}/{tipe}/aksi', [AdminController::class, 'verificationAction'])->name('verification.action');
+        Route::post('/verifikasi/{id}/{tipe}/kirim-wa', [AdminController::class, 'resendVerificationWa'])->name('verification.resend_wa');
+    });
 
-    // Manajemen Pengguna (Users)
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::post('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    // 3. Pesanan Kaos
+    Route::middleware('permission:orders.view')->group(function () {
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    });
+    Route::middleware('permission:orders.manage')->group(function () {
+        Route::post('/orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
+    });
 
-    // Manajemen Peran (Roles)
-    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    // 4. Koleksi Kaos
+    Route::middleware('permission:designs.view')->get('/koleksi-kaos', [AdminDesignController::class, 'index'])->name('designs');
+    Route::middleware('permission:designs.manage')->group(function () {
+        Route::get('/koleksi-kaos/tambah', [AdminDesignController::class, 'create'])->name('designs.create');
+        Route::post('/koleksi-kaos/tambah', [AdminDesignController::class, 'store'])->name('designs.store');
+        Route::get('/koleksi-kaos/{design}/edit', [AdminDesignController::class, 'edit'])->name('designs.edit');
+        Route::post('/koleksi-kaos/{design}/simpan', [AdminDesignController::class, 'update'])->name('designs.update');
+        Route::post('/koleksi-kaos/{design}/toggle', [AdminDesignController::class, 'toggleStatus'])->name('designs.toggle');
+        Route::post('/koleksi-kaos/{design}/hapus', [AdminDesignController::class, 'destroy'])->name('designs.destroy');
+    });
 
-    // Manajemen Hak Akses (Permissions)
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
-    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
-    Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
-    Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    // 5. Donasi
+    Route::middleware('permission:donations.view')->group(function () {
+        Route::get('/donasi', [AdminController::class, 'donations'])->name('donations');
+        Route::get('/donasi/{donation}', [AdminController::class, 'donationShow'])->name('donations.show');
+    });
+    Route::middleware('permission:donations.manage')->group(function () {
+        Route::post('/donasi/{donation}/aksi', [AdminController::class, 'donationAction'])->name('donations.action');
+    });
+
+    // 6. Laporan Dana
+    Route::middleware('permission:reports.view')->get('/laporan', [AdminController::class, 'reports'])->name('reports');
+    Route::middleware('permission:reports.export')->get('/laporan/export/{format}', [AdminController::class, 'reportExport'])->name('reports.export');
+
+    // 7. Pengeluaran
+    Route::middleware('permission:expenses.view')->get('/pengeluaran', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::middleware('permission:expenses.manage')->group(function () {
+        Route::post('/pengeluaran', [ExpenseController::class, 'store'])->name('expenses.store');
+        Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+    });
+
+    // 8. Konten
+    Route::middleware('permission:content.view')->get('/konten', [AdminController::class, 'content'])->name('content');
+    Route::middleware('permission:content.manage')->group(function () {
+        Route::get('/konten/progres/baru', [AdminController::class, 'contentCreate'])->name('content.create');
+        Route::get('/konten/progres/{id}/edit', [AdminController::class, 'contentEdit'])->name('content.edit');
+        Route::post('/konten/progres/{id}/simpan', [AdminController::class, 'contentUpdate'])->name('content.update');
+        Route::post('/konten/progres/tambah', [AdminController::class, 'contentStore'])->name('content.store');
+        Route::post('/konten/progres/{id}/hapus', [AdminController::class, 'contentDestroy'])->name('content.destroy');
+        Route::post('/konten/convert-video', [AdminController::class, 'convertVideo'])->name('content.convert-video');
+        Route::post('/konten/proposal', [ProposalController::class, 'upload'])->name('content.proposal');
+        Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
+    });
+
+    // 9. Provider WhatsApp (Fonnte API)
+    Route::middleware('permission:provider.view')->get('/provider', [ProviderController::class, 'index'])->name('provider');
+    Route::middleware('permission:provider.manage')->group(function () {
+        Route::post('/provider', [ProviderController::class, 'update'])->name('provider.update');
+        Route::post('/provider/check', [ProviderController::class, 'checkStatus'])->name('provider.check');
+        Route::post('/provider/test', [ProviderController::class, 'testSend'])->name('provider.test');
+    });
+
+    // 10. Manajemen Pengguna (Users)
+    Route::middleware('permission:users.view')->get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::middleware('permission:users.manage')->group(function () {
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+
+    // 11. Manajemen Peran (Roles)
+    Route::middleware('permission:roles.view')->get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::middleware('permission:roles.manage')->group(function () {
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    // 12. Manajemen Hak Akses (Permissions)
+    Route::middleware('permission:permissions.view')->get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::middleware('permission:permissions.manage')->group(function () {
+        Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+        Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    });
+
+    // Setup / Inisialisasi Database Server (khusus Super Admin untuk deploy Hostinger tanpa SSH)
+    Route::get('/system/setup-database', function () {
+        if (! Auth::check() || ! Auth::user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang berhak menjalankan sinkronisasi database.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'RoleAndPermissionSeeder', '--force' => true]);
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+
+            return redirect()->route('admin.dashboard')->with('success', 'Database dan tabel hak akses berhasil diperbarui dan disinkronkan di server Hostinger!');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.dashboard')->withErrors(['error' => 'Gagal sinkronisasi database: ' . $e->getMessage()]);
+        }
+    })->name('system.setup-database');
 });

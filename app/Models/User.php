@@ -70,6 +70,19 @@ class User extends Authenticatable
             return false;
         }
 
-        return $this->roleModel?->hasPermission($permissionName) ?? false;
+        try {
+            if ($this->roleModel) {
+                return $this->roleModel->hasPermission($permissionName);
+            }
+
+            if ($this->role) {
+                $role = Role::where('name', $this->role)->first();
+                return $role?->hasPermission($permissionName) ?? false;
+            }
+        } catch (\Throwable $e) {
+            return $this->role === 'super_admin';
+        }
+
+        return false;
     }
 }

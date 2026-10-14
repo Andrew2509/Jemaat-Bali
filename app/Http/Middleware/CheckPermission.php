@@ -26,7 +26,13 @@ class CheckPermission
         }
 
         if (! $user->hasPermission($permission)) {
-            abort(403, 'Anda tidak memiliki hak akses (izin: ' . $permission . ') untuk halaman atau aksi ini.');
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => "Anda tidak memiliki hak akses untuk tindakan ini ({$permission})."
+                ], 403);
+            }
+
+            abort(403, "Anda tidak memiliki wewenang atau hak akses ({$permission}) untuk membuka halaman atau melakukan tindakan ini.");
         }
 
         return $next($request);
