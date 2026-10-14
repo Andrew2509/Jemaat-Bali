@@ -6,6 +6,7 @@ use App\Models\Design;
 use App\Models\Order;
 use App\Models\ProgramInfo;
 use App\Services\FonnteService;
+use App\Services\RajaOngkirService;
 use App\Support\Provinsi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 class CheckoutController extends Controller
 {
     /** Halaman Pemesanan kaos (form data + pengiriman + metode pembayaran). */
-    public function create(Request $request)
+    public function create(Request $request, RajaOngkirService $rajaOngkir)
     {
         $designs = Design::where('aktif', true)->orderBy('harga')->get();
 
@@ -35,7 +36,8 @@ class CheckoutController extends Controller
         return view('checkout.pemesanan', [
             'designs' => $designs,
             'selected' => $selected,
-            'provinsi' => Provinsi::all(),
+            'provinsi' => $rajaOngkir->getProvinces(),
+            'isRajaOngkirLive' => $rajaOngkir->isConfigured(),
             'ukuran' => ['S', 'M', 'L', 'XL', 'XXL'],
             'tipe' => $tipe,
         ]);
@@ -49,7 +51,18 @@ class CheckoutController extends Controller
             'nomor' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{6,}$/'],
             'email' => ['nullable', 'email', 'max:150'],
             'alamat' => ['required', 'string', 'max:255'],
-            'provinsi' => ['required', 'string', 'in:'.implode(',', Provinsi::all())],
+            'provinsi' => [
+                'required',
+                'string',
+                'max:120',
+                function ($attribute, $value, $fail) {
+                    $normalized = strtoupper(trim((string) $value));
+                    $valid = array_map('strtoupper', Provinsi::all());
+                    if (! in_array($normalized, $valid, true)) {
+                        $fail('Provinsi yang dipilih tidak valid.');
+                    }
+                },
+            ],
             'kabupaten' => ['required', 'string', 'max:120'],
             'kecamatan' => ['required', 'string', 'max:120'],
             'kode_pos' => ['required', 'string', 'max:10'],

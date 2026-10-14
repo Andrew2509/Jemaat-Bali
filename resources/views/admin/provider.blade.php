@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Provider WhatsApp (Fonnte)')
-@section('breadcrumb', 'Provider WhatsApp')
+@section('title', 'Integrasi & Provider')
+@section('breadcrumb', 'Provider & Integrasi')
 
 @section('content')
     <div class="mx-auto max-w-6xl space-y-6">
@@ -30,377 +30,471 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <div class="flex items-center gap-2.5">
-                    <h1 class="font-serif text-2xl font-bold tracking-tight text-stone-900">Provider WhatsApp (Fonnte)</h1>
+                    <h1 class="font-serif text-2xl font-bold tracking-tight text-stone-900">
+                        {!! request('tab') === 'rajaongkir' ? 'Provider RajaOngkir (Lokasi & Ekspedisi)' : 'Provider WhatsApp (Fonnte)' !!}
+                    </h1>
                     <span class="inline-flex items-center gap-1.5 rounded-full border border-[#e8e4dc] bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-stone-600 shadow-2xs">
-                        API v1.0
+                        {{ request('tab') === 'rajaongkir' ? 'API V2 (Komerce)' : 'API v1.0' }}
                     </span>
                 </div>
                 <p class="mt-1 text-xs text-stone-500 leading-relaxed">
-                    Integrasi WhatsApp Gateway resmi via <a href="https://docs.fonnte.com/category/api/" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#b55322] hover:underline">Fonnte API</a> untuk notifikasi otomatis pemesanan dan bukti donasi.
+                    {{ request('tab') === 'rajaongkir'
+                        ? 'Integrasi API resmi RajaOngkir untuk pencarian hierarki Provinsi, Kota/Kabupaten, Kecamatan, dan otomatisasi kode pos pada pemesanan pakaian.'
+                        : 'Integrasi WhatsApp Gateway resmi via Fonnte API untuk notifikasi otomatis pemesanan dan bukti donasi.' }}
                 </p>
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="https://docs.fonnte.com/category/api/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-400">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                    </svg>
-                    <span>Dokumentasi API</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3 text-stone-400">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
-                    </svg>
-                </a>
-                <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition hover:bg-stone-800">
-                    <span>Dashboard Fonnte</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
-                    </svg>
-                </a>
+                @if (request('tab') === 'rajaongkir')
+                    <a href="https://rajaongkir.com/docs" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        <span>Dokumentasi RajaOngkir</span>
+                    </a>
+                @else
+                    <a href="https://docs.fonnte.com/category/api/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        <span>Dokumentasi Fonnte</span>
+                    </a>
+                @endif
             </div>
         </div>
 
-        {{-- 1. Status Perangkat (Device Connection Card) --}}
-        <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-stone-100 pb-5">
-                <div class="flex items-center gap-3.5">
-                    <div class="grid h-12 w-12 place-items-center rounded-2xl {{ $setting->isConnected() ? 'bg-emerald-50 text-emerald-600' : 'bg-[#faefe8] text-[#b55322]' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="font-serif text-base font-bold text-stone-900">Status Koneksi Perangkat Fonnte</h2>
-                            @if ($setting->isConnected())
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    Terhubung (Connect)
-                                </span>
-                            @elseif ($setting->isConfigured())
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 border border-amber-200">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                    Terputus (Disconnect)
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-bold text-stone-600 border border-stone-200">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span>
-                                    Belum Diatur
-                                </span>
-                            @endif
-                        </div>
-                        <p class="text-xs text-stone-500 mt-0.5">
-                            Endpoint: <code class="rounded bg-stone-100 px-1.5 py-0.5 text-[11px] text-stone-700">POST https://api.fonnte.com/device</code>
-                        </p>
-                    </div>
-                </div>
+        {{-- Provider Tabs Navigation --}}
+        <div class="flex items-center gap-2 border-b border-[#e8e4dc] pb-3">
+            <a href="{{ route('admin.provider', ['tab' => 'whatsapp']) }}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ request('tab', 'whatsapp') !== 'rajaongkir' ? 'bg-[#b55322] text-white shadow-2xs' : 'bg-white text-stone-600 hover:bg-stone-50 border border-[#e8e4dc]' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                <span>WhatsApp (Fonnte)</span>
+                @if ($setting->isConnected())
+                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                @endif
+            </a>
 
-                <div class="flex items-center gap-2">
-                    <form method="POST" action="{{ route('admin.provider.check') }}">
-                        @csrf
-                        <button type="submit" id="btn-sync-device" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50 cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            <a href="{{ route('admin.provider', ['tab' => 'rajaongkir']) }}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ request('tab') === 'rajaongkir' ? 'bg-[#b55322] text-white shadow-2xs' : 'bg-white text-stone-600 hover:bg-stone-50 border border-[#e8e4dc]' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25V3.375c0-.621-.504-1.125-1.125-1.125H4.125C3.504 2.25 3 2.754 3 3.375v10.875" />
+                </svg>
+                <span>RajaOngkir (Lokasi & Ekspedisi)</span>
+                @if ($shippingSetting && $shippingSetting->isConnected())
+                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                @endif
+            </a>
+        </div>
+
+        @if (request('tab') === 'rajaongkir')
+            {{-- ======================================================== --}}
+            {{-- TAB: RAJAONGKIR (LOKASI & EKSPEDISI) --}}
+            {{-- ======================================================== --}}
+
+            {{-- 1. Status Koneksi RajaOngkir --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-stone-100 pb-5">
+                    <div class="flex items-center gap-3.5">
+                        <div class="grid h-12 w-12 place-items-center rounded-2xl {{ $shippingSetting->isConnected() ? 'bg-emerald-50 text-emerald-600' : 'bg-[#faefe8] text-[#b55322]' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-6 w-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                             </svg>
-                            <span>Perbarui Status</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            {{-- Device Metrics Grid --}}
-            <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 text-xs">
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Nomor WhatsApp</span>
-                    <span class="mt-1 block font-mono text-xs font-bold text-stone-900 truncate">
-                        {{ $setting->device_phone ?: '—' }}
-                    </span>
-                </div>
-
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Nama Perangkat</span>
-                    <span class="mt-1 block font-semibold text-stone-900 truncate">
-                        {{ $setting->device_name ?: '—' }}
-                    </span>
-                </div>
-
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Kuota Pesan</span>
-                    <span class="mt-1 block font-semibold text-stone-900 truncate">
-                        {{ $setting->quota !== null ? $setting->quota . ' pesan' : '—' }}
-                    </span>
-                </div>
-
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Paket Fonnte</span>
-                    <span class="mt-1 block font-semibold uppercase text-stone-900 truncate">
-                        {{ $setting->package ?: 'Regular' }}
-                    </span>
-                </div>
-
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Masa Aktif</span>
-                    <span class="mt-1 block font-semibold text-stone-900 truncate">
-                        {{ $setting->expired ?: '—' }}
-                    </span>
-                </div>
-
-                <div class="rounded-xl border border-stone-100 bg-[#fbf9f5] p-3.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Terakhir Dicek</span>
-                    <span class="mt-1 block text-stone-600 truncate">
-                        {{ $setting->last_checked_at ? $setting->last_checked_at->format('d M H:i') : 'Belum' }}
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        {{-- Form Konfigurasi & Uji Coba (2 Kolom) --}}
-        <div class="grid gap-6 lg:grid-cols-12">
-
-            {{-- Kolom Kiri: Form Konfigurasi Token & Fitur --}}
-            <div class="lg:col-span-7 space-y-6">
-                <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
-                    <div class="border-b border-stone-100 pb-4">
-                        <h2 class="font-serif text-base font-bold text-stone-900">Konfigurasi Fonnte API</h2>
-                        <p class="text-xs text-stone-500 mt-0.5">Masukkan token perangkat yang diperoleh dari akun Fonnte Anda.</p>
-                    </div>
-
-                    <form id="provider-config-form" method="POST" action="{{ route('admin.provider.update') }}" class="mt-5 space-y-4">
-                        @csrf
-
-                        {{-- Toggle Status Integrasi --}}
-                        <div class="flex items-center justify-between rounded-xl border border-[#ede8df] bg-[#fbf9f5] p-4">
-                            <div>
-                                <label for="is_active" class="text-xs font-bold text-stone-900 cursor-pointer">Aktifkan Pengiriman WhatsApp</label>
-                                <p class="text-[11px] text-stone-500 mt-0.5">Jika aktif, sistem otomatis mengirimkan pesan WA melalui Fonnte.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="is_active" name="is_active" value="1" class="sr-only peer" {{ old('is_active', $setting->is_active) ? 'checked' : '' }}>
-                                <div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#b55322]"></div>
-                            </label>
                         </div>
-
-                        {{-- Token Device Fonnte --}}
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label for="api_token" class="text-xs font-semibold text-stone-700">Fonnte Device Token <span class="text-red-500">*</span></label>
-                                <a href="https://fonnte.com" target="_blank" class="text-[11px] font-semibold text-[#b55322] hover:underline">Ambil token di Fonnte &rarr;</a>
+                            <div class="flex items-center gap-2">
+                                <h2 class="font-serif text-base font-bold text-stone-900">Status Provider RajaOngkir</h2>
+                                @if ($shippingSetting->isConnected())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Terhubung (Live API)
+                                    </span>
+                                @elseif ($shippingSetting->isConfigured())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 border border-amber-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                        Menunggu Uji Coba
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-bold text-stone-600 border border-stone-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span>
+                                        Mode Cadangan (38 Provinsi Aktif)
+                                    </span>
+                                @endif
                             </div>
-                            <div class="relative">
-                                <input type="password" id="api_token" name="api_token" value="{{ old('api_token', $setting->api_token) }}" placeholder="Contoh: pz#XXXXXXXXXXXXX" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 pr-20 text-xs font-mono text-stone-900 focus:border-[#b55322] focus:outline-none" required>
-                                <button type="button" id="toggle-token-btn" class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-[11px] font-semibold text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition">
-                                    Lihat
-                                </button>
-                            </div>
-                            <p class="mt-1.5 text-[11px] text-stone-400">
-                                Buka Fonnte &gt; Menu <b>Device</b> &gt; Klik nama perangkat WhatsApp &gt; Salin <b>Token</b>.
+                            <p class="text-xs text-stone-500 mt-0.5">
+                                Endpoint Utama: <code class="rounded bg-stone-100 px-1.5 py-0.5 text-[11px] text-stone-700">{{ $shippingSetting->getEffectiveBaseUrl() }}</code>
                             </p>
                         </div>
-
-                        {{-- Country Code --}}
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="country_code" class="block text-xs font-semibold text-stone-700 mb-1.5">Country Code</label>
-                                <input type="text" id="country_code" name="country_code" value="{{ old('country_code', $setting->country_code ?: '62') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none" required>
-                                <p class="mt-1 text-[10px] text-stone-400">Default: 62 (Indonesia)</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-700 mb-1.5">Metode API</label>
-                                <div class="w-full rounded-xl border border-[#ede8df] bg-[#fbf9f5] px-3.5 py-2.5 text-xs text-stone-600 font-mono">
-                                    POST /send
-                                </div>
-                                <p class="mt-1 text-[10px] text-stone-400">Header: Authorization</p>
-                            </div>
-                        </div>
-
-                        {{-- Notifikasi Otomatis Toggles --}}
-                        <div class="space-y-2.5 pt-2">
-                            <span class="block text-xs font-bold text-stone-900">Pemicu Pengiriman Otomatis</span>
-
-                            <label class="flex items-start gap-3 rounded-xl border border-[#ede8df] bg-[#fbf9f5] p-3 text-xs text-stone-700 cursor-pointer hover:bg-stone-50 transition">
-                                <input type="checkbox" name="auto_notify_order" value="1" class="mt-0.5 rounded text-[#b55322] focus:ring-[#b55322]" {{ old('auto_notify_order', $setting->auto_notify_order) ? 'checked' : '' }}>
-                                <div>
-                                    <span class="font-semibold text-stone-900">Kirim notifikasi saat pesanan baru dibuat</span>
-                                    <p class="text-[11px] text-stone-500 mt-0.5">Kirim WhatsApp berisi rincian pesanan dan tautan upload bukti transfer ke donatur.</p>
-                                </div>
-                            </label>
-
-                            <label class="flex items-start gap-3 rounded-xl border border-[#ede8df] bg-[#fbf9f5] p-3 text-xs text-stone-700 cursor-pointer hover:bg-stone-50 transition">
-                                <input type="checkbox" name="auto_notify_waiting" value="1" class="mt-0.5 rounded text-[#b55322] focus:ring-[#b55322]" {{ old('auto_notify_waiting', $setting->auto_notify_waiting) ? 'checked' : '' }}>
-                                <div>
-                                    <span class="font-semibold text-stone-900">Kirim notifikasi saat bukti diunggah (Menunggu Konfirmasi)</span>
-                                    <p class="text-[11px] text-stone-500 mt-0.5">Kirim WhatsApp otomatis ke pemesan begitu bukti transfer diunggah bahwa pesanan sedang menunggu verifikasi panitia.</p>
-                                </div>
-                            </label>
-
-                            <label class="flex items-start gap-3 rounded-xl border border-[#ede8df] bg-[#fbf9f5] p-3 text-xs text-stone-700 cursor-pointer hover:bg-stone-50 transition">
-                                <input type="checkbox" name="auto_notify_verified" value="1" class="mt-0.5 rounded text-[#b55322] focus:ring-[#b55322]" {{ old('auto_notify_verified', $setting->auto_notify_verified) ? 'checked' : '' }}>
-                                <div>
-                                    <span class="font-semibold text-stone-900">Kirim notifikasi saat pembayaran terverifikasi</span>
-                                    <p class="text-[11px] text-stone-500 mt-0.5">Kirim ucapan terima kasih dan konfirmasi bahwa dana telah diterima panitia.</p>
-                                </div>
-                            </label>
-                        </div>
-
-                        <div class="pt-2">
-                            <button type="submit" class="w-full rounded-xl bg-[#b55322] hover:bg-[#9d4419] py-3 text-xs font-bold text-white shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                </svg>
-                                <span>Simpan Konfigurasi</span>
-                            </button>
-                        </div>
-                    </form>
-                </section>
-            </div>
-
-            {{-- Kolom Kanan: Uji Kirim Pesan & Panduan Cepat --}}
-            <div class="lg:col-span-5 space-y-6">
-
-                {{-- Live Test Send Card --}}
-                <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
-                    <div class="border-b border-stone-100 pb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold">▶</span>
-                            <h2 class="font-serif text-base font-bold text-stone-900">Uji Kirim WhatsApp Langsung</h2>
-                        </div>
-                        <p class="text-xs text-stone-500 mt-1">Uji coba kirim pesan WhatsApp ke nomor HP Anda untuk memastikan Fonnte berjalan normal.</p>
                     </div>
 
-                    <form id="test-send-form" method="POST" action="{{ route('admin.provider.test') }}" class="mt-4 space-y-3.5">
-                        @csrf
+                    <div class="flex items-center gap-2">
+                        <form method="POST" action="{{ route('admin.provider.rajaongkir.test') }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50 cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                <span>Uji Koneksi API</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-                        <div>
-                            <label for="test-target" class="block text-xs font-semibold text-stone-700 mb-1">Nomor WhatsApp Tujuan</label>
-                            <input type="text" id="test-target" name="target" placeholder="Contoh: 081234567890" value="{{ old('whatsapp', $programInfo->whatsapp ?? '') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none" required>
-                            <p class="mt-1 text-[10px] text-stone-400">Format: 08... atau 62...</p>
+                {{-- Status Metrics Grid --}}
+                <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Cakupan Wilayah</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-stone-900">
+                            {{ $shippingSetting->provinces_count > 0 ? $shippingSetting->provinces_count . ' Provinsi' : '38 Provinsi (Nasional)' }}
+                        </p>
+                        <span class="text-[10px] text-stone-400">Seluruh Indonesia</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Otomatisasi Kode Pos</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-emerald-600">Aktif ✓</p>
+                        <span class="text-[10px] text-stone-400">Terisi saat pilih kecamatan</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Status Form Checkout</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-stone-900">
+                            {{ $shippingSetting->is_active ? 'Terhubung' : 'Non-Aktif' }}
+                        </p>
+                        <span class="text-[10px] text-stone-400">/pesan-kaos</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Terakhir Dicek</span>
+                        <p class="mt-1 font-serif text-sm font-bold text-stone-900">
+                            {{ $shippingSetting->last_checked_at ? $shippingSetting->last_checked_at->diffForHumans() : 'Belum Pernah' }}
+                        </p>
+                        <span class="text-[10px] text-stone-400">{{ $shippingSetting->last_checked_at ? $shippingSetting->last_checked_at->format('d/m/Y H:i') : '-' }}</span>
+                    </div>
+                </div>
+
+                @if ($shippingSetting->last_error)
+                    <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs text-amber-800">
+                        <span class="font-bold">Catatan respons terakhir:</span> {{ $shippingSetting->last_error }}
+                    </div>
+                @endif
+            </section>
+
+            {{-- 2. Form Konfigurasi RajaOngkir --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+                    <div>
+                        <h2 class="font-serif text-base font-bold text-stone-900">Konfigurasi Kunci API RajaOngkir</h2>
+                        <p class="text-xs text-stone-500 mt-0.5">Dapatkan API Key di akun <a href="https://rajaongkir.com" target="_blank" class="text-[#b55322] font-semibold hover:underline">RajaOngkir</a> untuk pencarian alamat real-time.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ route('admin.provider.rajaongkir.update') }}" class="mt-5 space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="rajaongkir_api_key" class="block text-xs font-semibold text-stone-700 mb-1.5">
+                            API Key RajaOngkir <span class="text-stone-400 font-normal">(Header: Key)</span>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="rajaongkir_api_key" name="api_key" value="{{ old('api_key', $shippingSetting->api_key) }}" placeholder="Contoh: 8c3f... atau ambil dari akun RajaOngkir" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none pr-24">
+                            <button type="button" id="toggle-rajaongkir-key" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-600 hover:bg-stone-200 transition">
+                                Lihat
+                            </button>
                         </div>
+                        <p class="mt-1 text-[11px] text-stone-500">
+                            Bisa juga diatur melalui file <code class="bg-stone-100 px-1 rounded">.env</code> dengan variabel <code class="bg-stone-100 px-1 rounded">RAJAONGKIR_API_KEY</code>.
+                        </p>
+                    </div>
 
-                        <div>
-                            <label for="test-message" class="block text-xs font-semibold text-stone-700 mb-1">Pesan Uji Coba</label>
-                            <textarea id="test-message" name="message" rows="3" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none leading-relaxed" required>Halo! Ini adalah pesan uji coba dari sistem donasi pembangunan Jemaat Bali melalui Fonnte API.</textarea>
+                    <div>
+                        <label for="rajaongkir_base_url" class="block text-xs font-semibold text-stone-700 mb-1.5">
+                            Base URL API RajaOngkir <span class="text-stone-400 font-normal">(Default V2 Komerce)</span>
+                        </label>
+                        <input type="text" id="rajaongkir_base_url" name="base_url" value="{{ old('base_url', $shippingSetting->base_url ?: 'https://rajaongkir.komerce.id/api/v1') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none">
+                        <p class="mt-1 text-[11px] text-stone-500">Gunakan <code class="bg-stone-100 px-1 rounded">https://rajaongkir.komerce.id/api/v1</code> sesuai dokumentasi resmi RajaOngkir Docs V2.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 pt-2">
+                        <label class="flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-stone-800">
+                            <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('is_active', $shippingSetting->is_active))>
+                            Aktifkan integrasi RajaOngkir di form pemesanan
+                        </label>
+                    </div>
+
+                    <div class="flex justify-end border-t border-stone-100 pt-4">
+                        <button type="submit" class="rounded-xl bg-[#b55322] hover:bg-[#9d4419] px-6 py-2.5 text-xs font-bold text-white shadow-2xs transition cursor-pointer">
+                            Simpan Konfigurasi RajaOngkir
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            {{-- 3. Panduan Endpoint Terhubung --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <h3 class="font-serif text-base font-bold text-stone-900 mb-2">Endpoint RajaOngkir yang Terhubung</h3>
+                <p class="text-xs text-stone-500 mb-4">Hierarki pemilihan wilayah bertingkat yang diaktifkan pada sistem pemesanan pakaian:</p>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-stone-900">1. Search Province</span>
+                            <span class="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">GET</span>
                         </div>
+                        <code class="text-[11px] font-mono text-stone-700 block truncate">/destination/province</code>
+                        <p class="mt-1 text-[11px] text-stone-500">Mengambil daftar 38 provinsi di Indonesia.</p>
+                    </div>
 
-                        <div id="test-feedback" class="hidden rounded-xl p-3 text-xs"></div>
+                    <div class="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-stone-900">2. Search City</span>
+                            <span class="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">GET</span>
+                        </div>
+                        <code class="text-[11px] font-mono text-stone-700 block truncate">/destination/city/{province_id}</code>
+                        <p class="mt-1 text-[11px] text-stone-500">Mengambil daftar Kota / Kabupaten dalam provinsi yang dipilih.</p>
+                    </div>
 
-                        <button type="submit" id="btn-submit-test" class="w-full rounded-xl bg-stone-900 hover:bg-stone-800 py-2.5 text-xs font-bold text-white shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                    <div class="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-stone-900">3. Search District (Kecamatan)</span>
+                            <span class="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">GET</span>
+                        </div>
+                        <code class="text-[11px] font-mono text-stone-700 block truncate">/destination/district/{city_id}</code>
+                        <p class="mt-1 text-[11px] text-stone-500">Mengambil daftar Kecamatan beserta informasi <b class="text-emerald-700">zip_code</b>.</p>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-stone-900">4. Search Sub-District</span>
+                            <span class="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">GET</span>
+                        </div>
+                        <code class="text-[11px] font-mono text-stone-700 block truncate">/destination/sub-district/{district_id}</code>
+                        <p class="mt-1 text-[11px] text-stone-500">Mendukung resolusi kode pos spesifik per kelurahan.</p>
+                    </div>
+                </div>
+            </section>
+        @else
+            {{-- ======================================================== --}}
+            {{-- TAB: WHATSAPP GATEWAY (FONNTE) --}}
+            {{-- ======================================================== --}}
+
+            {{-- 1. Status Perangkat (Device Connection Card) --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-stone-100 pb-5">
+                    <div class="flex items-center gap-3.5">
+                        <div class="grid h-12 w-12 place-items-center rounded-2xl {{ $setting->isConnected() ? 'bg-emerald-50 text-emerald-600' : 'bg-[#faefe8] text-[#b55322]' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
                             </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="font-serif text-base font-bold text-stone-900">Status Koneksi Perangkat Fonnte</h2>
+                                @if ($setting->isConnected())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Terhubung (Connect)
+                                    </span>
+                                @elseif ($setting->isConfigured())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700 border border-amber-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                        Terputus (Disconnect)
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-bold text-stone-600 border border-stone-200">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span>
+                                        Belum Diatur
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-stone-500 mt-0.5">
+                                Endpoint: <code class="rounded bg-stone-100 px-1.5 py-0.5 text-[11px] text-stone-700">POST https://api.fonnte.com/device</code>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <form method="POST" action="{{ route('admin.provider.check') }}">
+                            @csrf
+                            <button type="submit" id="btn-sync-device" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50 cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                <span>Perbarui Status</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Device Metrics Grid --}}
+                <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Perangkat</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-stone-900">{{ $setting->device_name ?: 'Belum Terhubung' }}</p>
+                        <span class="text-[10px] text-stone-400 font-mono">{{ $setting->device_id ?: '-' }}</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Nomor Pengirim</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-stone-900">{{ $setting->sender_number ?: '-' }}</p>
+                        <span class="text-[10px] text-stone-400">Kode Negara: +{{ $setting->country_code }}</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Sisa Kuota Pesan</span>
+                        <p class="mt-1 font-serif text-lg font-bold text-stone-900">{{ number_format($setting->quota, 0, ',', '.') }}</p>
+                        <span class="text-[10px] text-stone-400">Paket: {{ strtoupper($setting->package ?: 'Free/Reguler') }}</span>
+                    </div>
+
+                    <div class="rounded-xl border border-stone-100 bg-stone-50/50 p-3.5">
+                        <span class="text-[11px] font-medium text-stone-500">Pembaruan Terakhir</span>
+                        <p class="mt-1 font-serif text-sm font-bold text-stone-900">
+                            {{ $setting->last_checked_at ? $setting->last_checked_at->diffForHumans() : 'Belum Pernah' }}
+                        </p>
+                        <span class="text-[10px] text-stone-400">{{ $setting->last_checked_at ? $setting->last_checked_at->format('d/m/Y H:i') : '-' }}</span>
+                    </div>
+                </div>
+            </section>
+
+            {{-- 2. Form Konfigurasi Token & Opsi Otomatisasi --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+                    <div>
+                        <h2 class="font-serif text-base font-bold text-stone-900">Konfigurasi API Token & Opsi Pengiriman</h2>
+                        <p class="text-xs text-stone-500 mt-0.5">Kelola token autentikasi Fonnte dan pilih notifikasi yang aktif otomatis.</p>
+                    </div>
+                </div>
+
+                <form id="provider-config-form" method="POST" action="{{ route('admin.provider.update') }}" class="mt-5 space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="api_token" class="block text-xs font-semibold text-stone-700 mb-1.5">
+                            Fonnte API Token <span class="text-stone-400 font-normal">(Authorization Header)</span>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="api_token" name="api_token" value="{{ old('api_token', $setting->api_token) }}" placeholder="Contoh: pz#123abc456def..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none pr-24">
+                            <button type="button" id="toggle-token-btn" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-600 hover:bg-stone-200 transition">
+                                Lihat
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="country_code" class="block text-xs font-semibold text-stone-700 mb-1.5">Default Kode Negara</label>
+                            <input type="text" id="country_code" name="country_code" value="{{ old('country_code', $setting->country_code) }}" placeholder="62" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-800 focus:border-[#b55322] focus:outline-none">
+                        </div>
+
+                        <div class="flex items-center pt-5">
+                            <label class="flex cursor-pointer items-center gap-2.5 text-xs font-semibold text-stone-800">
+                                <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('is_active', $setting->is_active))>
+                                Aktifkan Pengiriman WhatsApp
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-stone-100 pt-4">
+                        <span class="block text-xs font-bold text-stone-800 mb-3">Pemicu Pengiriman Otomatis (Auto Triggers):</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
+                                <input type="checkbox" name="auto_notify_order" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_order', $setting->auto_notify_order))>
+                                <div>
+                                    <span class="block text-xs font-bold text-stone-800">1. Pesanan Baru</span>
+                                    <span class="text-[11px] text-stone-500 leading-tight">Kirim saat pemesan submit form.</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
+                                <input type="checkbox" name="auto_notify_waiting" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_waiting', $setting->auto_notify_waiting))>
+                                <div>
+                                    <span class="block text-xs font-bold text-stone-800">2. Menunggu Verifikasi</span>
+                                    <span class="text-[11px] text-stone-500 leading-tight">Kirim saat bukti bayar diupload.</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
+                                <input type="checkbox" name="auto_notify_verified" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_verified', $setting->auto_notify_verified))>
+                                <div>
+                                    <span class="block text-xs font-bold text-stone-800">3. Terverifikasi</span>
+                                    <span class="text-[11px] text-stone-500 leading-tight">Kirim saat admin setujui pembayaran.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            {{-- 3. Uji Coba Kirim Pesan --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <h2 class="font-serif text-base font-bold text-stone-900 mb-1">Uji Coba Pengiriman Pesan (Sandbox Test)</h2>
+                <p class="text-xs text-stone-500 mb-4">Kirim pesan WhatsApp tes ke nomor tujuan untuk memastikan Fonnte berjalan lancar.</p>
+
+                <form id="test-send-form" method="POST" action="{{ route('admin.provider.test') }}" class="space-y-4">
+                    @csrf
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="test_target" class="block text-xs font-semibold text-stone-700 mb-1">Nomor WhatsApp Tujuan</label>
+                            <input type="text" id="test_target" name="target" placeholder="Contoh: 08123456789" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs text-stone-800 focus:border-[#b55322] focus:outline-none" required>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="test_message" class="block text-xs font-semibold text-stone-700 mb-1">Isi Pesan Uji Coba</label>
+                            <input type="text" id="test_message" name="message" value="Halo, ini pesan uji coba WhatsApp resmi dari Sistem Jemaat Bali melalui Fonnte Gateway." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs text-stone-800 focus:border-[#b55322] focus:outline-none" required>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <div id="test-feedback" class="hidden text-xs"></div>
+                        <button type="submit" id="btn-submit-test" class="ml-auto inline-flex items-center gap-2 rounded-xl bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-stone-800 cursor-pointer">
                             <span id="btn-submit-text">Kirim Pesan WhatsApp Tes</span>
                         </button>
-                    </form>
-                </section>
-
-                {{-- Panduan 3 Langkah --}}
-                <section class="rounded-2xl border border-[#ede8df] bg-[#fbf9f5] p-5 shadow-2xs text-xs">
-                    <h3 class="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-3">Panduan Menghubungkan Fonnte</h3>
-                    <ol class="space-y-3 text-stone-600 leading-relaxed list-decimal list-inside">
-                        <li>
-                            <b class="text-stone-900">Daftar Akun:</b> Buat akun gratis di <a href="https://fonnte.com" target="_blank" class="text-[#b55322] font-semibold underline">fonnte.com</a>.
-                        </li>
-                        <li>
-                            <b class="text-stone-900">Scan QR Code WhatsApp:</b> Pada dashboard Fonnte, buka menu <b>Device</b>, tambahkan perangkat lalu scan QR code menggunakan aplikasi WhatsApp di HP panitia.
-                        </li>
-                        <li>
-                            <b class="text-stone-900">Salin &amp; Simpan Token:</b> Salin <b>Token Perangkat</b> lalu tempelkan di form konfigurasi sebelah kiri, simpan, dan klik tombol <b>Uji Coba</b>.
-                        </li>
-                    </ol>
-
-                    <div class="mt-4 pt-3 border-t border-stone-200/80 text-[11px] text-stone-500">
-                        <span class="font-semibold text-stone-700">Tips Penting:</span>
-                        Pastikan HP panitia memiliki koneksi internet aktif agar pesan WhatsApp dapat terkirim secara otomatis kapan pun ada transaksi.
                     </div>
-                </section>
-            </div>
-        </div>
+                </form>
+            </section>
 
-        {{-- 3. Template Pesan Otomatis --}}
-        <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
-            <div class="border-b border-stone-100 pb-4">
-                <div class="flex items-center gap-2">
-                    <span class="grid h-7 w-7 place-items-center rounded-lg bg-[#faefe8] text-[#b55322] text-xs font-bold">📝</span>
-                    <h2 class="font-serif text-base font-bold text-stone-900">Format Template Pesan WhatsApp</h2>
-                </div>
-                <p class="text-xs text-stone-500 mt-1">
-                    Sesuaikan pesan WhatsApp otomatis yang dikirim kepada pemesan &amp; donatur. Klik tombol tag variabel untuk menyisipkannya ke dalam template.
-                </p>
-            </div>
-
-            <div class="mt-6 grid gap-6 lg:grid-cols-3">
-                {{-- Template 1: Pesanan Baru --}}
-                <div class="space-y-3 rounded-2xl border border-stone-100 bg-[#fbf9f5] p-4">
-                    <div class="flex items-center justify-between">
-                        <label for="template_order" class="text-xs font-bold text-stone-900">1. Pesanan Baru Dibuat</label>
-                        <span class="rounded bg-stone-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-700">Tahap 1</span>
-                    </div>
-
-                    {{-- Variabel Chips --}}
-                    <div class="flex flex-wrap gap-1 text-[11px]">
-                        @php
-                            $varsOrder = ['{nama}', '{nomor_pesanan}', '{jenis}', '{total}', '{metode}', '{link}', '{nama_program}'];
-                        @endphp
-                        @foreach ($varsOrder as $v)
-                            <button type="button" onclick="insertVariable('template_order', '{{ $v }}')" class="rounded-md border border-stone-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-stone-700 hover:border-[#b55322] hover:text-[#b55322] transition cursor-pointer">
-                                + {{ $v }}
-                            </button>
-                        @endforeach
-                    </div>
-
-                    <textarea id="template_order" form="provider-config-form" name="template_order" rows="12" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_order', $setting->template_order ?: \App\Models\WhatsappSetting::defaultOrderTemplate()) }}</textarea>
+            {{-- 4. Template Pesan WhatsApp --}}
+            <section class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+                <div class="border-b border-stone-100 pb-4">
+                    <h2 class="font-serif text-base font-bold text-stone-900">Templat Pesan WhatsApp</h2>
+                    <p class="text-xs text-stone-500 mt-0.5">Sesuaikan teks pesan WhatsApp yang dikirimkan kepada jemaat pada tiap tahapan.</p>
                 </div>
 
-                {{-- Template 2: Menunggu Konfirmasi (Setelah Upload Bukti) --}}
-                <div class="space-y-3 rounded-2xl border border-amber-200/70 bg-amber-50/30 p-4">
-                    <div class="flex items-center justify-between">
-                        <label for="template_waiting" class="text-xs font-bold text-amber-950">2. Menunggu Konfirmasi (Upload Bukti)</label>
-                        <span class="rounded bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-900">Tahap 2</span>
+                <div class="mt-6 space-y-6">
+                    {{-- Template 1: Pesanan Baru --}}
+                    <div class="space-y-3 rounded-2xl border border-stone-200/80 bg-stone-50/40 p-4">
+                        <div class="flex items-center justify-between">
+                            <label for="template_order" class="text-xs font-bold text-stone-900">1. Pesanan Kaos Baru (Menunggu Pembayaran)</label>
+                            <span class="rounded bg-stone-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-700">Tahap 1</span>
+                        </div>
+                        <textarea id="template_order" form="provider-config-form" name="template_order" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_order', $setting->template_order ?: \App\Models\WhatsappSetting::defaultOrderTemplate()) }}</textarea>
                     </div>
 
-                    {{-- Variabel Chips --}}
-                    <div class="flex flex-wrap gap-1 text-[11px]">
-                        @php
-                            $varsWaiting = ['{nama}', '{nomor_pesanan}', '{jenis}', '{total}', '{metode}', '{link}', '{nama_program}'];
-                        @endphp
-                        @foreach ($varsWaiting as $v)
-                            <button type="button" onclick="insertVariable('template_waiting', '{{ $v }}')" class="rounded-md border border-amber-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-stone-700 hover:border-[#b55322] hover:text-[#b55322] transition cursor-pointer">
-                                + {{ $v }}
-                            </button>
-                        @endforeach
+                    {{-- Template 2: Menunggu Konfirmasi --}}
+                    <div class="space-y-3 rounded-2xl border border-amber-200/70 bg-amber-50/30 p-4">
+                        <div class="flex items-center justify-between">
+                            <label for="template_waiting" class="text-xs font-bold text-amber-950">2. Menunggu Konfirmasi (Upload Bukti)</label>
+                            <span class="rounded bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-900">Tahap 2</span>
+                        </div>
+                        <textarea id="template_waiting" form="provider-config-form" name="template_waiting" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_waiting', $setting->template_waiting ?: \App\Models\WhatsappSetting::defaultWaitingTemplate()) }}</textarea>
                     </div>
 
-                    <textarea id="template_waiting" form="provider-config-form" name="template_waiting" rows="12" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_waiting', $setting->template_waiting ?: \App\Models\WhatsappSetting::defaultWaitingTemplate()) }}</textarea>
+                    {{-- Template 3: Pembayaran Terverifikasi --}}
+                    <div class="space-y-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/30 p-4">
+                        <div class="flex items-center justify-between">
+                            <label for="template_verified" class="text-xs font-bold text-emerald-950">3. Pembayaran Terverifikasi</label>
+                            <span class="rounded bg-emerald-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-900">Tahap 3</span>
+                        </div>
+                        <textarea id="template_verified" form="provider-config-form" name="template_verified" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_verified', $setting->template_verified ?: \App\Models\WhatsappSetting::defaultVerifiedTemplate()) }}</textarea>
+                    </div>
                 </div>
 
-                {{-- Template 3: Pembayaran Terverifikasi --}}
-                <div class="space-y-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/30 p-4">
-                    <div class="flex items-center justify-between">
-                        <label for="template_verified" class="text-xs font-bold text-emerald-950">3. Pembayaran Terverifikasi</label>
-                        <span class="rounded bg-emerald-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-900">Tahap 3</span>
-                    </div>
-
-                    {{-- Variabel Chips --}}
-                    <div class="flex flex-wrap gap-1 text-[11px]">
-                        @php
-                            $varsVerified = ['{nama}', '{nomor_pesanan}', '{rincian}', '{produk}', '{ukuran}', '{jumlah}', '{total}', '{nominal}', '{metode}', '{alamat}', '{link}', '{catatan}', '{nama_program}'];
-                        @endphp
-                        @foreach ($varsVerified as $v)
-                            <button type="button" onclick="insertVariable('template_verified', '{{ $v }}')" class="rounded-md border border-emerald-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-stone-700 hover:border-[#b55322] hover:text-[#b55322] transition cursor-pointer">
-                                + {{ $v }}
-                            </button>
-                        @endforeach
-                    </div>
-
-                    <textarea id="template_verified" form="provider-config-form" name="template_verified" rows="12" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_verified', $setting->template_verified ?: \App\Models\WhatsappSetting::defaultVerifiedTemplate()) }}</textarea>
+                <div class="mt-6 flex justify-end border-t border-stone-100 pt-4">
+                    <button type="submit" form="provider-config-form" class="rounded-xl bg-[#b55322] hover:bg-[#9d4419] px-6 py-2.5 text-xs font-bold text-white shadow-2xs transition cursor-pointer">
+                        Simpan Semua Perubahan
+                    </button>
                 </div>
-            </div>
-
-            <div class="mt-6 flex justify-end border-t border-stone-100 pt-4">
-                <button type="submit" form="provider-config-form" class="rounded-xl bg-[#b55322] hover:bg-[#9d4419] px-6 py-2.5 text-xs font-bold text-white shadow-2xs transition cursor-pointer">
-                    Simpan Semua Perubahan
-                </button>
-            </div>
-        </section>
+            </section>
+        @endif
 
     </div>
 
@@ -418,7 +512,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Toggle Token Visibility
+            // Toggle Token Fonnte
             const tokenInput = document.getElementById('api_token');
             const toggleBtn = document.getElementById('toggle-token-btn');
             if (tokenInput && toggleBtn) {
@@ -429,7 +523,18 @@
                 });
             }
 
-            // AJAX Test Send Handler
+            // Toggle Key RajaOngkir
+            const rajaKeyInput = document.getElementById('rajaongkir_api_key');
+            const toggleRajaKey = document.getElementById('toggle-rajaongkir-key');
+            if (rajaKeyInput && toggleRajaKey) {
+                toggleRajaKey.addEventListener('click', function () {
+                    const isPassword = rajaKeyInput.type === 'password';
+                    rajaKeyInput.type = isPassword ? 'text' : 'password';
+                    toggleRajaKey.textContent = isPassword ? 'Sembunyikan' : 'Lihat';
+                });
+            }
+
+            // AJAX Test Send Fonnte
             const testForm = document.getElementById('test-send-form');
             const feedbackEl = document.getElementById('test-feedback');
             const btnSubmit = document.getElementById('btn-submit-test');
@@ -438,14 +543,12 @@
             if (testForm && feedbackEl) {
                 testForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
-
                     feedbackEl.className = 'hidden rounded-xl p-3 text-xs';
                     feedbackEl.textContent = '';
                     btnSubmit.disabled = true;
                     btnText.textContent = 'Sedang Mengirim ke Fonnte...';
 
                     const formData = new FormData(testForm);
-
                     try {
                         const response = await fetch(testForm.action, {
                             method: 'POST',
@@ -455,9 +558,7 @@
                             },
                             body: formData
                         });
-
                         const res = await response.json();
-
                         if (response.ok && res.success) {
                             feedbackEl.className = 'rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800';
                             feedbackEl.textContent = '✓ ' + (res.message || 'Pesan berhasil dikirim via Fonnte!');

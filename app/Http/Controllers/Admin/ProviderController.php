@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ShippingSetting;
 use App\Models\WhatsappSetting;
 use App\Services\FonnteService;
+use App\Services\RajaOngkirService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,11 +15,12 @@ use Illuminate\View\View;
 class ProviderController extends Controller
 {
     /**
-     * Tampilkan halaman Pengaturan Provider WhatsApp (Fonnte)
+     * Tampilkan halaman Pengaturan Provider (WhatsApp Fonnte & RajaOngkir)
      */
-    public function index(FonnteService $service, Request $request): View
+    public function index(FonnteService $service, RajaOngkirService $rajaOngkir, Request $request): View
     {
         $setting = $service->getSetting();
+        $shippingSetting = $rajaOngkir->getSetting();
 
         // Auto refresh jika ada parameter refresh atau jika sudah lebih dari 1 menit sejak cek terakhir
         if ($request->has('refresh') || ($setting->isConfigured() && (!$setting->last_checked_at || $setting->last_checked_at->diffInMinutes(now()) >= 1))) {
@@ -25,7 +28,7 @@ class ProviderController extends Controller
             $setting->refresh();
         }
 
-        return view('admin.provider', compact('setting'));
+        return view('admin.provider', compact('setting', 'shippingSetting'));
     }
 
     /**
@@ -119,4 +122,64 @@ class ProviderController extends Controller
         return redirect()->route('admin.provider')
             ->with('error', 'Gagal mengirim pesan: ' . $result['message']);
     }
+
+    /**
+     * Simpan konfigurasi API Key RajaOngkir
+     */
+    public function updateRajaOngkir(Request $request, RajaOngkirService $service): RedirectResponse
+    {
+        $data = $request->validate([
+            'api_key' => ['nullable', 'string', 'max:255'],
+            'base_url' => ['required', 'string', 'max:255'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $shippingSetting = $service->getSetting();
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['base_url'] = rtrim($data['base_url'], '/');
+
+        $keyChanged = isset($data['api_key']) && $data['api_key'] !== $shippingSetting->api_key;
+
+        $shippingSetting->fill($data);
+        if ($shippingSetting->exists) {
+            $shippingSetting->save();
+        }
+
+        // Langsung tes koneksi jika API key terisi
+        if (!empty($shippingSetting->getEffectiveApiKey()) && ($keyChanged || !$shippingSetting->isConnected())) {
+            $testResult = $service->testConnection($shippingSetting->getEffectiveApiKey(), $shippingSetting->getEffectiveBaseUrl());
+            if ($testResult['success']) {
+                return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
+                    ->with('success', 'Konfigurasi RajaOngkir disimpan! ' . $testResult['message']);
+            } else {
+                return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
+                    ->with('warning', 'Konfigurasi disimpan, namun koneksi: ' . $testResult['message']);
+            }
+        }
+
+        return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
+            ->with('success', 'Pengaturan RajaOngkir berhasil disimpan.');
+    }
+
+    /**
+     * Cek & Uji koneksi API RajaOngkir
+     */
+    public function testRajaOngkir(Request $request, RajaOngkirService $service): JsonResponse|RedirectResponse
+    {
+        $result = $service->testConnection();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($result);
+        }
+
+        if ($result['success']) {
+            return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
+                ->with('success', $result['message']);
+        }
+
+        return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
+            ->with('error', $result['message']);
+    }
 }
+

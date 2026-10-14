@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\RajaOngkirController;
 use App\Http\Controllers\BuktiController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DesignController;
@@ -39,6 +40,14 @@ Route::post('/pesan-kaos', [CheckoutController::class, 'store'])->name('checkout
 Route::get('/pesan-kaos/{order}/pembayaran', [CheckoutController::class, 'bayar'])->name('checkout.bayar');
 Route::post('/pesan-kaos/{order}/pembayaran', [CheckoutController::class, 'bayarStore'])->name('checkout.bayar.store');
 Route::get('/pesan-kaos/{order}/menunggu', [CheckoutController::class, 'menunggu'])->name('checkout.menunggu');
+
+// Endpoint API RajaOngkir untuk Pencarian Wilayah & Kode Pos Otomatis
+Route::prefix('api/rajaongkir')->name('api.rajaongkir.')->group(function () {
+    Route::get('/provinces', [RajaOngkirController::class, 'provinces'])->name('provinces');
+    Route::get('/cities', [RajaOngkirController::class, 'cities'])->name('cities');
+    Route::get('/districts', [RajaOngkirController::class, 'districts'])->name('districts');
+    Route::get('/subdistricts', [RajaOngkirController::class, 'subdistricts'])->name('subdistricts');
+});
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // 1. Dashboard
@@ -108,12 +117,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
     });
 
-    // 9. Provider WhatsApp (Fonnte API)
+    // 9. Provider Integrasi (WhatsApp Fonnte & RajaOngkir API)
     Route::middleware('permission:provider.view')->get('/provider', [ProviderController::class, 'index'])->name('provider');
     Route::middleware('permission:provider.manage')->group(function () {
         Route::post('/provider', [ProviderController::class, 'update'])->name('provider.update');
         Route::post('/provider/check', [ProviderController::class, 'checkStatus'])->name('provider.check');
         Route::post('/provider/test', [ProviderController::class, 'testSend'])->name('provider.test');
+        Route::post('/provider/rajaongkir', [ProviderController::class, 'updateRajaOngkir'])->name('provider.rajaongkir.update');
+        Route::post('/provider/rajaongkir/test', [ProviderController::class, 'testRajaOngkir'])->name('provider.rajaongkir.test');
     });
 
     // 10. Manajemen Pengguna (Users)

@@ -122,40 +122,80 @@
                         Nama dan nomor penerima sama dengan pemesan
                     </label>
 
-                    <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                    <div class="mt-6 grid gap-5 sm:grid-cols-2" id="wilayah-container">
                         <div class="sm:col-span-2">
                             <label for="alamat" class="label">Alamat lengkap <span class="text-error">*</span></label>
                             <textarea id="alamat" name="alamat" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, dan patokan"
-                                class="input @error('alamat') input-error @enderror">{{ old('alamat') }}</textarea>
+                                class="input @error('alamat') input-error @enderror" required>{{ old('alamat') }}</textarea>
                             @error('alamat')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
+
+                        <!-- 1. Provinsi (RajaOngkir) -->
                         <div>
-                            <label for="provinsi" class="label">Provinsi <span class="text-error">*</span></label>
+                            <div class="flex items-center justify-between">
+                                <label for="provinsi" class="label">Provinsi <span class="text-error">*</span></label>
+                                <span id="loading-provinsi" class="hidden text-[11px] text-primary flex items-center gap-1 font-medium">
+                                    <svg class="animate-spin h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Memuat...
+                                </span>
+                            </div>
                             <select id="provinsi" name="provinsi" class="input @error('provinsi') input-error @enderror" required>
-                                <option value="">Pilih provinsi</option>
+                                <option value="">— Pilih Provinsi —</option>
                                 @foreach ($provinsi as $p)
-                                    <option value="{{ $p }}" @selected(old('provinsi') === $p)>{{ $p }}</option>
+                                    @php
+                                        $pName = is_array($p) ? ($p['name'] ?? '') : $p;
+                                        $pId = is_array($p) ? ($p['id'] ?? '') : '';
+                                    @endphp
+                                    <option value="{{ $pName }}" data-id="{{ $pId }}" @selected(strtoupper(old('provinsi')) === strtoupper($pName))>{{ $pName }}</option>
                                 @endforeach
                             </select>
                             @error('provinsi')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
+
+                        <!-- 2. Kota / Kabupaten (RajaOngkir) -->
                         <div>
-                            <label for="kabupaten" class="label">Kota / Kabupaten <span class="text-error">*</span></label>
-                            <input type="text" id="kabupaten" name="kabupaten" value="{{ old('kabupaten') }}" placeholder="Pilih kota / kabupaten"
-                                class="input @error('kabupaten') input-error @enderror" required>
+                            <div class="flex items-center justify-between">
+                                <label for="kabupaten" class="label">Kota / Kabupaten <span class="text-error">*</span></label>
+                                <span id="loading-kabupaten" class="hidden text-[11px] text-primary flex items-center gap-1 font-medium">
+                                    <svg class="animate-spin h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Memuat kota...
+                                </span>
+                            </div>
+                            <select id="kabupaten" name="kabupaten" class="input @error('kabupaten') input-error @enderror" required disabled>
+                                <option value="">— Pilih Provinsi Terlebih Dahulu —</option>
+                            </select>
+                            <input type="hidden" id="old-kabupaten" value="{{ old('kabupaten') }}">
                             @error('kabupaten')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
+
+                        <!-- 3. Kecamatan (RajaOngkir) -->
                         <div>
-                            <label for="kecamatan" class="label">Kecamatan <span class="text-error">*</span></label>
-                            <input type="text" id="kecamatan" name="kecamatan" value="{{ old('kecamatan') }}" placeholder="Pilih kecamatan"
-                                class="input @error('kecamatan') input-error @enderror" required>
+                            <div class="flex items-center justify-between">
+                                <label for="kecamatan" class="label">Kecamatan <span class="text-error">*</span></label>
+                                <span id="loading-kecamatan" class="hidden text-[11px] text-primary flex items-center gap-1 font-medium">
+                                    <svg class="animate-spin h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Memuat kecamatan...
+                                </span>
+                            </div>
+                            <select id="kecamatan" name="kecamatan" class="input @error('kecamatan') input-error @enderror" required disabled>
+                                <option value="">— Pilih Kota/Kabupaten Dahulu —</option>
+                            </select>
+                            <input type="hidden" id="old-kecamatan" value="{{ old('kecamatan') }}">
                             @error('kecamatan')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
+
+                        <!-- 4. Kode Pos (Terisi Otomatis) -->
                         <div>
-                            <label for="kode_pos" class="label">Kode pos <span class="text-error">*</span></label>
-                            <input type="text" id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Masukkan kode pos"
+                            <div class="flex items-center justify-between">
+                                <label for="kode_pos" class="label">Kode pos <span class="text-error">*</span></label>
+                                <span id="badge-kodepos" class="hidden text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    Otomatis RajaOngkir ✓
+                                </span>
+                            </div>
+                            <input type="text" id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Terisi otomatis..."
                                 class="input @error('kode_pos') input-error @enderror" required>
                             @error('kode_pos')<p class="error-text">{{ $message }}</p>@enderror
+                            <p class="mt-1 text-[11px] text-stone-500" id="kode-pos-helper">Terisi otomatis setelah memilih kecamatan dari RajaOngkir.</p>
                         </div>
                     </div>
 
@@ -400,6 +440,204 @@
             });
 
             render();
+        })();
+
+        // Integrasi RajaOngkir: Dropdown Wilayah & Otomatisasi Kode Pos
+        (function () {
+            var provSelect = document.getElementById('provinsi');
+            var kabSelect = document.getElementById('kabupaten');
+            var kecSelect = document.getElementById('kecamatan');
+            var posInput = document.getElementById('kode_pos');
+            var oldKab = document.getElementById('old-kabupaten') ? document.getElementById('old-kabupaten').value : '';
+            var oldKec = document.getElementById('old-kecamatan') ? document.getElementById('old-kecamatan').value : '';
+            var loadKab = document.getElementById('loading-kabupaten');
+            var loadKec = document.getElementById('loading-kecamatan');
+            var badgePos = document.getElementById('badge-kodepos');
+
+            if (!provSelect || !kabSelect || !kecSelect || !posInput) return;
+
+            // Cache lokal untuk respon cepat tanpa request berulang
+            var cityCache = {};
+            var districtCache = {};
+
+            function getSelectedOption(select) {
+                if (select.selectedIndex < 0) return null;
+                return select.options[select.selectedIndex];
+            }
+
+            function loadCities(provId, selectedCityName) {
+                kabSelect.disabled = true;
+                kabSelect.innerHTML = '<option value="">Memuat kota/kabupaten...</option>';
+                kecSelect.disabled = true;
+                kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                if (loadKab) loadKab.classList.remove('hidden');
+
+                function populate(cities) {
+                    if (loadKab) loadKab.classList.add('hidden');
+                    kabSelect.innerHTML = '<option value="">— Pilih Kota / Kabupaten —</option>';
+                    var matchedCityId = null;
+
+                    cities.forEach(function (c) {
+                        var opt = document.createElement('option');
+                        opt.value = c.name;
+                        opt.textContent = c.name;
+                        opt.dataset.id = c.id;
+                        if (selectedCityName && selectedCityName.toUpperCase() === c.name.toUpperCase()) {
+                            opt.selected = true;
+                            matchedCityId = c.id;
+                        }
+                        kabSelect.appendChild(opt);
+                    });
+
+                    kabSelect.disabled = false;
+
+                    if (matchedCityId) {
+                        loadDistricts(matchedCityId, oldKec);
+                    }
+                }
+
+                if (cityCache[provId]) {
+                    populate(cityCache[provId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/cities?province_id=' + encodeURIComponent(provId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        cityCache[provId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKab) loadKab.classList.add('hidden');
+                        kabSelect.innerHTML = '<option value="">Gagal memuat kota, silakan coba lagi</option>';
+                        kabSelect.disabled = false;
+                    });
+            }
+
+            function loadDistricts(cityId, selectedDistrictName) {
+                kecSelect.disabled = true;
+                kecSelect.innerHTML = '<option value="">Memuat kecamatan...</option>';
+                if (loadKec) loadKec.classList.remove('hidden');
+
+                function populate(districts) {
+                    if (loadKec) loadKec.classList.add('hidden');
+                    kecSelect.innerHTML = '<option value="">— Pilih Kecamatan —</option>';
+                    var matchedZip = null;
+
+                    districts.forEach(function (d) {
+                        var opt = document.createElement('option');
+                        opt.value = d.name;
+                        opt.textContent = d.name;
+                        opt.dataset.id = d.id;
+                        opt.dataset.zip = d.zip_code || '';
+                        if (selectedDistrictName && selectedDistrictName.toUpperCase() === d.name.toUpperCase()) {
+                            opt.selected = true;
+                            matchedZip = d.zip_code || '';
+                        }
+                        kecSelect.appendChild(opt);
+                    });
+
+                    kecSelect.disabled = false;
+
+                    if (matchedZip && (!posInput.value || posInput.value === '0')) {
+                        posInput.value = matchedZip;
+                        if (badgePos) badgePos.classList.remove('hidden');
+                    }
+                }
+
+                if (districtCache[cityId]) {
+                    populate(districtCache[cityId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/districts?city_id=' + encodeURIComponent(cityId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        districtCache[cityId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKec) loadKec.classList.add('hidden');
+                        kecSelect.innerHTML = '<option value="">Gagal memuat kecamatan, silakan coba lagi</option>';
+                        kecSelect.disabled = false;
+                    });
+            }
+
+            // Saat Provinsi berubah
+            provSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(provSelect);
+                var provId = opt ? opt.dataset.id : null;
+                posInput.value = '';
+                if (badgePos) badgePos.classList.add('hidden');
+
+                if (!provId) {
+                    kabSelect.disabled = true;
+                    kabSelect.innerHTML = '<option value="">— Pilih Provinsi Terlebih Dahulu —</option>';
+                    kecSelect.disabled = true;
+                    kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                    return;
+                }
+
+                loadCities(provId, null);
+            });
+
+            // Saat Kabupaten berubah
+            kabSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(kabSelect);
+                var cityId = opt ? opt.dataset.id : null;
+                posInput.value = '';
+                if (badgePos) badgePos.classList.add('hidden');
+
+                if (!cityId) {
+                    kecSelect.disabled = true;
+                    kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                    return;
+                }
+
+                loadDistricts(cityId, null);
+            });
+
+            // Saat Kecamatan berubah -> ISI KODE POS OTOMATIS
+            kecSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(kecSelect);
+                if (!opt || !opt.value) {
+                    posInput.value = '';
+                    if (badgePos) badgePos.classList.add('hidden');
+                    return;
+                }
+
+                var zip = opt.dataset.zip;
+                var distId = opt.dataset.id;
+
+                if (zip && zip !== '0') {
+                    posInput.value = zip;
+                    if (badgePos) badgePos.classList.remove('hidden');
+                } else if (distId) {
+                    // Coba ambil dari sub-district / kelurahan jika kecamatan memiliki multi-kodepos
+                    fetch('/api/rajaongkir/subdistricts?district_id=' + encodeURIComponent(distId))
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (res && res.data && res.data.length > 0) {
+                                for (var i = 0; i < res.data.length; i++) {
+                                    if (res.data[i].zip_code && res.data[i].zip_code !== '0') {
+                                        posInput.value = res.data[i].zip_code;
+                                        if (badgePos) badgePos.classList.remove('hidden');
+                                        break;
+                                    }
+                                }
+                            }
+                        })
+                        .catch(function () {});
+                }
+            });
+
+            // Inisialisasi awal saat reload halaman (misal form validation gagal)
+            var initOpt = getSelectedOption(provSelect);
+            if (initOpt && initOpt.dataset.id) {
+                loadCities(initOpt.dataset.id, oldKab);
+            }
         })();
     </script>
 @endpush
