@@ -77,6 +77,27 @@ class RajaOngkirIntegrationTest extends TestCase
         $this->assertEquals('80361', $kuta['zip_code']);
     }
 
+    public function test_api_subdistricts_returns_subdistricts_with_zip_code(): void
+    {
+        // District ID 1001 = Kuta
+        $response = $this->getJson(route('api.rajaongkir.subdistricts', ['district_id' => 1001]));
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'is_live',
+                'data' => [
+                    '*' => ['id', 'name', 'zip_code'],
+                ],
+            ]);
+
+        $data = collect($response->json('data'));
+        $legian = $data->firstWhere('name', 'LEGIAN');
+
+        $this->assertNotNull($legian);
+        $this->assertEquals('80361', $legian['zip_code']);
+    }
+
     public function test_checkout_page_renders_rajaongkir_cascading_selectors(): void
     {
         $design = Design::where('aktif', true)->firstOrFail();
@@ -87,12 +108,27 @@ class RajaOngkirIntegrationTest extends TestCase
             ->assertSee('id="provinsi"', false)
             ->assertSee('id="kabupaten"', false)
             ->assertSee('id="kecamatan"', false)
+            ->assertSee('id="kelurahan"', false)
             ->assertSee('id="kode_pos"', false)
             ->assertSee('badge-kodepos', false)
             ->assertSee('BALI', false);
     }
 
-    public function test_order_can_be_stored_with_rajaongkir_location_and_postal_code(): void
+    public function test_shop_page_renders_rajaongkir_cascading_selectors_with_kelurahan(): void
+    {
+        $response = $this->get(route('shop', ['tab' => 'kaos_donasi']));
+
+        $response->assertStatus(200)
+            ->assertSee('id="kd-provinsi"', false)
+            ->assertSee('id="kd-kabupaten"', false)
+            ->assertSee('id="kd-kecamatan"', false)
+            ->assertSee('id="kd-kelurahan"', false)
+            ->assertSee('id="kd-kode-pos"', false)
+            ->assertSee('kd-badge-kodepos', false)
+            ->assertSee('BALI', false);
+    }
+
+    public function test_order_can_be_stored_with_rajaongkir_location_and_kelurahan_in_checkout(): void
     {
         $design = Design::where('aktif', true)->firstOrFail();
 
@@ -104,6 +140,7 @@ class RajaOngkirIntegrationTest extends TestCase
             'provinsi' => 'BALI',
             'kabupaten' => 'KABUPATEN BADUNG',
             'kecamatan' => 'KUTA',
+            'kelurahan' => 'LEGIAN',
             'kode_pos' => '80361',
             'design_id' => $design->id,
             'ukuran' => 'XL',
@@ -118,9 +155,47 @@ class RajaOngkirIntegrationTest extends TestCase
         $this->assertEquals('BALI', $order->provinsi);
         $this->assertEquals('KABUPATEN BADUNG', $order->kabupaten);
         $this->assertEquals('KUTA', $order->kecamatan);
+        $this->assertEquals('LEGIAN', $order->kelurahan);
         $this->assertEquals('80361', $order->kode_pos);
+        $this->assertStringContainsString('Kel./Desa LEGIAN', $order->alamatLengkap());
 
         $response->assertRedirect(route('checkout.bayar', $order));
+    }
+
+    public function test_order_can_be_stored_with_rajaongkir_location_and_kelurahan_in_shop(): void
+    {
+        $design = Design::where('aktif', true)->firstOrFail();
+
+        $payload = [
+            'jenis' => 'kaos_donasi',
+            'nama' => 'Ni Wayan Sari',
+            'nomor' => '081987654321',
+            'email' => 'sari@example.com',
+            'alamat' => 'Jl. Danau Tamblingan No. 12',
+            'provinsi' => 'BALI',
+            'kabupaten' => 'KOTA DENPASAR',
+            'kecamatan' => 'DENPASAR SELATAN',
+            'kelurahan' => 'SANUR',
+            'kode_pos' => '80228',
+            'design_id' => $design->id,
+            'ukuran' => 'M',
+            'jumlah' => 1,
+            'donasi' => 200000,
+            'metode' => 'qris',
+        ];
+
+        $response = $this->post(route('shop.store'), $payload);
+
+        $order = Order::where('nomor', '081987654321')->first();
+        $this->assertNotNull($order);
+        $this->assertEquals('BALI', $order->provinsi);
+        $this->assertEquals('KOTA DENPASAR', $order->kabupaten);
+        $this->assertEquals('DENPASAR SELATAN', $order->kecamatan);
+        $this->assertEquals('SANUR', $order->kelurahan);
+        $this->assertEquals('80228', $order->kode_pos);
+        $this->assertStringContainsString('Kel./Desa SANUR', $order->alamatLengkap());
+
+        $response->assertRedirect(route('shop.pemesanan', $order));
     }
 
     public function test_admin_can_view_rajaongkir_provider_tab(): void

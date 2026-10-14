@@ -35,7 +35,7 @@
         $donasiLabel = $order->isDonasiOnly() ? 'Donasi Saja' : 'Donasi bersama kaos';
         $alamatLengkap = $order->isDonasiOnly()
             ? '—'
-            : collect([$order->alamat, $order->kecamatan, $order->kabupaten, $order->provinsi])->filter()->implode(', ') . ($order->kode_pos ? ' ' . $order->kode_pos : '');
+            : $order->alamatLengkap();
     @endphp
 
     @if (session('success'))

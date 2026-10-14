@@ -184,8 +184,24 @@
                             @error('kecamatan')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
 
-                        <!-- 4. Kode Pos (Terisi Otomatis) -->
+                        <!-- 4. Kelurahan / Desa (RajaOngkir) -->
                         <div>
+                            <div class="flex items-center justify-between">
+                                <label for="kelurahan" class="label">Kelurahan / Desa <span class="text-error">*</span></label>
+                                <span id="loading-kelurahan" class="hidden text-[11px] text-primary flex items-center gap-1 font-medium">
+                                    <svg class="animate-spin h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Memuat kelurahan...
+                                </span>
+                            </div>
+                            <select id="kelurahan" name="kelurahan" class="input @error('kelurahan') input-error @enderror" disabled>
+                                <option value="">— Pilih Kecamatan Dahulu —</option>
+                            </select>
+                            <input type="hidden" id="old-kelurahan" value="{{ old('kelurahan') }}">
+                            @error('kelurahan')<p class="error-text">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- 5. Kode Pos (Terisi Otomatis) -->
+                        <div class="sm:col-span-2">
                             <div class="flex items-center justify-between">
                                 <label for="kode_pos" class="label">Kode pos <span class="text-error">*</span></label>
                                 <span id="badge-kodepos" class="hidden text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -195,7 +211,7 @@
                             <input type="text" id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Terisi otomatis..."
                                 class="input @error('kode_pos') input-error @enderror" required>
                             @error('kode_pos')<p class="error-text">{{ $message }}</p>@enderror
-                            <p class="mt-1 text-[11px] text-stone-500" id="kode-pos-helper">Terisi otomatis setelah memilih kecamatan dari RajaOngkir.</p>
+                            <p class="mt-1 text-[11px] text-stone-500" id="kode-pos-helper">Terisi otomatis setelah memilih kelurahan / kecamatan dari RajaOngkir.</p>
                         </div>
                     </div>
 
@@ -447,11 +463,14 @@
             var provSelect = document.getElementById('provinsi');
             var kabSelect = document.getElementById('kabupaten');
             var kecSelect = document.getElementById('kecamatan');
+            var kelSelect = document.getElementById('kelurahan');
             var posInput = document.getElementById('kode_pos');
             var oldKab = document.getElementById('old-kabupaten') ? document.getElementById('old-kabupaten').value : '';
             var oldKec = document.getElementById('old-kecamatan') ? document.getElementById('old-kecamatan').value : '';
+            var oldKel = document.getElementById('old-kelurahan') ? document.getElementById('old-kelurahan').value : '';
             var loadKab = document.getElementById('loading-kabupaten');
             var loadKec = document.getElementById('loading-kecamatan');
+            var loadKel = document.getElementById('loading-kelurahan');
             var badgePos = document.getElementById('badge-kodepos');
 
             if (!provSelect || !kabSelect || !kecSelect || !posInput) return;
@@ -459,9 +478,10 @@
             // Cache lokal untuk respon cepat tanpa request berulang
             var cityCache = {};
             var districtCache = {};
+            var subdistrictCache = {};
 
             function getSelectedOption(select) {
-                if (select.selectedIndex < 0) return null;
+                if (!select || select.selectedIndex < 0) return null;
                 return select.options[select.selectedIndex];
             }
 
@@ -470,6 +490,10 @@
                 kabSelect.innerHTML = '<option value="">Memuat kota/kabupaten...</option>';
                 kecSelect.disabled = true;
                 kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                if (kelSelect) {
+                    kelSelect.disabled = true;
+                    kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                }
                 if (loadKab) loadKab.classList.remove('hidden');
 
                 function populate(cities) {
@@ -518,11 +542,16 @@
             function loadDistricts(cityId, selectedDistrictName) {
                 kecSelect.disabled = true;
                 kecSelect.innerHTML = '<option value="">Memuat kecamatan...</option>';
+                if (kelSelect) {
+                    kelSelect.disabled = true;
+                    kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                }
                 if (loadKec) loadKec.classList.remove('hidden');
 
                 function populate(districts) {
                     if (loadKec) loadKec.classList.add('hidden');
                     kecSelect.innerHTML = '<option value="">— Pilih Kecamatan —</option>';
+                    var matchedDistId = null;
                     var matchedZip = null;
 
                     districts.forEach(function (d) {
@@ -533,6 +562,7 @@
                         opt.dataset.zip = d.zip_code || '';
                         if (selectedDistrictName && selectedDistrictName.toUpperCase() === d.name.toUpperCase()) {
                             opt.selected = true;
+                            matchedDistId = d.id;
                             matchedZip = d.zip_code || '';
                         }
                         kecSelect.appendChild(opt);
@@ -540,9 +570,8 @@
 
                     kecSelect.disabled = false;
 
-                    if (matchedZip && (!posInput.value || posInput.value === '0')) {
-                        posInput.value = matchedZip;
-                        if (badgePos) badgePos.classList.remove('hidden');
+                    if (matchedDistId) {
+                        loadSubDistricts(matchedDistId, oldKel, matchedZip);
                     }
                 }
 
@@ -565,6 +594,63 @@
                     });
             }
 
+            function loadSubDistricts(districtId, selectedSubDistrictName, fallbackZip) {
+                if (!kelSelect) return;
+                kelSelect.disabled = true;
+                kelSelect.innerHTML = '<option value="">Memuat kelurahan...</option>';
+                if (loadKel) loadKel.classList.remove('hidden');
+
+                function populate(subdistricts) {
+                    if (loadKel) loadKel.classList.add('hidden');
+                    kelSelect.innerHTML = '<option value="">— Pilih Kelurahan / Desa —</option>';
+                    var matchedZip = null;
+
+                    if (subdistricts && subdistricts.length > 0) {
+                        subdistricts.forEach(function (s) {
+                            var opt = document.createElement('option');
+                            opt.value = s.name;
+                            opt.textContent = s.name + (s.zip_code ? ' (' + s.zip_code + ')' : '');
+                            opt.dataset.id = s.id;
+                            opt.dataset.zip = s.zip_code || '';
+                            if (selectedSubDistrictName && selectedSubDistrictName.toUpperCase() === s.name.toUpperCase()) {
+                                opt.selected = true;
+                                matchedZip = s.zip_code || '';
+                            }
+                            kelSelect.appendChild(opt);
+                        });
+                        kelSelect.disabled = false;
+                    } else {
+                        kelSelect.innerHTML = '<option value="">— Tidak ada data kelurahan khusus —</option>';
+                        kelSelect.disabled = false;
+                    }
+
+                    // Auto-fill kode pos jika matched
+                    var finalZip = matchedZip || fallbackZip;
+                    if (finalZip && (!posInput.value || posInput.value === '0')) {
+                        posInput.value = finalZip;
+                        if (badgePos) badgePos.classList.remove('hidden');
+                    }
+                }
+
+                if (subdistrictCache[districtId]) {
+                    populate(subdistrictCache[districtId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/subdistricts?district_id=' + encodeURIComponent(districtId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        subdistrictCache[districtId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKel) loadKel.classList.add('hidden');
+                        kelSelect.innerHTML = '<option value="">Gagal memuat kelurahan, silakan coba lagi</option>';
+                        kelSelect.disabled = false;
+                    });
+            }
+
             // Saat Provinsi berubah
             provSelect.addEventListener('change', function () {
                 var opt = getSelectedOption(provSelect);
@@ -577,6 +663,10 @@
                     kabSelect.innerHTML = '<option value="">— Pilih Provinsi Terlebih Dahulu —</option>';
                     kecSelect.disabled = true;
                     kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                    }
                     return;
                 }
 
@@ -593,18 +683,26 @@
                 if (!cityId) {
                     kecSelect.disabled = true;
                     kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                    }
                     return;
                 }
 
                 loadDistricts(cityId, null);
             });
 
-            // Saat Kecamatan berubah -> ISI KODE POS OTOMATIS
+            // Saat Kecamatan berubah -> Muat Kelurahan & Pasang Kode Pos Provisional
             kecSelect.addEventListener('change', function () {
                 var opt = getSelectedOption(kecSelect);
                 if (!opt || !opt.value) {
                     posInput.value = '';
                     if (badgePos) badgePos.classList.add('hidden');
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                    }
                     return;
                 }
 
@@ -614,24 +712,26 @@
                 if (zip && zip !== '0') {
                     posInput.value = zip;
                     if (badgePos) badgePos.classList.remove('hidden');
-                } else if (distId) {
-                    // Coba ambil dari sub-district / kelurahan jika kecamatan memiliki multi-kodepos
-                    fetch('/api/rajaongkir/subdistricts?district_id=' + encodeURIComponent(distId))
-                        .then(function (r) { return r.json(); })
-                        .then(function (res) {
-                            if (res && res.data && res.data.length > 0) {
-                                for (var i = 0; i < res.data.length; i++) {
-                                    if (res.data[i].zip_code && res.data[i].zip_code !== '0') {
-                                        posInput.value = res.data[i].zip_code;
-                                        if (badgePos) badgePos.classList.remove('hidden');
-                                        break;
-                                    }
-                                }
-                            }
-                        })
-                        .catch(function () {});
+                }
+
+                if (distId) {
+                    loadSubDistricts(distId, null, zip);
                 }
             });
+
+            // Saat Kelurahan berubah -> ISI KODE POS AKURAT DARI KELURAHAN
+            if (kelSelect) {
+                kelSelect.addEventListener('change', function () {
+                    var opt = getSelectedOption(kelSelect);
+                    if (!opt || !opt.value) return;
+
+                    var zip = opt.dataset.zip;
+                    if (zip && zip !== '0') {
+                        posInput.value = zip;
+                        if (badgePos) badgePos.classList.remove('hidden');
+                    }
+                });
+            }
 
             // Inisialisasi awal saat reload halaman (misal form validation gagal)
             var initOpt = getSelectedOption(provSelect);

@@ -481,9 +481,130 @@ class RajaOngkirService
      */
     protected function fallbackSubDistricts(int $districtId): array
     {
+        // Kuta (Badung, Bali)
+        if ($districtId === 1001) {
+            return [
+                ['id' => 10001, 'name' => 'KUTA', 'zip_code' => '80361'],
+                ['id' => 10002, 'name' => 'LEGIAN', 'zip_code' => '80361'],
+                ['id' => 10003, 'name' => 'SEMINYAK', 'zip_code' => '80361'],
+                ['id' => 10004, 'name' => 'TUBAN', 'zip_code' => '80361'],
+                ['id' => 10005, 'name' => 'KEDONGANAN', 'zip_code' => '80361'],
+            ];
+        }
+
+        // Kuta Selatan (Badung, Bali)
+        if ($districtId === 1002) {
+            return [
+                ['id' => 10011, 'name' => 'JIMBARAN', 'zip_code' => '80361'],
+                ['id' => 10012, 'name' => 'BENOA', 'zip_code' => '80361'],
+                ['id' => 10013, 'name' => 'TANJUNG BENOA', 'zip_code' => '80361'],
+                ['id' => 10014, 'name' => 'UNGASAN', 'zip_code' => '80364'],
+                ['id' => 10015, 'name' => 'PECATU', 'zip_code' => '80364'],
+                ['id' => 10016, 'name' => 'KUTUH', 'zip_code' => '80361'],
+            ];
+        }
+
+        // Kuta Utara (Badung, Bali)
+        if ($districtId === 1003) {
+            return [
+                ['id' => 10021, 'name' => 'KEROBOKAN', 'zip_code' => '80361'],
+                ['id' => 10022, 'name' => 'KEROBOKAN KELOD', 'zip_code' => '80361'],
+                ['id' => 10023, 'name' => 'KEROBOKAN KAJA', 'zip_code' => '80361'],
+                ['id' => 10024, 'name' => 'CANGGU', 'zip_code' => '80361'],
+                ['id' => 10025, 'name' => 'TIBUBENENG', 'zip_code' => '80361'],
+                ['id' => 10026, 'name' => 'DALUNG', 'zip_code' => '80361'],
+            ];
+        }
+
+        // Mengwi (Badung, Bali)
+        if ($districtId === 1004) {
+            return [
+                ['id' => 10031, 'name' => 'MENGWI', 'zip_code' => '80351'],
+                ['id' => 10032, 'name' => 'KAPAL', 'zip_code' => '80351'],
+                ['id' => 10033, 'name' => 'LUKLUK', 'zip_code' => '80351'],
+                ['id' => 10034, 'name' => 'SEMPIDI', 'zip_code' => '80351'],
+                ['id' => 10035, 'name' => 'SADING', 'zip_code' => '80351'],
+            ];
+        }
+
+        // Denpasar Barat (Bali)
+        if ($districtId === 1011) {
+            return [
+                ['id' => 10041, 'name' => 'DAUH PURI', 'zip_code' => '80113'],
+                ['id' => 10042, 'name' => 'DAUH PURI KANGIN', 'zip_code' => '80112'],
+                ['id' => 10043, 'name' => 'DAUH PURI KAUH', 'zip_code' => '80113'],
+                ['id' => 10044, 'name' => 'PEMECUTAN', 'zip_code' => '80112'],
+                ['id' => 10045, 'name' => 'PEMECUTAN KLOD', 'zip_code' => '80119'],
+                ['id' => 10046, 'name' => 'PADANGSAMBIAN', 'zip_code' => '80117'],
+            ];
+        }
+
+        // Denpasar Selatan (Bali)
+        if ($districtId === 1012) {
+            return [
+                ['id' => 10051, 'name' => 'SANUR', 'zip_code' => '80228'],
+                ['id' => 10052, 'name' => 'SANUR KAJA', 'zip_code' => '80227'],
+                ['id' => 10053, 'name' => 'SANUR KAUH', 'zip_code' => '80227'],
+                ['id' => 10054, 'name' => 'RENON', 'zip_code' => '80226'],
+                ['id' => 10055, 'name' => 'PANJER', 'zip_code' => '80225'],
+                ['id' => 10056, 'name' => 'SESETAN', 'zip_code' => '80223'],
+                ['id' => 10057, 'name' => 'SIDAKARYA', 'zip_code' => '80224'],
+                ['id' => 10058, 'name' => 'PEDUNGAN', 'zip_code' => '80222'],
+            ];
+        }
+
+        // Denpasar Timur (Bali)
+        if ($districtId === 1013) {
+            return [
+                ['id' => 10061, 'name' => 'KESIMAN', 'zip_code' => '80237'],
+                ['id' => 10062, 'name' => 'KESIMAN PETILAN', 'zip_code' => '80237'],
+                ['id' => 10063, 'name' => 'SUMERTA', 'zip_code' => '80235'],
+                ['id' => 10064, 'name' => 'SUMERTA KELOD', 'zip_code' => '80239'],
+                ['id' => 10065, 'name' => 'PENATIH', 'zip_code' => '80238'],
+            ];
+        }
+
+        // Denpasar Utara (Bali)
+        if ($districtId === 1014) {
+            return [
+                ['id' => 10071, 'name' => 'PEGUYANGAN', 'zip_code' => '80115'],
+                ['id' => 10072, 'name' => 'PEGUYANGAN KANGIN', 'zip_code' => '80115'],
+                ['id' => 10073, 'name' => 'TONJA', 'zip_code' => '80235'],
+                ['id' => 10074, 'name' => 'UBUNG', 'zip_code' => '80115'],
+                ['id' => 10075, 'name' => 'UBUNG KAJA', 'zip_code' => '80115'],
+            ];
+        }
+
+        // Ubud (Gianyar, Bali)
+        if ($districtId === 1021) {
+            return [
+                ['id' => 10081, 'name' => 'UBUD', 'zip_code' => '80571'],
+                ['id' => 10082, 'name' => 'KEDEWATAN', 'zip_code' => '80571'],
+                ['id' => 10083, 'name' => 'SAYAN', 'zip_code' => '80571'],
+                ['id' => 10084, 'name' => 'PELIATAN', 'zip_code' => '80571'],
+                ['id' => 10085, 'name' => 'PETULU', 'zip_code' => '80571'],
+                ['id' => 10086, 'name' => 'SINGAKERTA', 'zip_code' => '80571'],
+            ];
+        }
+
+        // Tebet (Jakarta Selatan)
+        if ($districtId === 2006) {
+            return [
+                ['id' => 20061, 'name' => 'TEBET BARAT', 'zip_code' => '12810'],
+                ['id' => 20062, 'name' => 'TEBET TIMUR', 'zip_code' => '12820'],
+                ['id' => 20063, 'name' => 'KEBON BARU', 'zip_code' => '12830'],
+                ['id' => 20064, 'name' => 'BUKIT DURI', 'zip_code' => '12840'],
+                ['id' => 20065, 'name' => 'MANGGARAI', 'zip_code' => '12850'],
+                ['id' => 20066, 'name' => 'MANGGARAI SELATAN', 'zip_code' => '12860'],
+                ['id' => 20067, 'name' => 'MENTENG DALAM', 'zip_code' => '12870'],
+            ];
+        }
+
+        $baseZip = 10000 + ($districtId % 80000);
         return [
-            ['id' => ($districtId * 10) + 1, 'name' => 'KELURAHAN 1', 'zip_code' => '80361'],
-            ['id' => ($districtId * 10) + 2, 'name' => 'KELURAHAN 2', 'zip_code' => '80361'],
+            ['id' => ($districtId * 10) + 1, 'name' => 'DESA / KELURAHAN PUSAT', 'zip_code' => (string) $baseZip],
+            ['id' => ($districtId * 10) + 2, 'name' => 'DESA / KELURAHAN 1', 'zip_code' => (string) ($baseZip + 1)],
+            ['id' => ($districtId * 10) + 3, 'name' => 'DESA / KELURAHAN 2', 'zip_code' => (string) ($baseZip + 2)],
         ];
     }
 }

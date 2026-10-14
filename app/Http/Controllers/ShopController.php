@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Design;
 use App\Models\Order;
 use App\Services\FonnteService;
+use App\Services\RajaOngkirService;
 use App\Support\Provinsi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class ShopController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, RajaOngkirService $rajaOngkir)
     {
         $designs = Design::where('aktif', true)->orderBy('harga')->get();
         $selectedDesign = $designs->firstWhere('id', (int) $request->query('desain')) ?? $designs->first();
@@ -27,7 +28,8 @@ class ShopController extends Controller
         return view('shop', [
             'designs' => $designs,
             'selectedDesign' => $selectedDesign,
-            'provinsi' => Provinsi::all(),
+            'provinsi' => $rajaOngkir->getProvinces(),
+            'isRajaOngkirLive' => $rajaOngkir->isConfigured(),
             'ukuran' => ['S', 'M', 'L', 'XL', 'XXL'],
             'tab' => $tab,
             'berhasil' => $request->boolean('sukses'),
@@ -44,9 +46,21 @@ class ShopController extends Controller
                 'nomor' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{6,}$/'],
                 'email' => ['required', 'email', 'max:150'],
                 'alamat' => ['required', 'string', 'max:255'],
-                'provinsi' => ['required', 'string', 'in:'.implode(',', Provinsi::all())],
+                'provinsi' => [
+                    'required',
+                    'string',
+                    'max:120',
+                    function ($attribute, $value, $fail) {
+                        $normalized = strtoupper(trim((string) $value));
+                        $valid = array_map('strtoupper', Provinsi::all());
+                        if (! in_array($normalized, $valid, true)) {
+                            $fail('Provinsi yang dipilih tidak valid.');
+                        }
+                    },
+                ],
                 'kabupaten' => ['required', 'string', 'max:120'],
                 'kecamatan' => ['required', 'string', 'max:120'],
+                'kelurahan' => ['nullable', 'string', 'max:120'],
                 'kode_pos' => ['required', 'string', 'max:10'],
                 'design_id' => ['required', 'integer', 'exists:designs,id'],
                 'ukuran' => ['required', 'string', 'in:S,M,L,XL,XXL'],
@@ -80,6 +94,7 @@ class ShopController extends Controller
                 'provinsi' => $data['provinsi'],
                 'kabupaten' => $data['kabupaten'],
                 'kecamatan' => $data['kecamatan'],
+                'kelurahan' => $data['kelurahan'] ?? null,
                 'kode_pos' => $data['kode_pos'],
                 'ukuran' => $data['ukuran'],
                 'jumlah' => (int) $data['jumlah'],

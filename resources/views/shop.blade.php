@@ -188,41 +188,91 @@
                             <h2 class="font-serif text-lg font-bold text-stone-900">Alamat Pengiriman</h2>
                             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label for="kd-provinsi" class="label">Provinsi <span class="text-error">*</span></label>
+                                    <div class="flex items-center justify-between">
+                                        <label for="kd-provinsi" class="label">Provinsi <span class="text-error">*</span></label>
+                                        <span id="kd-loading-provinsi" class="hidden text-[11px] text-[#b05525] font-medium flex items-center gap-1">
+                                            <svg class="animate-spin h-3 w-3 text-[#b05525]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Memuat...
+                                        </span>
+                                    </div>
                                     <select id="kd-provinsi" name="provinsi" class="input @error('provinsi') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
                                         <option value="">Pilih provinsi &blacktriangledown;</option>
                                         @foreach ($provinsi as $p)
-                                            <option value="{{ $p }}" @selected(old('provinsi') === $p)>{{ $p }}</option>
+                                            @php
+                                                $pName = is_array($p) ? ($p['name'] ?? '') : $p;
+                                                $pId = is_array($p) ? ($p['id'] ?? '') : '';
+                                            @endphp
+                                            <option value="{{ $pName }}" data-id="{{ $pId }}" @selected(strtoupper((string) old('provinsi')) === strtoupper((string) $pName))>
+                                                {{ $pName }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('provinsi')<p class="error-text">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="kd-kabupaten" class="label">Kabupaten / Kota <span class="text-error">*</span></label>
-                                    <input type="text" id="kd-kabupaten" name="kabupaten" value="{{ old('kabupaten') }}" placeholder="Pilih kabupaten / kota"
-                                        class="input @error('kabupaten') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
+                                    <div class="flex items-center justify-between">
+                                        <label for="kd-kabupaten" class="label">Kabupaten / Kota <span class="text-error">*</span></label>
+                                        <span id="kd-loading-kabupaten" class="hidden text-[11px] text-[#b05525] font-medium flex items-center gap-1">
+                                            <svg class="animate-spin h-3 w-3 text-[#b05525]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Memuat kota...
+                                        </span>
+                                    </div>
+                                    <select id="kd-kabupaten" name="kabupaten" class="input @error('kabupaten') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }} disabled>
+                                        <option value="">Pilih kabupaten / kota</option>
+                                    </select>
+                                    <input type="hidden" id="kd-old-kabupaten" value="{{ old('kabupaten') }}">
                                     @error('kabupaten')<p class="error-text">{{ $message }}</p>@enderror
                                 </div>
                             </div>
                             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label for="kd-kecamatan" class="label">Kecamatan <span class="text-error">*</span></label>
-                                    <input type="text" id="kd-kecamatan" name="kecamatan" value="{{ old('kecamatan') }}" placeholder="Pilih kecamatan"
-                                        class="input @error('kecamatan') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
+                                    <div class="flex items-center justify-between">
+                                        <label for="kd-kecamatan" class="label">Kecamatan <span class="text-error">*</span></label>
+                                        <span id="kd-loading-kecamatan" class="hidden text-[11px] text-[#b05525] font-medium flex items-center gap-1">
+                                            <svg class="animate-spin h-3 w-3 text-[#b05525]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Memuat kecamatan...
+                                        </span>
+                                    </div>
+                                    <select id="kd-kecamatan" name="kecamatan" class="input @error('kecamatan') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }} disabled>
+                                        <option value="">Pilih kecamatan</option>
+                                    </select>
+                                    <input type="hidden" id="kd-old-kecamatan" value="{{ old('kecamatan') }}">
                                     @error('kecamatan')<p class="error-text">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="kd-kode-pos" class="label">Kode Pos <span class="text-error">*</span></label>
-                                    <input type="text" id="kd-kode-pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Masukkan kode pos"
-                                        class="input @error('kode_pos') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
-                                    @error('kode_pos')<p class="error-text">{{ $message }}</p>@enderror
+                                    <div class="flex items-center justify-between">
+                                        <label for="kd-kelurahan" class="label">Kelurahan / Desa <span class="text-error">*</span></label>
+                                        <span id="kd-loading-kelurahan" class="hidden text-[11px] text-[#b05525] font-medium flex items-center gap-1">
+                                            <svg class="animate-spin h-3 w-3 text-[#b05525]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            Memuat kelurahan...
+                                        </span>
+                                    </div>
+                                    <select id="kd-kelurahan" name="kelurahan" class="input @error('kelurahan') input-error @enderror" disabled>
+                                        <option value="">Pilih kelurahan / desa</option>
+                                    </select>
+                                    <input type="hidden" id="kd-old-kelurahan" value="{{ old('kelurahan') }}">
+                                    @error('kelurahan')<p class="error-text">{{ $message }}</p>@enderror
                                 </div>
                             </div>
-                            <div class="mt-4">
-                                <label for="kd-alamat" class="label">Alamat Lengkap <span class="text-error">*</span></label>
-                                <textarea id="kd-alamat" name="alamat" rows="2" placeholder="Jalan, nomor rumah, RT/RW, kelurahan"
-                                    class="input @error('alamat') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>{{ old('alamat') }}</textarea>
-                                @error('alamat')<p class="error-text">{{ $message }}</p>@enderror
+                            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <label for="kd-kode-pos" class="label">Kode Pos <span class="text-error">*</span></label>
+                                        <span id="kd-badge-kodepos" class="hidden text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                            Otomatis RajaOngkir ✓
+                                        </span>
+                                    </div>
+                                    <input type="text" id="kd-kode-pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Masukkan kode pos"
+                                        class="input @error('kode_pos') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
+                                    <p class="mt-1 text-[11px] text-stone-500">Terisi otomatis saat memilih kelurahan / kecamatan.</p>
+                                    @error('kode_pos')<p class="error-text">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="kd-alamat" class="label">Alamat Lengkap <span class="text-error">*</span></label>
+                                    <textarea id="kd-alamat" name="alamat" rows="2" placeholder="Jalan, nomor rumah, RT/RW, patokan"
+                                        class="input @error('alamat') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>{{ old('alamat') }}</textarea>
+                                    @error('alamat')<p class="error-text">{{ $message }}</p>@enderror
+                                </div>
                             </div>
                         </div>
 
@@ -555,6 +605,281 @@
             setMode('{{ $tab }}');
             renderDonasiSaja();
             renderKaosDonasi();
+        })();
+
+        // Integrasi RajaOngkir pada form Shop (Pesan Kaos + Donasi)
+        (function () {
+            var provSelect = document.getElementById('kd-provinsi');
+            var kabSelect = document.getElementById('kd-kabupaten');
+            var kecSelect = document.getElementById('kd-kecamatan');
+            var kelSelect = document.getElementById('kd-kelurahan');
+            var posInput = document.getElementById('kd-kode-pos');
+            var oldKab = document.getElementById('kd-old-kabupaten') ? document.getElementById('kd-old-kabupaten').value : '';
+            var oldKec = document.getElementById('kd-old-kecamatan') ? document.getElementById('kd-old-kecamatan').value : '';
+            var oldKel = document.getElementById('kd-old-kelurahan') ? document.getElementById('kd-old-kelurahan').value : '';
+            var loadKab = document.getElementById('kd-loading-kabupaten');
+            var loadKec = document.getElementById('kd-loading-kecamatan');
+            var loadKel = document.getElementById('kd-loading-kelurahan');
+            var badgePos = document.getElementById('kd-badge-kodepos');
+
+            if (!provSelect || !kabSelect || !kecSelect || !posInput) return;
+
+            var cityCache = {};
+            var districtCache = {};
+            var subdistrictCache = {};
+
+            function getSelectedOption(select) {
+                if (!select || select.selectedIndex < 0) return null;
+                return select.options[select.selectedIndex];
+            }
+
+            function loadCities(provId, selectedCityName) {
+                kabSelect.disabled = true;
+                kabSelect.innerHTML = '<option value="">Memuat kota/kabupaten...</option>';
+                kecSelect.disabled = true;
+                kecSelect.innerHTML = '<option value="">— Pilih Kota/Kabupaten Dahulu —</option>';
+                if (kelSelect) {
+                    kelSelect.disabled = true;
+                    kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                }
+                if (loadKab) loadKab.classList.remove('hidden');
+
+                function populate(cities) {
+                    if (loadKab) loadKab.classList.add('hidden');
+                    kabSelect.innerHTML = '<option value="">Pilih kabupaten / kota</option>';
+                    var matchedCityId = null;
+
+                    cities.forEach(function (c) {
+                        var opt = document.createElement('option');
+                        opt.value = c.name;
+                        opt.textContent = c.name;
+                        opt.dataset.id = c.id;
+                        if (selectedCityName && selectedCityName.toUpperCase() === c.name.toUpperCase()) {
+                            opt.selected = true;
+                            matchedCityId = c.id;
+                        }
+                        kabSelect.appendChild(opt);
+                    });
+
+                    kabSelect.disabled = false;
+
+                    if (matchedCityId) {
+                        loadDistricts(matchedCityId, oldKec);
+                    }
+                }
+
+                if (cityCache[provId]) {
+                    populate(cityCache[provId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/cities?province_id=' + encodeURIComponent(provId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        cityCache[provId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKab) loadKab.classList.add('hidden');
+                        kabSelect.innerHTML = '<option value="">Gagal memuat kota, silakan coba lagi</option>';
+                        kabSelect.disabled = false;
+                    });
+            }
+
+            function loadDistricts(cityId, selectedDistrictName) {
+                kecSelect.disabled = true;
+                kecSelect.innerHTML = '<option value="">Memuat kecamatan...</option>';
+                if (kelSelect) {
+                    kelSelect.disabled = true;
+                    kelSelect.innerHTML = '<option value="">— Pilih Kecamatan Dahulu —</option>';
+                }
+                if (loadKec) loadKec.classList.remove('hidden');
+
+                function populate(districts) {
+                    if (loadKec) loadKec.classList.add('hidden');
+                    kecSelect.innerHTML = '<option value="">Pilih kecamatan</option>';
+                    var matchedDistId = null;
+                    var matchedZip = null;
+
+                    districts.forEach(function (d) {
+                        var opt = document.createElement('option');
+                        opt.value = d.name;
+                        opt.textContent = d.name;
+                        opt.dataset.id = d.id;
+                        opt.dataset.zip = d.zip_code || '';
+                        if (selectedDistrictName && selectedDistrictName.toUpperCase() === d.name.toUpperCase()) {
+                            opt.selected = true;
+                            matchedDistId = d.id;
+                            matchedZip = d.zip_code || '';
+                        }
+                        kecSelect.appendChild(opt);
+                    });
+
+                    kecSelect.disabled = false;
+
+                    if (matchedDistId) {
+                        loadSubDistricts(matchedDistId, oldKel, matchedZip);
+                    }
+                }
+
+                if (districtCache[cityId]) {
+                    populate(districtCache[cityId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/districts?city_id=' + encodeURIComponent(cityId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        districtCache[cityId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKec) loadKec.classList.add('hidden');
+                        kecSelect.innerHTML = '<option value="">Gagal memuat kecamatan, silakan coba lagi</option>';
+                        kecSelect.disabled = false;
+                    });
+            }
+
+            function loadSubDistricts(districtId, selectedSubDistrictName, fallbackZip) {
+                if (!kelSelect) return;
+                kelSelect.disabled = true;
+                kelSelect.innerHTML = '<option value="">Memuat kelurahan...</option>';
+                if (loadKel) loadKel.classList.remove('hidden');
+
+                function populate(subdistricts) {
+                    if (loadKel) loadKel.classList.add('hidden');
+                    kelSelect.innerHTML = '<option value="">Pilih kelurahan / desa</option>';
+                    var matchedZip = null;
+
+                    if (subdistricts && subdistricts.length > 0) {
+                        subdistricts.forEach(function (s) {
+                            var opt = document.createElement('option');
+                            opt.value = s.name;
+                            opt.textContent = s.name + (s.zip_code ? ' (' + s.zip_code + ')' : '');
+                            opt.dataset.id = s.id;
+                            opt.dataset.zip = s.zip_code || '';
+                            if (selectedSubDistrictName && selectedSubDistrictName.toUpperCase() === s.name.toUpperCase()) {
+                                opt.selected = true;
+                                matchedZip = s.zip_code || '';
+                            }
+                            kelSelect.appendChild(opt);
+                        });
+                        kelSelect.disabled = false;
+                    } else {
+                        kelSelect.innerHTML = '<option value="">— Tidak ada data kelurahan khusus —</option>';
+                        kelSelect.disabled = false;
+                    }
+
+                    var finalZip = matchedZip || fallbackZip;
+                    if (finalZip && (!posInput.value || posInput.value === '0')) {
+                        posInput.value = finalZip;
+                        if (badgePos) badgePos.classList.remove('hidden');
+                    }
+                }
+
+                if (subdistrictCache[districtId]) {
+                    populate(subdistrictCache[districtId]);
+                    return;
+                }
+
+                fetch('/api/rajaongkir/subdistricts?district_id=' + encodeURIComponent(districtId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var data = (res && res.data) ? res.data : [];
+                        subdistrictCache[districtId] = data;
+                        populate(data);
+                    })
+                    .catch(function () {
+                        if (loadKel) loadKel.classList.add('hidden');
+                        kelSelect.innerHTML = '<option value="">Gagal memuat kelurahan, silakan coba lagi</option>';
+                        kelSelect.disabled = false;
+                    });
+            }
+
+            provSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(provSelect);
+                var provId = opt ? opt.dataset.id : null;
+                posInput.value = '';
+                if (badgePos) badgePos.classList.add('hidden');
+
+                if (!provId) {
+                    kabSelect.disabled = true;
+                    kabSelect.innerHTML = '<option value="">Pilih kabupaten / kota</option>';
+                    kecSelect.disabled = true;
+                    kecSelect.innerHTML = '<option value="">Pilih kecamatan</option>';
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">Pilih kelurahan / desa</option>';
+                    }
+                    return;
+                }
+
+                loadCities(provId, null);
+            });
+
+            kabSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(kabSelect);
+                var cityId = opt ? opt.dataset.id : null;
+                posInput.value = '';
+                if (badgePos) badgePos.classList.add('hidden');
+
+                if (!cityId) {
+                    kecSelect.disabled = true;
+                    kecSelect.innerHTML = '<option value="">Pilih kecamatan</option>';
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">Pilih kelurahan / desa</option>';
+                    }
+                    return;
+                }
+
+                loadDistricts(cityId, null);
+            });
+
+            kecSelect.addEventListener('change', function () {
+                var opt = getSelectedOption(kecSelect);
+                if (!opt || !opt.value) {
+                    posInput.value = '';
+                    if (badgePos) badgePos.classList.add('hidden');
+                    if (kelSelect) {
+                        kelSelect.disabled = true;
+                        kelSelect.innerHTML = '<option value="">Pilih kelurahan / desa</option>';
+                    }
+                    return;
+                }
+
+                var zip = opt.dataset.zip;
+                var distId = opt.dataset.id;
+
+                if (zip && zip !== '0') {
+                    posInput.value = zip;
+                    if (badgePos) badgePos.classList.remove('hidden');
+                }
+
+                if (distId) {
+                    loadSubDistricts(distId, null, zip);
+                }
+            });
+
+            if (kelSelect) {
+                kelSelect.addEventListener('change', function () {
+                    var opt = getSelectedOption(kelSelect);
+                    if (!opt || !opt.value) return;
+
+                    var zip = opt.dataset.zip;
+                    if (zip && zip !== '0') {
+                        posInput.value = zip;
+                        if (badgePos) badgePos.classList.remove('hidden');
+                    }
+                });
+            }
+
+            var initOpt = getSelectedOption(provSelect);
+            if (initOpt && initOpt.dataset.id) {
+                loadCities(initOpt.dataset.id, oldKab);
+            }
         })();
     </script>
 @endpush

@@ -346,6 +346,7 @@
                                 $cleanAlamat = ltrim(trim($selectedOrder->alamat ?? ''), ', ');
                                 $orderAlamatParts = array_filter([
                                     $cleanAlamat ?: null,
+                                    $selectedOrder->kelurahan ? 'Kel./Desa ' . $selectedOrder->kelurahan : null,
                                     $selectedOrder->kecamatan ? 'Kec. ' . $selectedOrder->kecamatan : null,
                                     $selectedOrder->kabupaten ? (str_starts_with(strtolower($selectedOrder->kabupaten), 'kota') || str_starts_with(strtolower($selectedOrder->kabupaten), 'kab') ? $selectedOrder->kabupaten : 'Kota/Kab. ' . $selectedOrder->kabupaten) : null,
                                     $selectedOrder->provinsi,

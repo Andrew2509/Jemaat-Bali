@@ -91,7 +91,7 @@
                                 <dt class="shrink-0 text-muted">Alamat</dt>
                                 <dd class="max-w-sm text-right font-semibold leading-relaxed text-ink">
                                     {{ $order->alamat }},
-                                    {{ collect([$order->kecamatan, $order->kabupaten])->filter()->implode(', ') }}
+                                    {{ collect([$order->kelurahan ? 'Kel./Desa ' . $order->kelurahan : null, $order->kecamatan ? 'Kec. ' . $order->kecamatan : null, $order->kabupaten])->filter()->implode(', ') }}
                                     {{ $order->kode_pos ? 'Kode Pos ' . $order->kode_pos : '' }}<br>
                                     <span class="font-medium text-muted">{{ $order->provinsi }}</span>
                                 </dd>

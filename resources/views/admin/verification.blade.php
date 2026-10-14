@@ -460,6 +460,7 @@
                                         @php
                                             $vAlamatParts = array_filter([
                                                 ltrim(trim($selectedItem->alamat ?? ''), ', '),
+                                                $selectedItem->kelurahan ? 'Kel./Desa ' . $selectedItem->kelurahan : null,
                                                 $selectedItem->kecamatan ? 'Kec. ' . $selectedItem->kecamatan : null,
                                                 $selectedItem->kabupaten,
                                                 $selectedItem->provinsi,

@@ -51,6 +51,7 @@ class Order extends Model
         'provinsi',
         'kabupaten',
         'kecamatan',
+        'kelurahan',
         'kode_pos',
         'ukuran',
         'jumlah',
@@ -118,6 +119,24 @@ class Order extends Model
         return URL::signedRoute('bukti.show', ['type' => 'pesanan', 'id' => $this->id]);
     }
 
+    protected static function booted(): void
+    {
+        static::ensureKelurahanColumn();
+    }
+
+    public static function ensureKelurahanColumn(): void
+    {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('orders') && ! \Illuminate\Support\Facades\Schema::hasColumn('orders', 'kelurahan')) {
+                \Illuminate\Support\Facades\Schema::table('orders', function ($table) {
+                    $table->string('kelurahan', 120)->nullable()->after('kecamatan');
+                });
+            }
+        } catch (\Throwable $e) {
+            // Ignore if permission or already exists
+        }
+    }
+
     public function totalTagihan(): int
     {
         return $this->subtotal_kaos + $this->ongkir + $this->donasi;
@@ -127,6 +146,7 @@ class Order extends Model
     {
         $parts = array_filter([
             ltrim(trim($this->alamat ?? ''), ', '),
+            $this->kelurahan ? 'Kel./Desa ' . $this->kelurahan : null,
             $this->kecamatan ? 'Kec. ' . $this->kecamatan : null,
             $this->kabupaten,
             $this->provinsi,
