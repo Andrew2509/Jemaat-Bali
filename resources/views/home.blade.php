@@ -178,7 +178,9 @@
                                         <span class="grid h-9 w-9 place-items-center rounded-full bg-[#b05525] text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
                                         <span class="font-extrabold tracking-tight text-stone-900">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
                                     </div>
-                                    <p class="mt-8 inline-block rounded bg-[#b05525]/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#b05525]">Program Resmi</p>
+                                    <p class="mt-8 inline-block rounded bg-[#b05525]/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#b05525]">
+                                        {{ $programInfo && $programInfo->isCanvaProposal() ? '✦ Presentasi Canva' : 'Program Resmi' }}
+                                    </p>
                                     <h3 class="mt-3 font-display text-4xl font-extrabold leading-tight text-stone-900 sm:text-5xl">Proposal<br><span class="font-serif italic font-normal text-[#b05525]">Pembangunan</span></h3>
                                     <p class="mt-3 max-w-md text-sm leading-relaxed text-stone-500">{{ $programInfo->deskripsi ?? 'Rencana fisik, anggaran kebutuhan, & tahapan pembangunan rumah jemaat.' }}</p>
                                 </div>
@@ -192,24 +194,26 @@
                             {{-- Overlay hover --}}
                             <div class="absolute inset-0 grid place-items-center bg-stone-900/0 transition group-hover:bg-stone-900/40">
                                 <span class="translate-y-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-stone-900 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100">
-                                    Buka Proposal &rarr;
+                                    {{ $programInfo && $programInfo->isCanvaProposal() ? 'Buka Presentasi Canva →' : 'Buka Proposal →' }}
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center justify-between px-5 pb-5 text-xs font-medium text-stone-500 sm:px-8 sm:pb-6">
                         <span>Proposal Pembangunan</span>
-                        <span>1</span>
+                        <span>{{ $programInfo && $programInfo->isCanvaProposal() ? 'Canva' : '1' }}</span>
                     </div>
                 </a>
-                        <p id="proposal-cover-pages" class="mt-3 text-center text-xs text-stone-500">Klik sampul untuk membaca proposal lengkap</p>
+                        <p id="proposal-cover-pages" class="mt-3 text-center text-xs text-stone-500">
+                            {{ $programInfo && $programInfo->isCanvaProposal() ? 'Klik sampul untuk membuka presentasi proposal interaktif' : 'Klik sampul untuk membaca proposal lengkap' }}
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    @if ($adaFile)
+    @if ($adaFile && (!$programInfo || !$programInfo->isCanvaProposal()))
         @push('scripts')
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
             <script>

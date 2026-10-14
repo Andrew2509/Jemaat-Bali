@@ -33,7 +33,7 @@
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#e8e4dc]">
         <nav class="flex gap-8 -mb-px">
             <a href="{{ route('admin.content') }}" class="border-b-2 border-[#b55322] pb-3 text-xs font-bold text-[#b55322]">Progres pembangunan</a>
-            <a href="#proposal-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Proposal PDF</a>
+            <a href="#proposal-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Proposal Pembangunan</a>
             <a href="#program-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Program &amp; kontak</a>
         </nav>
         <p class="text-xs font-medium text-stone-400 pb-3">{{ $progresses->total() }} entri &middot; {{ $totalTerbit }} terbit &middot; {{ $totalDraf }} draf</p>
@@ -368,75 +368,136 @@
 
     <!-- Bottom Row: Proposal PDF (left) & Informasi Program & Kontak (right) -->
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        
-        <!-- Proposal PDF Card -->
+        <!-- Proposal Section Card -->
         <section id="proposal-section" class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
-                    <h2 class="font-serif text-lg font-bold text-stone-900">Proposal PDF</h2>
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] px-2.5 py-0.5 text-xs font-semibold text-stone-700">
-                        <span class="h-1.5 w-1.5 rounded-full bg-stone-500"></span>
-                        Aktif
+                    <div>
+                        <h2 class="font-serif text-lg font-bold text-stone-900">Proposal Pembangunan</h2>
+                        <p class="text-xs text-stone-500 mt-0.5">Pilih untuk menampilkan presentasi Canva atau dokumen buku PDF.</p>
+                    </div>
+                    @php
+                        $isCanva = ($programInfo->proposal_tipe ?? 'canva') === 'canva';
+                    @endphp
+                    <span id="badge-proposal-status" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $isCanva ? 'bg-purple-100 text-purple-800' : 'bg-[#f2eee7] text-stone-700' }}">
+                        <span class="h-1.5 w-1.5 rounded-full {{ $isCanva ? 'bg-purple-600' : 'bg-stone-500' }}"></span>
+                        {{ $isCanva ? 'Mode Canva Aktif' : 'Mode PDF Aktif' }}
                     </span>
                 </div>
 
-                <!-- PDF File Box matching mockup -->
-                <div class="mt-4 flex items-center gap-3.5 rounded-xl bg-[#f5f2ec] border border-[#ede8df] p-4">
-                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#faefe8] text-[#b55322]">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-5 w-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                    </span>
-                    <div class="min-w-0">
-                        <p class="truncate text-sm font-bold text-stone-900">Proposal Pembangunan &mdash; Jemaat Bali</p>
-                        <p class="text-xs text-stone-400 mt-0.5">proposal-pembangunan-2026.pdf</p>
-                        <p class="text-[11px] text-stone-400 mt-0.5">PDF &middot; 2 halaman &middot; dokumen contoh</p>
-                    </div>
-                </div>
-
-                <!-- Metadata Key-Value List -->
-                <div class="mt-4 space-y-2 border-t border-stone-100 pt-3 text-xs">
-                    <div class="flex items-center justify-between">
-                        <span class="text-stone-400">Versi aktif</span>
-                        <span class="font-semibold text-stone-800">2026 - v1.0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-stone-400">Diperbarui</span>
-                        <span class="font-semibold text-stone-800">18 Juli 2026</span>
-                    </div>
-                </div>
-
-                <!-- Judul di website -->
-                <div class="mt-4">
-                    <label class="block text-xs font-semibold text-stone-700 mb-1.5">Judul di website</label>
-                    <input type="text" form="info-form" name="judul_proposal" value="{{ old('judul_proposal', $programInfo->judul_proposal ?? 'Proposal pembangunan') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
-                </div>
-
-                <p class="mt-3 text-[11px] text-stone-400 leading-relaxed">
-                    Unggah PDF baru untuk mengganti versi aktif. Periksa isi dan persetujuan panitia sebelum dipublikasikan.
-                </p>
-            </div>
-
-            <!-- PDF Action Buttons -->
-            <div class="mt-5 flex flex-wrap items-center gap-2.5 pt-2">
-                <a href="{{ route('proposal') }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-50 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4 text-stone-500">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                    <span>Lihat PDF</span>
-                </a>
-                <form method="POST" action="{{ route('admin.content.proposal') }}" enctype="multipart/form-data" class="inline">
+                <form method="POST" action="{{ route('admin.content.proposal.settings') }}" class="mt-4 space-y-4">
                     @csrf
-                    <input type="file" id="pdf-upload-input" name="proposal" accept=".pdf,application/pdf" class="hidden" onchange="this.form.submit()">
-                    <label for="pdf-upload-input" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-50 transition cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4 text-stone-500">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                        </svg>
-                        <span>Ganti PDF</span>
-                    </label>
+
+                    <!-- Pilihan Mode Proposal -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1.5">Format Tampilan di Website</label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <label class="proposal-mode-label flex items-center gap-2.5 rounded-xl border p-3 cursor-pointer transition {{ $isCanva ? 'border-purple-300 bg-purple-50/50' : 'border-[#e8e4dc] bg-stone-50/40 hover:bg-stone-50' }}">
+                                <input type="radio" name="proposal_tipe" value="canva" @checked($isCanva) class="text-purple-600 focus:ring-purple-500">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-900">Sematkan Canva</p>
+                                    <p class="text-[11px] text-stone-500">Interaktif, geser halaman, tanpa unduh</p>
+                                </div>
+                            </label>
+                            <label class="proposal-mode-label flex items-center gap-2.5 rounded-xl border p-3 cursor-pointer transition {{ !$isCanva ? 'border-[#b55322] bg-[#faefe8]/40' : 'border-[#e8e4dc] bg-stone-50/40 hover:bg-stone-50' }}">
+                                <input type="radio" name="proposal_tipe" value="pdf" @checked(!$isCanva) class="text-[#b55322] focus:ring-[#b55322]">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-900">Berkas PDF</p>
+                                    <p class="text-[11px] text-stone-500">Mode buku digital bawaan PDF.js</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Judul di website -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1.5">Judul Proposal di Website</label>
+                        <input type="text" name="judul_proposal" value="{{ old('judul_proposal', $programInfo->judul_proposal ?? 'Proposal pembangunan') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none" placeholder="Contoh: Proposal Pembangunan Jemaat Bali">
+                    </div>
+
+                    <!-- Kolom Input Canva (Tampil jika mode Canva) -->
+                    <div id="canva-setting-box" class="{{ $isCanva ? '' : 'hidden' }} space-y-3 pt-1">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-stone-700">
+                                    Tautan atau Kode Sematan Canva <span class="text-purple-600 font-bold">*</span>
+                                </label>
+                                @if($programInfo?->canva_embed_url)
+                                    <a href="{{ $programInfo->canva_embed_url }}" target="_blank" class="text-[11px] font-semibold text-purple-700 hover:underline inline-flex items-center gap-1">
+                                        <span>Uji Pratinjau</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                            <textarea name="proposal_canva_url" rows="3" placeholder="Tempelkan Tautan penyematan cerdas (https://www.canva.com/design/...) atau Kode penyematan HTML dari Canva..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-purple-600 focus:outline-none leading-relaxed font-mono">{{ old('proposal_canva_url', $programInfo->proposal_canva_url ?? '') }}</textarea>
+                        </div>
+
+                        <!-- Petunjuk Canva -->
+                        <div class="flex items-start gap-2.5 rounded-xl bg-purple-50/80 border border-purple-100 p-3 text-[11px] text-purple-900 leading-relaxed">
+                            <span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-purple-200 text-purple-800 text-[10px] font-bold">i</span>
+                            <div>
+                                <p class="font-bold text-purple-950">Cara mengambil tautan sematan di Canva:</p>
+                                <p class="mt-0.5 text-purple-800">Buka desain di Canva &rarr; klik <strong>Bagikan</strong> &rarr; pilih <strong>Lainnya</strong> &rarr; pilih <strong>Sematkan</strong> &rarr; klik tombol <strong>Salin</strong> pada <em>Tautan penyematan cerdas</em> atau <em>Kode penyematan HTML</em>, lalu tempel pada kotak di atas.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Informasi PDF (Tampil jika mode PDF) -->
+                    @php
+                        $pdfPath = public_path(\App\Http\Controllers\ProposalController::FILE);
+                        $hasPdf = file_exists($pdfPath);
+                    @endphp
+                    <div id="pdf-setting-box" class="{{ !$isCanva ? '' : 'hidden' }} space-y-3 pt-1">
+                        <div class="flex items-center gap-3.5 rounded-xl bg-[#f5f2ec] border border-[#ede8df] p-4">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#faefe8] text-[#b55322]">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-bold text-stone-900">Proposal Pembangunan &mdash; Jemaat Bali</p>
+                                <p class="text-xs text-stone-400 mt-0.5">proposal-pembangunan.pdf ({{ $hasPdf ? round(filesize($pdfPath) / 1024, 1) . ' KB' : 'Belum diunggah' }})</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi Simpan & Pratinjau -->
+                    <div class="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100">
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-[#b55322] px-4 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#9a4216] transition cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            <span>Simpan Pengaturan Proposal</span>
+                        </button>
+
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('proposal') }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-50 transition">
+                                <span>Lihat di Website</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
                 </form>
+
+                <!-- Form Upload PDF Terpisah (jika ingin ganti berkas) -->
+                <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+                    <span>Atau unggah file PDF baru:</span>
+                    <form method="POST" action="{{ route('admin.content.proposal') }}" enctype="multipart/form-data" class="inline">
+                        @csrf
+                        <input type="file" id="pdf-upload-input" name="proposal" accept=".pdf,application/pdf" class="hidden" onchange="this.form.submit()">
+                        <label for="pdf-upload-input" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-50 transition cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-3.5 w-3.5 text-stone-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                            </svg>
+                            <span>Pilih File PDF</span>
+                        </label>
+                    </form>
+                </div>
             </div>
         </section>
+
 
         <!-- Informasi Program & Kontak Card -->
         <section id="program-section" class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6">
@@ -483,6 +544,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[name="proposal_tipe"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var isCanva = this.value === 'canva';
+                var canvaBox = document.getElementById('canva-setting-box');
+                var pdfBox = document.getElementById('pdf-setting-box');
+                var badge = document.getElementById('badge-proposal-status');
+                
+                if (canvaBox) canvaBox.classList.toggle('hidden', !isCanva);
+                if (pdfBox) pdfBox.classList.toggle('hidden', isCanva);
+                if (badge) {
+                    badge.className = 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ' + (isCanva ? 'bg-purple-100 text-purple-800' : 'bg-[#f2eee7] text-stone-700');
+                    badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full ' + (isCanva ? 'bg-purple-600' : 'bg-stone-500') + '"></span>' + (isCanva ? 'Mode Canva Aktif' : 'Mode PDF Aktif');
+                }
+
+                document.querySelectorAll('.proposal-mode-label').forEach(function (label) {
+                    var r = label.querySelector('input');
+                    if (r && r.checked) {
+                        label.classList.remove('border-[#e8e4dc]', 'bg-stone-50/40');
+                        if (r.value === 'canva') {
+                            label.classList.add('border-purple-300', 'bg-purple-50/50');
+                        } else {
+                            label.classList.add('border-[#b55322]', 'bg-[#faefe8]/40');
+                        }
+                    } else if (r) {
+                        label.classList.remove('border-purple-300', 'bg-purple-50/50', 'border-[#b55322]', 'bg-[#faefe8]/40');
+                        label.classList.add('border-[#e8e4dc]', 'bg-stone-50/40');
+                    }
+                });
+            });
+        });
+
             var form = document.getElementById('info-form');
             var proposalInput = document.querySelector('input[name="judul_proposal"][form="info-form"]');
             var hiddenInput = document.getElementById('info-form-judul-proposal');

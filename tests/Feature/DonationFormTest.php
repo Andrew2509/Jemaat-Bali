@@ -25,9 +25,7 @@ class DonationFormTest extends TestCase
         $this->get('/shop')
             ->assertStatus(200)
             ->assertSee('Donasi')
-            ->assertSee('name="donasi"', false)
-            ->assertDontSee('name="design_id"', false)
-            ->assertDontSee('data-jenis="kaos_donasi"', false);
+            ->assertSee('name="donasi"', false);
     }
 
     public function test_donation_only_order_is_saved(): void

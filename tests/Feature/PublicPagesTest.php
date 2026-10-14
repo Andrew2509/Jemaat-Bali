@@ -123,4 +123,42 @@ class PublicPagesTest extends TestCase
             ->assertSee('Anda Mungkin Suka')
             ->assertSee('150.000');
     }
+
+    public function test_proposal_page_displays_canva_embed_when_mode_is_canva(): void
+    {
+        $this->seed();
+
+        $info = \App\Models\ProgramInfo::first();
+        $info->update([
+            'proposal_tipe' => 'canva',
+            'proposal_canva_url' => 'https://www.canva.com/design/DAHX81gWwu8/view',
+        ]);
+
+        $response = $this->get('/proposal');
+        $response->assertStatus(200);
+        $response->assertSee('id="canva-frame"', false);
+        $response->assertSee('canva.com/design/DAHX81gWwu8/view?embed', false);
+        $response->assertSee('Presentasi Canva Interaktif', false);
+    }
+
+    public function test_admin_can_update_proposal_settings(): void
+    {
+        $this->seed();
+
+        $admin = \App\Models\User::where('email', 'admin@jemaatbali.or.id')->first();
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.content.proposal.settings'), [
+                'proposal_tipe' => 'canva',
+                'proposal_canva_url' => '<div style="position: relative;"><iframe src="https://www.canva.com/design/DAHX81gWwu8/view?embed"></iframe></div>',
+                'judul_proposal' => 'Proposal Pembangunan Gedung Gereja 2026',
+            ]);
+
+        $response->assertRedirect(route('admin.content'));
+        $response->assertSessionHas('success');
+
+        $info = \App\Models\ProgramInfo::first();
+        $this->assertSame('canva', $info->proposal_tipe);
+        $this->assertStringContainsString('DAHX81gWwu8', $info->proposal_canva_url);
+    }
 }

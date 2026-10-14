@@ -14,6 +14,8 @@ class ProgramInfo extends Model
         'whatsapp',
         'email',
         'judul_proposal',
+        'proposal_tipe',
+        'proposal_canva_url',
     ];
 
     protected static function booted(): void
@@ -59,5 +61,49 @@ class ProgramInfo extends Model
     public function getWaUrlAttribute(): string
     {
         return 'https://wa.me/' . $this->clean_whatsapp;
+    }
+
+    /**
+     * URL sematan resmi untuk iframe Canva (mendukung tautan cerdas maupun kode embed HTML)
+     */
+    public function getCanvaEmbedUrlAttribute(): ?string
+    {
+        $val = trim($this->proposal_canva_url ?? '');
+        if (!$val) {
+            return null;
+        }
+
+        // 1. Ekstrak src jika pemakai menempelkan tag <iframe> atau HTML embed Canva
+        if (preg_match('/<iframe[^>]+src=["\']([^"\']+)["\']/i', $val, $m)) {
+            $val = $m[1];
+        }
+
+        $val = html_entity_decode($val);
+
+        // 2. Normalisasi jika berupa tautan canva.com
+        if (preg_match('~^https?://(?:www\.)?canva\.com/design/([^?#]+)~i', $val, $m)) {
+            $path = trim($m[1], '/');
+            // Jika path berakhiran /view, /watch, /edit atau /embed, bersihkan
+            $path = preg_replace('~/(view|watch|edit|embed)$~i', '', $path);
+            return "https://www.canva.com/design/{$path}/view?embed";
+        }
+
+        if (filter_var($val, FILTER_VALIDATE_URL)) {
+            return str_contains($val, 'embed') ? $val : ($val . (str_contains($val, '?') ? '&embed' : '?embed'));
+        }
+
+        return null;
+    }
+
+    /**
+     * Cek apakah mode proposal aktif adalah Canva
+     */
+    public function isCanvaProposal(): bool
+    {
+        if ($this->proposal_tipe === 'canva') {
+            return !empty($this->canva_embed_url);
+        }
+
+        return !empty($this->canva_embed_url) && $this->proposal_tipe !== 'pdf';
     }
 }

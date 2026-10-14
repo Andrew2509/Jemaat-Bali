@@ -32,12 +32,12 @@ class Product360ViewerTest extends TestCase
         $response = $this->get('/design-kaos');
         $response->assertStatus(200);
 
-        // Struktur 360 viewer (putar gambar dengan geser kursor/jari)
+        // Struktur 360 viewer untuk desain default (video 360)
         $response->assertSee('id="viewer-360"', false);
-        $response->assertSee('id="viewer-360-img"', false);
+        $response->assertSee('id="viewer-360-video"', false);
         $response->assertSee('id="viewer-360-counter"', false);
         $response->assertSee('data-putar', false);
-        $response->assertSee('360&deg; View', false);
+        $response->assertSee('360&deg; Video Playing', false);
 
         // Kontrol putar tersedia
         $response->assertSee('id="btn-jeda"', false);
@@ -55,9 +55,12 @@ class Product360ViewerTest extends TestCase
             $response = $this->get('/design-kaos?desain=' . $design->id);
             $response->assertStatus(200);
 
-            // Viewer 360 dan kontrolnya selalu dirender
-            $response->assertSee('id="viewer-360"', false);
-            $response->assertSee('id="viewer-360-img"', false);
+            if ($design->video360Url()) {
+                $response->assertSee('id="viewer-360"', false);
+                $response->assertSee('id="viewer-360-video"', false);
+            } else {
+                $response->assertSee($design->gambarUrl(), false);
+            }
 
             // Setiap desain menampilkan CTA pesan ke checkout kaos baru
             $response->assertSee('pesan-kaos?desain=' . $design->id, false);

@@ -114,6 +114,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/konten/progres/{id}/hapus', [AdminController::class, 'contentDestroy'])->name('content.destroy');
         Route::post('/konten/convert-video', [AdminController::class, 'convertVideo'])->name('content.convert-video');
         Route::post('/konten/proposal', [ProposalController::class, 'upload'])->name('content.proposal');
+        Route::post('/konten/proposal/pengaturan', [ProposalController::class, 'updateSettings'])->name('content.proposal.settings');
         Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
     });
 

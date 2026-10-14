@@ -12,6 +12,9 @@ class ProposalController extends Controller
     public function index()
     {
         $path = public_path(self::FILE);
+        $programInfo = \App\Models\ProgramInfo::first();
+        $isCanva = $programInfo ? $programInfo->isCanvaProposal() : false;
+        $canvaEmbedUrl = $programInfo?->canva_embed_url;
 
         return view('proposal', [
             'adaFile' => file_exists($path),
@@ -19,6 +22,9 @@ class ProposalController extends Controller
             'namaFile' => basename(self::FILE),
             'url' => asset(self::FILE) . (file_exists($path) ? '?v=' . filemtime($path) : ''),
             'updatedAt' => file_exists($path) ? date('d M Y, H:i', filemtime($path)) : null,
+            'isCanva' => $isCanva,
+            'canvaEmbedUrl' => $canvaEmbedUrl,
+            'programInfo' => $programInfo,
         ]);
     }
 
@@ -39,7 +45,44 @@ class ProposalController extends Controller
 
         $request->file('proposal')->move($dir, 'proposal-pembangunan.pdf');
 
-        return redirect()->route('admin.content')->with('success', 'File proposal berhasil diperbarui dan langsung digunakan di website.');
+        if ($info = \App\Models\ProgramInfo::first()) {
+            $info->update(['proposal_tipe' => 'pdf']);
+            cache()->forget('program_info');
+        }
+
+        return redirect()->route('admin.content')->with('success', 'File proposal berhasil diperbarui dan mode berkas PDF diaktifkan.');
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $data = $request->validate([
+            'proposal_tipe' => ['required', 'in:canva,pdf'],
+            'proposal_canva_url' => ['nullable', 'string', 'max:3000'],
+            'judul_proposal' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $info = \App\Models\ProgramInfo::first();
+        if ($info) {
+            $info->update([
+                'proposal_tipe' => $data['proposal_tipe'],
+                'proposal_canva_url' => $data['proposal_canva_url'],
+                'judul_proposal' => !empty($data['judul_proposal']) ? $data['judul_proposal'] : $info->judul_proposal,
+            ]);
+        } else {
+            \App\Models\ProgramInfo::create([
+                'nama_program' => 'Pembangunan Jemaat Bali',
+                'deskripsi' => 'Penggalangan dana pembangunan bersama.',
+                'whatsapp' => '0812-0000-0000',
+                'email' => 'admin@jemaatbali.or.id',
+                'judul_proposal' => $data['judul_proposal'] ?: 'Proposal pembangunan',
+                'proposal_tipe' => $data['proposal_tipe'],
+                'proposal_canva_url' => $data['proposal_canva_url'],
+            ]);
+        }
+
+        cache()->forget('program_info');
+
+        return redirect()->route('admin.content')->with('success', 'Pengaturan proposal berhasil disimpan.');
     }
 
     /** Streaming file agar nama unduhan tetap rapi. */
