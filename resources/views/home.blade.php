@@ -148,72 +148,140 @@
         </div>
     </section>
 
-    {{-- ================= PROPOSAL (sampul saja, klik → halaman Proposal) ================= --}}
+    {{-- ================= PROPOSAL (Canva player interaktif atau Sampul PDF) ================= --}}
     <section class="border-b border-line bg-white">
         <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
             <div class="grid items-center gap-10 lg:grid-cols-12">
                 <div class="lg:col-span-4">
                     <h2 class="font-display text-2xl font-extrabold sm:text-3xl">Proposal pembangunan</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-muted">Dokumen resmi rencana kerja dan anggaran. Klik sampul untuk membaca selengkapnya.</p>
+                    <p class="mt-3 text-sm leading-relaxed text-muted">
+                        @if ($isCanva && $canvaEmbedUrl)
+                            Presentasi resmi rencana kerja dan anggaran pembangunan. Telusuri langsung slide proposal di samping atau buka dalam mode layar penuh.
+                        @else
+                            Dokumen resmi rencana kerja dan anggaran. Klik sampul untuk membaca selengkapnya.
+                        @endif
+                    </p>
+
+                    <div class="mt-6 flex flex-col sm:flex-row lg:flex-col gap-3">
+                        <a href="{{ route('proposal') }}" class="btn btn-primary inline-flex items-center justify-center gap-2">
+                            <span>{{ $isCanva && $canvaEmbedUrl ? 'Buka Proposal Layar Penuh' : 'Buka Halaman Proposal' }}</span>
+                            <span>&rarr;</span>
+                        </a>
+                        @if ($adaFile)
+                            <a href="{{ route('proposal.download') }}" class="btn btn-outline inline-flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                <span>Unduh Berkas PDF</span>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="lg:col-span-8">
-                    <div class="mx-auto max-w-2xl">
-                <a href="{{ route('proposal') }}" title="Buka halaman Proposal"
-                    class="group relative block overflow-hidden rounded-lg border border-stone-200 bg-white shadow-[0_20px_50px_-15px_rgba(0,0,0,0.18)] transition hover:shadow-xl">
-                    {{-- Kepala halaman seperti mode 1 halaman --}}
-                    <div class="flex items-center justify-between px-5 pt-5 sm:px-8 sm:pt-6">
-                        <div class="flex items-center gap-2">
-                            <span class="grid h-8 w-8 place-items-center rounded-full bg-[#b05525] text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
-                            <span class="text-sm font-extrabold tracking-tight text-stone-900 sm:text-base">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
+                    @if ($isCanva && $canvaEmbedUrl)
+                        {{-- Tampilan Canva Presentasi Langsung: Menampilkan Sampul Depan & Slide Interaktif --}}
+                        <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
+                            {{-- Header Bar Player --}}
+                            <div class="flex items-center justify-between border-b border-stone-800 bg-stone-900/95 px-4 py-3 sm:px-6 text-white backdrop-blur-xs">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-purple-300">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                                        Canva Interaktif
+                                    </span>
+                                    <span class="text-xs font-medium text-stone-300 truncate max-w-[200px] sm:max-w-md">
+                                        {{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}
+                                    </span>
+                                </div>
+                                <a href="{{ route('proposal') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:scale-105 shrink-0">
+                                    <span>Layar Penuh</span>
+                                    <span>&rarr;</span>
+                                </a>
+                            </div>
+
+                            {{-- Iframe Canva Player --}}
+                            <div class="relative w-full aspect-[16/9] min-h-[300px] sm:min-h-[420px] md:min-h-[460px] bg-stone-950">
+                                <iframe id="home-canva-frame"
+                                    src="{{ $canvaEmbedUrl }}"
+                                    title="{{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}"
+                                    loading="lazy"
+                                    allow="autoplay; fullscreen"
+                                    allowfullscreen="allowfullscreen"
+                                    class="absolute inset-0 h-full w-full border-0">
+                                </iframe>
+                            </div>
                         </div>
-                        <span class="text-xs font-medium text-stone-500 sm:text-sm">Hal. 1</span>
-                    </div>
-                    <div class="px-5 py-4 sm:px-8">
-                        <div class="relative aspect-[3/4] w-full overflow-hidden rounded-sm">
-                            {{-- Sampul statis (tampil duluan / fallback) --}}
-                            <div id="proposal-cover-fallback" class="absolute inset-0 flex flex-col justify-between bg-stone-100 p-6 text-left sm:p-8">
-                                <div>
+                        <div class="mt-3.5 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500">
+                            <p class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 text-purple-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+                                </svg>
+                                <span>Klik atau geser pada tampilan di atas untuk menelusuri halaman proposal.</span>
+                            </p>
+                            <a href="{{ route('proposal') }}" class="font-bold text-[#b05525] hover:underline inline-flex items-center gap-1">
+                                <span>Buka Halaman Khusus</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    @else
+                        {{-- Mode Buku PDF (Sampul PDF.js atau Fallback Card) --}}
+                        <div class="mx-auto max-w-2xl">
+                            <a href="{{ route('proposal') }}" title="Buka halaman Proposal"
+                                class="group relative block overflow-hidden rounded-lg border border-stone-200 bg-white shadow-[0_20px_50px_-15px_rgba(0,0,0,0.18)] transition hover:shadow-xl">
+                                {{-- Kepala halaman seperti mode 1 halaman --}}
+                                <div class="flex items-center justify-between px-5 pt-5 sm:px-8 sm:pt-6">
                                     <div class="flex items-center gap-2">
-                                        <span class="grid h-9 w-9 place-items-center rounded-full bg-[#b05525] text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
-                                        <span class="font-extrabold tracking-tight text-stone-900">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
+                                        <span class="grid h-8 w-8 place-items-center rounded-full bg-[#b05525] text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
+                                        <span class="text-sm font-extrabold tracking-tight text-stone-900 sm:text-base">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
                                     </div>
-                                    <p class="mt-8 inline-block rounded bg-[#b05525]/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#b05525]">
-                                        {{ $programInfo && $programInfo->isCanvaProposal() ? '✦ Presentasi Canva' : 'Program Resmi' }}
-                                    </p>
-                                    <h3 class="mt-3 font-display text-4xl font-extrabold leading-tight text-stone-900 sm:text-5xl">Proposal<br><span class="font-serif italic font-normal text-[#b05525]">Pembangunan</span></h3>
-                                    <p class="mt-3 max-w-md text-sm leading-relaxed text-stone-500">{{ $programInfo->deskripsi ?? 'Rencana fisik, anggaran kebutuhan, & tahapan pembangunan rumah jemaat.' }}</p>
+                                    <span class="text-xs font-medium text-stone-500 sm:text-sm">Hal. 1</span>
                                 </div>
-                                <div class="border-t border-stone-200 pt-4 text-xs text-stone-500">
-                                    <p class="font-semibold text-stone-800">Panitia {{ $programInfo->nama_program ?? 'Pembangunan' }}</p>
-                                    <p>{{ $programInfo->nama_program ?? 'Jemaat Bali' }} — {{ date('Y') }}</p>
+                                <div class="px-5 py-4 sm:px-8">
+                                    <div class="relative aspect-[3/4] w-full overflow-hidden rounded-sm">
+                                        {{-- Sampul statis (tampil duluan / fallback) --}}
+                                        <div id="proposal-cover-fallback" class="absolute inset-0 flex flex-col justify-between bg-stone-100 p-6 text-left sm:p-8">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="grid h-9 w-9 place-items-center rounded-full bg-[#b05525] text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
+                                                    <span class="font-extrabold tracking-tight text-stone-900">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
+                                                </div>
+                                                <p class="mt-8 inline-block rounded bg-[#b05525]/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#b05525]">
+                                                    Program Resmi
+                                                </p>
+                                                <h3 class="mt-3 font-display text-4xl font-extrabold leading-tight text-stone-900 sm:text-5xl">Proposal<br><span class="font-serif italic font-normal text-[#b05525]">Pembangunan</span></h3>
+                                                <p class="mt-3 max-w-md text-sm leading-relaxed text-stone-500">{{ $programInfo->deskripsi ?? 'Rencana fisik, anggaran kebutuhan, & tahapan pembangunan rumah jemaat.' }}</p>
+                                            </div>
+                                            <div class="border-t border-stone-200 pt-4 text-xs text-stone-500">
+                                                <p class="font-semibold text-stone-800">Panitia {{ $programInfo->nama_program ?? 'Pembangunan' }}</p>
+                                                <p>{{ $programInfo->nama_program ?? 'Jemaat Bali' }} — {{ date('Y') }}</p>
+                                            </div>
+                                        </div>
+                                        {{-- Sampul asli (halaman 1 PDF, dimuat via JS) --}}
+                                        <canvas id="proposal-cover-canvas" class="absolute inset-0 hidden h-full w-full"></canvas>
+                                        {{-- Overlay hover --}}
+                                        <div class="absolute inset-0 grid place-items-center bg-stone-900/0 transition group-hover:bg-stone-900/40">
+                                            <span class="translate-y-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-stone-900 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100">
+                                                Buka Proposal &rarr;
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            {{-- Sampul asli (halaman 1 PDF, dimuat via JS) --}}
-                            <canvas id="proposal-cover-canvas" class="absolute inset-0 hidden h-full w-full"></canvas>
-                            {{-- Overlay hover --}}
-                            <div class="absolute inset-0 grid place-items-center bg-stone-900/0 transition group-hover:bg-stone-900/40">
-                                <span class="translate-y-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-stone-900 opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100">
-                                    {{ $programInfo && $programInfo->isCanvaProposal() ? 'Buka Presentasi Canva →' : 'Buka Proposal →' }}
-                                </span>
-                            </div>
+                                <div class="flex items-center justify-between px-5 pb-5 text-xs font-medium text-stone-500 sm:px-8 sm:pb-6">
+                                    <span>Proposal Pembangunan</span>
+                                    <span>1</span>
+                                </div>
+                            </a>
+                            <p id="proposal-cover-pages" class="mt-3 text-center text-xs text-stone-500">
+                                Klik sampul untuk membaca proposal lengkap
+                            </p>
                         </div>
-                    </div>
-                    <div class="flex items-center justify-between px-5 pb-5 text-xs font-medium text-stone-500 sm:px-8 sm:pb-6">
-                        <span>Proposal Pembangunan</span>
-                        <span>{{ $programInfo && $programInfo->isCanvaProposal() ? 'Canva' : '1' }}</span>
-                    </div>
-                </a>
-                        <p id="proposal-cover-pages" class="mt-3 text-center text-xs text-stone-500">
-                            {{ $programInfo && $programInfo->isCanvaProposal() ? 'Klik sampul untuk membuka presentasi proposal interaktif' : 'Klik sampul untuk membaca proposal lengkap' }}
-                        </p>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </section>
 
-    @if ($adaFile && (!$programInfo || !$programInfo->isCanvaProposal()))
+    @if ($adaFile && !($isCanva && $canvaEmbedUrl))
         @push('scripts')
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
             <script>

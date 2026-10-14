@@ -141,6 +141,23 @@ class PublicPagesTest extends TestCase
         $response->assertSee('Presentasi Canva Interaktif', false);
     }
 
+    public function test_home_page_displays_canva_embed_player_when_canva_mode_is_active(): void
+    {
+        $this->seed();
+
+        $info = \App\Models\ProgramInfo::first();
+        $info->update([
+            'proposal_tipe' => 'canva',
+            'proposal_canva_url' => 'https://www.canva.com/design/DAHX81gWwu8/view',
+        ]);
+
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('id="home-canva-frame"', false);
+        $response->assertSee('canva.com/design/DAHX81gWwu8/view?embed', false);
+        $response->assertSee('Canva Interaktif', false);
+    }
+
     public function test_admin_can_update_proposal_settings(): void
     {
         $this->seed();
