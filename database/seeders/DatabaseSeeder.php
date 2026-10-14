@@ -16,12 +16,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Super Admin',
-            'nama' => 'Super Admin',
-            'email' => 'admin@jemaatbali.or.id',
-            'password' => Hash::make('password123'),
-            'role' => 'super_admin',
+        $this->call([
+            AdminSeeder::class,
         ]);
 
         ProgramInfo::create([
