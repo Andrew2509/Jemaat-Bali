@@ -31,7 +31,23 @@ class Progress extends Model
 
     public function mediaUrl(): ?string
     {
-        return $this->media_path ? asset('storage/' . $this->media_path) : null;
+        if (!$this->media_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->media_path, 'http://') || str_starts_with($this->media_path, 'https://')) {
+            return $this->media_path;
+        }
+
+        if (str_starts_with($this->media_path, 'uploads/') || str_starts_with($this->media_path, 'images/') || str_starts_with($this->media_path, 'designs/')) {
+            return asset($this->media_path);
+        }
+
+        if (str_starts_with($this->media_path, 'storage/')) {
+            return asset($this->media_path);
+        }
+
+        return asset('storage/' . $this->media_path);
     }
 
     public function scopePublished($query)

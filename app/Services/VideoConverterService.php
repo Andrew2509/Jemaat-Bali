@@ -41,10 +41,14 @@ class VideoConverterService
      */
     public static function getFfmpegPath(): ?string
     {
-        $candidates = [
+        $candidates = PHP_OS_FAMILY === 'Windows' ? [
             'C:\\Users\\HP\\AppData\\Local\\Microsoft\\WinGet\\Links\\ffmpeg.exe',
             'C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe',
             storage_path('app/bin/ffmpeg.exe'),
+        ] : [
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg',
+            storage_path('app/bin/ffmpeg'),
         ];
 
         foreach ($candidates as $candidate) {
@@ -181,8 +185,42 @@ class VideoConverterService
         $baseName = 'video_' . time() . '_' . Str::random(6);
         $outputTemplate = $targetDir . DIRECTORY_SEPARATOR . $baseName . '.%(ext)s';
 
-        $nodePath = 'C:\\nvm4w\\nodejs\\node.exe';
-        $nodeOpt = file_exists($nodePath) ? '--js-runtimes node:' . escapeshellarg($nodePath) . ' ' : '';
+        $nodePath = null;
+        if (PHP_OS_FAMILY === 'Windows') {
+            $windowsCandidates = [
+                'C:\\nvm4w\\nodejs\\node.exe',
+                'C:\\Program Files\\nodejs\\node.exe',
+            ];
+            foreach ($windowsCandidates as $cand) {
+                if (file_exists($cand)) {
+                    $nodePath = $cand;
+                    break;
+                }
+            }
+        } else {
+            $linuxCandidates = [
+                '/usr/bin/node',
+                '/usr/local/bin/node',
+            ];
+            foreach ($linuxCandidates as $cand) {
+                if (file_exists($cand)) {
+                    $nodePath = $cand;
+                    break;
+                }
+            }
+        }
+        if (!$nodePath) {
+            $whichNode = PHP_OS_FAMILY === 'Windows' ? 'where node' : 'which node';
+            $outputNode = @shell_exec($whichNode);
+            if ($outputNode && trim($outputNode)) {
+                $lines = explode("\n", trim($outputNode));
+                $found = trim($lines[0]);
+                if ($found && file_exists($found)) {
+                    $nodePath = $found;
+                }
+            }
+        }
+        $nodeOpt = $nodePath ? '--js-runtimes node:' . escapeshellarg($nodePath) . ' ' : '';
 
         $ffmpegPath = self::getFfmpegPath();
         $ffmpegOpt = $ffmpegPath ? '--ffmpeg-location ' . escapeshellarg($ffmpegPath) . ' ' : '';

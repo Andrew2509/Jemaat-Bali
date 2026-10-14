@@ -231,7 +231,6 @@
                         </div>
                     </div>
                 @else
-                    <input type="hidden" name="donasi" id="donasi" value="{{ old('donasi', 0) }}">
                     <div class="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-xs text-stone-600 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-2.5">
                             <svg class="h-4 w-4 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

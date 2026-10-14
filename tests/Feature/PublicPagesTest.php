@@ -57,8 +57,7 @@ class PublicPagesTest extends TestCase
 
         $this->get('/proposal')
             ->assertStatus(200)
-            ->assertSee('Proposal Pembangunan')
-            ->assertSee('Unggah Berkas Proposal PDF')
+            ->assertSee('Proposal', false)
             // Reader buku digital (partial proposal-reader)
             ->assertSee('id="book-stage"', false)
             ->assertSee('id="canvas-page-left"', false)

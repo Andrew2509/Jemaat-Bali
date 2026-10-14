@@ -252,7 +252,7 @@
         {{-- Latar foto per slide (full bleed dengan fade transition) --}}
         @forelse ($progressTerbaru as $i => $p)
             @php
-                $bgImg = $p->media_path ? asset($p->media_path) : asset('images/hero-poster.jpg');
+                $bgImg = $p->mediaUrl() ?: asset('images/hero-poster.jpg');
             @endphp
             <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
                 style="background-image: url('{{ $bgImg }}'); background-size: cover; background-position: center;">
@@ -334,7 +334,7 @@
                         <div id="progres-track" class="flex gap-4 sm:gap-5 transition-transform duration-500 ease-out">
                             @foreach ($progressTerbaru as $i => $p)
                                 @php
-                                    $cardImg = $p->media_path ? asset($p->media_path) : asset('images/hero-poster.jpg');
+                                    $cardImg = $p->mediaUrl() ?: asset('images/hero-poster.jpg');
                                 @endphp
                                 <button type="button" data-card="{{ $i }}"
                                     class="progres-card group relative w-40 sm:w-48 md:w-56 shrink-0 aspect-[9/13] overflow-hidden rounded-2xl sm:rounded-3xl text-left transition-all duration-300 {{ $i === 0 ? 'opacity-100 ring-2 ring-amber-400 shadow-2xl scale-[1.02]' : 'opacity-65 hover:opacity-95 hover:scale-[1.01]' }}">
