@@ -804,12 +804,27 @@
                             prevMediaText.textContent = 'Video MP4 Bersih (Server)';
                             setChecklist(chkMedia, true);
                         } else {
-                            convertStatusBox.className = 'rounded-lg p-2.5 text-xs bg-rose-50 text-rose-900 border border-rose-200 block';
-                            convertStatusBox.innerHTML = '<strong>❌ Gagal:</strong> ' + (res.message || 'Gagal mengunduh video.');
+                            var errMsg = res.message || 'Gagal mengunduh video.';
+                            if (res.errors) {
+                                var errList = [];
+                                for (var k in res.errors) {
+                                    if (Array.isArray(res.errors[k])) {
+                                        errList.push(res.errors[k].join(', '));
+                                    } else if (typeof res.errors[k] === 'string') {
+                                        errList.push(res.errors[k]);
+                                    }
+                                }
+                                if (errList.length) errMsg = errList.join('<br>');
+                            }
+                            var isInfo = Boolean(res.can_embed);
+                            var boxClass = isInfo ? 'bg-amber-50 text-amber-900 border-amber-200' : 'bg-rose-50 text-rose-900 border-rose-200';
+                            var prefix = isInfo ? 'ℹ️ Catatan:' : '❌ Gagal:';
+                            convertStatusBox.className = 'rounded-lg p-2.5 text-xs border block ' + boxClass;
+                            convertStatusBox.innerHTML = '<strong>' + prefix + '</strong> ' + errMsg;
                         }
                     } catch (err) {
                         convertStatusBox.className = 'rounded-lg p-2.5 text-xs bg-rose-50 text-rose-900 border border-rose-200 block';
-                        convertStatusBox.innerHTML = '<strong>❌ Error:</strong> Terjadi kendala saat mengunduh video ke server.';
+                        convertStatusBox.innerHTML = '<strong>❌ Error:</strong> Terjadi kendala saat menghubungi server konversi video.';
                     } finally {
                         btnConvertNow.disabled = false;
                         btnConvertSpinner.classList.add('hidden');

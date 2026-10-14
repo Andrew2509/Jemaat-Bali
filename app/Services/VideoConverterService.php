@@ -97,6 +97,10 @@ class VideoConverterService
             ];
         }
 
+        if (!preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . $url;
+        }
+
         // Normalisasi URL lebih dulu (misal vt.tiktok.com)
         $url = Progress::normalizeVideoUrl($url);
         $quality = in_array($quality, ['480p', '720p', '1080p']) ? $quality : '720p';
@@ -115,9 +119,12 @@ class VideoConverterService
             return $this->downloadWithYtDlp($ytDlp, $url, $quality);
         }
 
+        $platform = Progress::make(['video_url' => $url])->videoPlatformLabel();
+
         return [
             'success' => false,
-            'message' => 'Modul download video (yt-dlp) sedang tidak tersedia di server. Anda dapat mengunggah file MP4 secara manual melalui tab "Pilih File".',
+            'message' => "Modul pengunduh video otomatis (yt-dlp) tidak terpasang di server hosting ini. Anda tidak perlu khawatir: tautan video {$platform} ini tetap dapat disimpan dan akan diputar dengan lancar melalui pemutar resmi di halaman progres. Jika Anda menginginkan berkas MP4 langsung di server, silakan unggah berkas .mp4 secara manual melalui tab 'Pilih File'.",
+            'can_embed' => true,
         ];
     }
 
@@ -291,6 +298,7 @@ class VideoConverterService
             'success' => false,
             'message' => $errorHint,
             'detail' => $output[0] ?? null,
+            'can_embed' => true,
         ];
     }
 }

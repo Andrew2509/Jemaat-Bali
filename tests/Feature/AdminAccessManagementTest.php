@@ -256,4 +256,27 @@ class AdminAccessManagementTest extends TestCase
         $response->assertRedirect(route('admin.dashboard'));
         $response->assertSessionHas('success');
     }
+
+    public function test_convert_video_handles_validation_and_returns_clean_json(): void
+    {
+        // 1. URL kosong
+        $response = $this->actingAs($this->superAdmin)->postJson(route('admin.content.convert-video'), [
+            'video_url' => '',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => false,
+            ]);
+        $this->assertStringContainsString('Silakan masukkan tautan video', $response->json('message'));
+
+        // 2. URL tanpa skema https:// dinormalisasi otomatis
+        $response2 = $this->actingAs($this->superAdmin)->postJson(route('admin.content.convert-video'), [
+            'video_url' => 'www.youtube.com/watch?v=sample12345',
+            'video_quality' => '720p',
+        ]);
+
+        $response2->assertStatus(200)
+            ->assertJsonStructure(['success', 'message']);
+    }
 }

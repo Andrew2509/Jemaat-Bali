@@ -813,15 +813,35 @@ class AdminController extends Controller
      */
     public function convertVideo(Request $request, \App\Services\VideoConverterService $converter)
     {
-        $request->validate([
+        @set_time_limit(180);
+
+        // Otomatis normalisasi skema URL jika pemakai tidak mengetikkan https://
+        $rawUrl = trim((string) $request->input('video_url', ''));
+        if ($rawUrl !== '' && !preg_match('#^https?://#i', $rawUrl)) {
+            $rawUrl = 'https://' . $rawUrl;
+            $request->merge(['video_url' => $rawUrl]);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'video_url' => ['required', 'string', 'url'],
             'video_quality' => ['nullable', 'string', Rule::in(['480p', '720p', '1080p'])],
+        ], [
+            'video_url.required' => 'Silakan masukkan tautan video terlebih dahulu.',
+            'video_url.url' => 'Format tautan video tidak valid. Pastikan menyertakan tautan lengkap (contoh: https://www.youtube.com/watch?v=... atau https://vt.tiktok.com/...).',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first('video_url') ?: 'Tautan video yang dimasukkan tidak valid.',
+                'errors' => $validator->errors(),
+            ], 200);
+        }
 
         $quality = $request->input('video_quality', '720p');
         $result = $converter->convertToLocalMp4($request->input('video_url'), $quality);
 
-        return response()->json($result, $result['success'] ? 200 : 422);
+        return response()->json($result, 200);
     }
 
     public function contentInfo(Request $request)
