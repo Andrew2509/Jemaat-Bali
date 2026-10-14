@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 30 300 240" role="img" aria-label="Kaos Bangun Bersama" data-warna="#b4531f">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fdf6ef"/>
+      <stop offset="100%" stop-color="#f3e6d9"/>
+    </linearGradient>
+    <linearGradient id="shirt1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b4531f"/>
+      <stop offset="100%" stop-color="#8f411a"/>
+    </linearGradient>
+  </defs>
+  <path d="M148 44 L104 58 L62 104 L100 142 L126 120 L126 262 L274 262 L274 120 L300 142 L338 104 L296 58 L252 44 C244 76 156 76 148 44 Z" fill="url(#shirt1)"/>
+  <path d="M148 44 C156 76 244 76 252 44 L236 38 C228 60 172 60 164 38 Z" fill="#6f3314"/>
+  <g id="print">
+    <text x="200" y="150" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff" text-anchor="middle">BANGUN</text>
+    <text x="200" y="174" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff" text-anchor="middle">BERSAMA</text>
+    <rect x="164" y="188" width="72" height="3" fill="#ffffff90"/>
+    <text x="200" y="210" font-family="Arial, Helvetica, sans-serif" font-size="10" letter-spacing="2" fill="#ffffffcc" text-anchor="middle">JEMAAT BALI</text>
+  </g>
+  </svg>

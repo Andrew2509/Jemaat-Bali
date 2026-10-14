@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Kaos Keluarga Kudus" data-warna="#7f1d1d">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f0ee"/>
+      <stop offset="100%" stop-color="#ead9d5"/>
+    </linearGradient>
+    <linearGradient id="shirt5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7f1d1d"/>
+      <stop offset="100%" stop-color="#611414"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg5)"/>
+  <ellipse cx="200" cy="268" rx="118" ry="16" fill="#00000014"/>
+  <path d="M148 44 L104 58 L62 104 L100 142 L126 120 L126 262 L274 262 L274 120 L300 142 L338 104 L296 58 L252 44 C244 76 156 76 148 44 Z" fill="url(#shirt5)"/>
+  <path d="M148 44 C156 76 244 76 252 44 L236 38 C228 60 172 60 164 38 Z" fill="#4f0f0f"/>
+  <g id="print">
+    <text x="200" y="148" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#fde68a" text-anchor="middle">KELUARGA</text>
+    <text x="200" y="176" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle">KUDUS</text>
+    <rect x="164" y="190" width="72" height="3" fill="#fde68a90"/>
+    <text x="200" y="212" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="2" fill="#fde68acc" text-anchor="middle">BERDOA &amp; MEMBANGUN</text>
+  </g>
+  <text x="200" y="286" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#7f1d1d" text-anchor="middle">Desain 05 — Rp 145.000</text>
+</svg>
