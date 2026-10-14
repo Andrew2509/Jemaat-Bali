@@ -252,11 +252,21 @@
         {{-- Latar foto per slide (full bleed dengan fade transition) --}}
         @forelse ($progressTerbaru as $i => $p)
             @php
-                $bgImg = $p->mediaUrl() ?: asset('images/hero-poster.jpg');
+                $thumb = $p->thumbnailUrl() ?: ($p->tipe === 'foto' ? $p->mediaUrl() : null);
             @endphp
-            <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
-                style="background-image: url('{{ $bgImg }}'); background-size: cover; background-position: center;">
-            </div>
+            @if ($thumb)
+                <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
+                    style="background-image: url('{{ $thumb }}'); background-size: cover; background-position: center;">
+                </div>
+            @elseif ($p->tipe === 'video' && $p->mediaUrl())
+                <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out overflow-hidden {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}">
+                    <video src="{{ $p->mediaUrl() }}" autoplay muted loop playsinline class="h-full w-full object-cover"></video>
+                </div>
+            @else
+                <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
+                    style="background-image: url('{{ asset('images/hero-poster.jpg') }}'); background-size: cover; background-position: center;">
+                </div>
+            @endif
         @empty
             <div class="absolute inset-0 bg-[linear-gradient(135deg,#3a2415,#1c1917)]"></div>
         @endforelse
@@ -302,14 +312,27 @@
                                 {{ $p->deskripsi }}
                             </p>
 
-                            {{-- Tombol Aksi: Bookmark Kuning Bulat + Outline Discover Pill --}}
+                            {{-- Tombol Aksi: Putar Video / Lihat Dokumentasi --}}
                             <div class="mt-6 flex items-center gap-3.5">
-                                <a href="{{ route('progres') }}" title="Buka Detail Progres"
-                                    class="grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full bg-amber-400 text-stone-950 shadow-md transition hover:scale-105 hover:bg-amber-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                                        <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
-                                    </svg>
-                                </a>
+                                @if ($p->tipe === 'video' && ($p->embedUrl() || $p->mediaUrl()))
+                                    <button type="button" 
+                                        class="btn-play-progres grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full bg-amber-400 text-stone-950 shadow-md transition hover:scale-105 hover:bg-amber-300"
+                                        data-embed="{{ $p->embedUrl() }}"
+                                        data-file="{{ $p->mediaUrl() }}"
+                                        data-title="{{ $p->judul }}"
+                                        title="Putar Video: {{ $p->judul }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 ml-0.5">
+                                            <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
+                                        </svg>
+                                    </button>
+                                @else
+                                    <a href="{{ route('progres') }}" title="Buka Detail Progres"
+                                        class="grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full bg-amber-400 text-stone-950 shadow-md transition hover:scale-105 hover:bg-amber-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                                            <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
+                                        </svg>
+                                    </a>
+                                @endif
                                 <a href="{{ route('progres') }}"
                                     class="inline-flex items-center rounded-full border border-white/50 bg-white/5 backdrop-blur-sm px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-stone-900">
                                     <span>Lihat Dokumentasi &rarr;</span>
@@ -334,13 +357,22 @@
                         <div id="progres-track" class="flex gap-4 sm:gap-5 transition-transform duration-500 ease-out">
                             @foreach ($progressTerbaru as $i => $p)
                                 @php
-                                    $cardImg = $p->mediaUrl() ?: asset('images/hero-poster.jpg');
+                                    $cardThumb = $p->thumbnailUrl() ?: ($p->tipe === 'foto' ? $p->mediaUrl() : null);
                                 @endphp
                                 <button type="button" data-card="{{ $i }}"
                                     class="progres-card group relative w-40 sm:w-48 md:w-56 shrink-0 aspect-[9/13] overflow-hidden rounded-2xl sm:rounded-3xl text-left transition-all duration-300 {{ $i === 0 ? 'opacity-100 ring-2 ring-amber-400 shadow-2xl scale-[1.02]' : 'opacity-65 hover:opacity-95 hover:scale-[1.01]' }}">
-                                    {{-- Foto Kartu --}}
-                                    <img src="{{ $cardImg }}" alt="{{ $p->judul }}"
-                                        class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                                    {{-- Foto / Thumbnail Kartu --}}
+                                    @if ($cardThumb)
+                                        <img src="{{ $cardThumb }}" alt="{{ $p->judul }}"
+                                            class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                                    @elseif ($p->tipe === 'video' && $p->mediaUrl())
+                                        <video src="{{ $p->mediaUrl() }}#t=0.1" preload="metadata" muted playsinline
+                                            class="absolute inset-0 h-full w-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"></video>
+                                    @else
+                                        <img src="{{ asset('images/hero-poster.jpg') }}" alt="{{ $p->judul }}"
+                                            class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                                    @endif
+
                                     {{-- Gradient Gelap Bawah Kartu --}}
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent"></div>
 
@@ -411,6 +443,26 @@
         @endif
     </section>
 
+    {{-- Modal Pemutar Video Progres Lapangan --}}
+    <div id="modal-progres-video" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 p-4 backdrop-blur-md transition-opacity" role="dialog" aria-modal="true">
+        <div class="relative w-full max-w-3xl overflow-hidden rounded-2xl bg-stone-950 shadow-2xl border border-white/10">
+            <div class="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+                    <h4 id="modal-video-title" class="font-display text-sm font-bold text-white truncate max-w-md">Video Progres</h4>
+                </div>
+                <button type="button" id="btn-close-progres-video" class="rounded-lg p-1 text-white/70 hover:bg-white/10 hover:text-white transition" aria-label="Tutup video">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-video-container" class="relative aspect-video w-full bg-black">
+                {{-- Diisi secara dinamis dengan video atau iframe embed --}}
+            </div>
+        </div>
+    </div>
+
     @if ($progressTerbaru->count())
         @push('scripts')
             <script>
@@ -424,6 +476,55 @@
                     const prev = document.getElementById('progres-prev');
                     const next = document.getElementById('progres-next');
                     const total = cards.length;
+
+                    // Modal Video Elements
+                    const modalVideo = document.getElementById('modal-progres-video');
+                    const modalTitle = document.getElementById('modal-video-title');
+                    const modalContainer = document.getElementById('modal-video-container');
+                    const btnCloseVideo = document.getElementById('btn-close-progres-video');
+
+                    function openVideoModal(title, embedUrl, fileUrl) {
+                        if (!modalVideo || !modalContainer) return;
+                        if (modalTitle) modalTitle.textContent = title || 'Video Progres Lapangan';
+                        if (fileUrl) {
+                            modalContainer.innerHTML = '<video src="' + fileUrl + '" controls autoplay playsinline class="h-full w-full object-contain bg-black"></video>';
+                        } else if (embedUrl) {
+                            modalContainer.innerHTML = '<iframe src="' + embedUrl + '" class="h-full w-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+                        }
+                        modalVideo.classList.remove('hidden');
+                        modalVideo.classList.add('flex');
+                        document.body.classList.add('overflow-hidden');
+                    }
+
+                    function closeVideoModal() {
+                        if (!modalVideo || !modalContainer) return;
+                        modalVideo.classList.add('hidden');
+                        modalVideo.classList.remove('flex');
+                        modalContainer.innerHTML = '';
+                        document.body.classList.remove('overflow-hidden');
+                    }
+
+                    document.querySelectorAll('.btn-play-progres').forEach(function (btn) {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const embed = btn.getAttribute('data-embed');
+                            const file = btn.getAttribute('data-file');
+                            const title = btn.getAttribute('data-title');
+                            openVideoModal(title, embed, file);
+                        });
+                    });
+
+                    btnCloseVideo?.addEventListener('click', closeVideoModal);
+                    modalVideo?.addEventListener('click', function (e) {
+                        if (e.target === modalVideo) closeVideoModal();
+                    });
+                    document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape' && modalVideo && !modalVideo.classList.contains('hidden')) {
+                            closeVideoModal();
+                        }
+                    });
+
                     if (!track || total === 0) return;
 
                     let idx = 0;

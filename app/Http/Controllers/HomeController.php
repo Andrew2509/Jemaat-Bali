@@ -12,7 +12,7 @@ class HomeController extends Controller
         $proposalPath = public_path(ProposalController::FILE);
 
         return view('home', [
-            'progressTerbaru' => Progress::latest('tanggal')->latest('id')->take(6)->get(),
+            'progressTerbaru' => Progress::published()->latest('tanggal')->latest('id')->take(6)->get(),
             'designs' => Design::where('aktif', true)->latest('id')->get(),
             'adaFile' => file_exists($proposalPath),
             'url' => asset(ProposalController::FILE) . (file_exists($proposalPath) ? '?v=' . filemtime($proposalPath) : ''),

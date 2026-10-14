@@ -16,6 +16,17 @@ class PublicPagesTest extends TestCase
         $this->get('/')->assertStatus(200)->assertSee('Jemaat Bali');
     }
 
+    public function test_home_page_displays_progress_highlight_section(): void
+    {
+        $this->seed();
+
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('Dokumentasi Progres Lapangan', false);
+        $response->assertSee('Pemasangan fondasi bangunan utama', false);
+        $response->assertDontSee('Video profil program pembangunan');
+    }
+
     public function test_all_public_pages_load(): void
     {
         $this->seed();
