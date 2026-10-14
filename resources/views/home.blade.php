@@ -167,14 +167,6 @@
                             <span>{{ $isCanva && $canvaEmbedUrl ? 'Buka Proposal Layar Penuh' : 'Buka Halaman Proposal' }}</span>
                             <span>&rarr;</span>
                         </a>
-                        @if ($adaFile)
-                            <a href="{{ route('proposal.download') }}" class="btn btn-outline inline-flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                </svg>
-                                <span>Unduh Berkas PDF</span>
-                            </a>
-                        @endif
                     </div>
                 </div>
 
@@ -1052,7 +1044,7 @@
             </p>
             <div class="mt-7 flex flex-wrap justify-center gap-3">
                 <a href="{{ route('shop') }}" class="btn btn-primary !px-6 !py-3.5">Isi Formulir Donasi</a>
-                <a href="{{ route('proposal.download') }}" class="btn btn-outline !px-6 !py-3.5">Unduh Proposal</a>
+                <a href="{{ route('proposal') }}" class="btn btn-outline !px-6 !py-3.5">Lihat Proposal</a>
             </div>
         </div>
     </section>
