@@ -12,6 +12,8 @@ class User extends Authenticatable
         'password',
         'nama',
         'role',
+        'role_id',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -19,11 +21,55 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function roleModel()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function getRoleDisplayNameAttribute(): string
+    {
+        if ($this->roleModel) {
+            return $this->roleModel->display_name;
+        }
+
+        return match ($this->role) {
+            'super_admin' => 'Super Admin',
+            'admin' => 'Admin',
+            default => ucfirst(str_replace('_', ' ', $this->role ?? 'Pengguna')),
+        };
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return $this->role === 'super_admin'
+            || ($this->roleModel && $this->roleModel->name === 'super_admin');
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_string($roles)) {
+            $roles = [$roles];
+        }
+
+        $current = $this->roleModel?->name ?? $this->role;
+
+        return in_array($current, $roles, true);
+    }
+
+    public function hasPermission(string $permissionName): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->is_active) {
+            return false;
+        }
+
+        return $this->roleModel?->hasPermission($permissionName) ?? false;
     }
 }

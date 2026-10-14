@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+
         $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'local';
         if ($env === 'testing') {
             $middleware->validateCsrfTokens(except: ['*']);

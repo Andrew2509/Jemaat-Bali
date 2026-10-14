@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DesignController as AdminDesignController;
-use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ProviderController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\BuktiController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DesignController;
@@ -72,8 +76,27 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
 
     // Provider WhatsApp (Fonnte API)
-    Route::get('/provider', [\App\Http\Controllers\Admin\ProviderController::class, 'index'])->name('provider');
-    Route::post('/provider', [\App\Http\Controllers\Admin\ProviderController::class, 'update'])->name('provider.update');
-    Route::post('/provider/check', [\App\Http\Controllers\Admin\ProviderController::class, 'checkStatus'])->name('provider.check');
-    Route::post('/provider/test', [\App\Http\Controllers\Admin\ProviderController::class, 'testSend'])->name('provider.test');
+    Route::get('/provider', [ProviderController::class, 'index'])->name('provider');
+    Route::post('/provider', [ProviderController::class, 'update'])->name('provider.update');
+    Route::post('/provider/check', [ProviderController::class, 'checkStatus'])->name('provider.check');
+    Route::post('/provider/test', [ProviderController::class, 'testSend'])->name('provider.test');
+
+    // Manajemen Pengguna (Users)
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::post('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Manajemen Peran (Roles)
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+    // Manajemen Hak Akses (Permissions)
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
 });

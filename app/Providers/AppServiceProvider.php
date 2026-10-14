@@ -22,6 +22,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::anonymousComponentPath(resource_path('views/components'));
 
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+                return true;
+            }
+        });
+
+        \Illuminate\Support\Facades\Gate::after(function ($user, $ability, $result) {
+            if ($result !== null) {
+                return $result;
+            }
+            if (method_exists($user, 'hasPermission')) {
+                return $user->hasPermission($ability);
+            }
+            return false;
+        });
+
         \Illuminate\Support\Facades\Blade::directive('money', function ($expression) {
             return "<?php echo 'Rp' . number_format($expression, 0, ',', '.'); ?>";
         });
