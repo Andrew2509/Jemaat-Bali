@@ -192,7 +192,10 @@
                                 <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">100% Video Bersih</span>
                             </div>
                             <p class="text-[11px] text-stone-500 leading-relaxed">
-                                Unduh langsung dari link menjadi berkas video MP4 di server Jemaat Bali. Diputar menggunakan tag <code class="bg-stone-200/60 px-1 py-0.5 rounded text-[10px] font-mono text-stone-700">&lt;video&gt;</code> murni tanpa watermark, tanpa logo platform, dan tanpa nama channel.
+                                Unduh langsung dari link menjadi berkas video MP4 di server Jemaat Bali.
+                                <span class="block mt-1.5 rounded-lg bg-stone-100 p-2 text-[11px] text-stone-700 font-medium border border-stone-200">
+                                    💡 <strong>Tips Shared Hosting:</strong> Jika server hosting Anda tidak memiliki modul pengunduh MP4, Anda <strong>tidak perlu mengunduh</strong> &mdash; cukup tempelkan link video dan langsung klik <strong>"Simpan"</strong> di bawah. Video akan langsung diputar rapi melalui pemutar resmi!
+                                </span>
                             </p>
 
                             <!-- Pilihan Kompresi Ukuran Video -->
@@ -819,8 +822,9 @@
                             var isInfo = Boolean(res.can_embed);
                             var boxClass = isInfo ? 'bg-amber-50 text-amber-900 border-amber-200' : 'bg-rose-50 text-rose-900 border-rose-200';
                             var prefix = isInfo ? 'ℹ️ Catatan:' : '❌ Gagal:';
+                            var nextActionHtml = isInfo ? '<div class="mt-2 text-amber-950 font-medium">👉 <strong>Langkah Anda:</strong> Cukup klik tombol <strong>"Simpan"</strong> di bagian bawah halaman. Tautan video ini akan langsung aktif dan diputar di website!</div>' : '';
                             convertStatusBox.className = 'rounded-lg p-2.5 text-xs border block ' + boxClass;
-                            convertStatusBox.innerHTML = '<strong>' + prefix + '</strong> ' + errMsg;
+                            convertStatusBox.innerHTML = '<strong>' + prefix + '</strong> ' + errMsg + nextActionHtml;
                         }
                     } catch (err) {
                         convertStatusBox.className = 'rounded-lg p-2.5 text-xs bg-rose-50 text-rose-900 border border-rose-200 block';
