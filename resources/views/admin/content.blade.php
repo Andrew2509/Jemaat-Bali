@@ -385,7 +385,7 @@
                     </span>
                 </div>
 
-                <form method="POST" action="{{ route('admin.content.proposal.settings') }}" class="mt-4 space-y-4">
+                <form method="POST" action="{{ route('admin.content.proposal') }}" class="mt-4 space-y-4">
                     @csrf
 
                     <!-- Pilihan Mode Proposal -->

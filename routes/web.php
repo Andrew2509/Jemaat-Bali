@@ -153,7 +153,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
     });
 
-    // Setup / Inisialisasi Database Server (khusus Super Admin untuk deploy Hostinger tanpa SSH)
+    // Setup / Inisialisasi Database Server & Pembersihan Seluruh Cache (khusus Super Admin untuk deploy Hostinger tanpa SSH)
     Route::get('/system/setup-database', function () {
         if (! Auth::check() || ! Auth::user()->isSuperAdmin()) {
             abort(403, 'Hanya Super Admin yang berhak menjalankan sinkronisasi database.');
@@ -162,12 +162,25 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         try {
             \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'RoleAndPermissionSeeder', '--force' => true]);
-            \Illuminate\Support\Facades\Artisan::call('view:clear');
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
 
-            return redirect()->route('admin.dashboard')->with('success', 'Database dan tabel hak akses berhasil diperbarui dan disinkronkan di server Hostinger!');
+            return redirect()->route('admin.dashboard')->with('success', 'Database, hak akses, dan seluruh cache (route, config, view) berhasil disinkronkan di server Hostinger!');
         } catch (\Throwable $e) {
             return redirect()->route('admin.dashboard')->withErrors(['error' => 'Gagal sinkronisasi database: ' . $e->getMessage()]);
         }
     })->name('system.setup-database');
+
+    Route::get('/system/clear-cache', function () {
+        if (! Auth::check() || ! Auth::user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang berhak membersihkan cache.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+            return redirect()->back()->with('success', 'Seluruh cache sistem (route, config, view) berhasil dibersihkan!');
+        } catch (\Throwable $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal membersihkan cache: ' . $e->getMessage()]);
+        }
+    })->name('system.clear-cache');
 });

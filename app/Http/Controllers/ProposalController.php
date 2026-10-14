@@ -30,6 +30,10 @@ class ProposalController extends Controller
 
     public function upload(Request $request)
     {
+        if ($request->has('proposal_tipe') || $request->has('proposal_canva_url') || ($request->has('judul_proposal') && !$request->hasFile('proposal'))) {
+            return $this->updateSettings($request);
+        }
+
         $request->validate([
             'proposal' => ['required', 'file', 'mimes:pdf', 'max:25600'],
         ], [
@@ -62,11 +66,14 @@ class ProposalController extends Controller
         ]);
 
         $info = \App\Models\ProgramInfo::first();
+        $canvaUrl = array_key_exists('proposal_canva_url', $data) ? $data['proposal_canva_url'] : ($info->proposal_canva_url ?? null);
+        $judul = !empty($data['judul_proposal']) ? $data['judul_proposal'] : ($info->judul_proposal ?? 'Proposal pembangunan');
+
         if ($info) {
             $info->update([
                 'proposal_tipe' => $data['proposal_tipe'],
-                'proposal_canva_url' => $data['proposal_canva_url'],
-                'judul_proposal' => !empty($data['judul_proposal']) ? $data['judul_proposal'] : $info->judul_proposal,
+                'proposal_canva_url' => $canvaUrl,
+                'judul_proposal' => $judul,
             ]);
         } else {
             \App\Models\ProgramInfo::create([
@@ -74,9 +81,9 @@ class ProposalController extends Controller
                 'deskripsi' => 'Penggalangan dana pembangunan bersama.',
                 'whatsapp' => '0812-0000-0000',
                 'email' => 'admin@jemaatbali.or.id',
-                'judul_proposal' => $data['judul_proposal'] ?: 'Proposal pembangunan',
+                'judul_proposal' => $judul,
                 'proposal_tipe' => $data['proposal_tipe'],
-                'proposal_canva_url' => $data['proposal_canva_url'],
+                'proposal_canva_url' => $canvaUrl,
             ]);
         }
 

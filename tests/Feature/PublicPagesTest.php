@@ -147,8 +147,9 @@ class PublicPagesTest extends TestCase
 
         $admin = \App\Models\User::where('email', 'admin@jemaatbali.or.id')->first();
 
+        // Menggunakan rute admin.content.proposal langsung (kompatibel cache lama)
         $response = $this->actingAs($admin)
-            ->post(route('admin.content.proposal.settings'), [
+            ->post(route('admin.content.proposal'), [
                 'proposal_tipe' => 'canva',
                 'proposal_canva_url' => '<div style="position: relative;"><iframe src="https://www.canva.com/design/DAHX81gWwu8/view?embed"></iframe></div>',
                 'judul_proposal' => 'Proposal Pembangunan Gedung Gereja 2026',
@@ -160,5 +161,15 @@ class PublicPagesTest extends TestCase
         $info = \App\Models\ProgramInfo::first();
         $this->assertSame('canva', $info->proposal_tipe);
         $this->assertStringContainsString('DAHX81gWwu8', $info->proposal_canva_url);
+
+        // Menggunakan rute spesifik admin.content.proposal.settings
+        $response2 = $this->actingAs($admin)
+            ->post(route('admin.content.proposal.settings'), [
+                'proposal_tipe' => 'pdf',
+                'judul_proposal' => 'Proposal Pembangunan PDF 2026',
+            ]);
+
+        $response2->assertRedirect(route('admin.content'));
+        $this->assertSame('pdf', $info->fresh()->proposal_tipe);
     }
 }
