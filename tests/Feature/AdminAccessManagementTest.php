@@ -278,5 +278,22 @@ class AdminAccessManagementTest extends TestCase
 
         $response2->assertStatus(200)
             ->assertJsonStructure(['success', 'message']);
+
+        // 3. Google Drive URL dideteksi dengan benar pada model Progress
+        $gdriveProgress = new \App\Models\Progress([
+            'video_url' => 'https://drive.google.com/file/d/1AbC-123_xyz/view?usp=sharing',
+        ]);
+        $this->assertEquals('gdrive', $gdriveProgress->videoPlatform());
+        $this->assertEquals('Google Drive', $gdriveProgress->videoPlatformLabel());
+        $this->assertEquals('https://drive.google.com/file/d/1AbC-123_xyz/preview', $gdriveProgress->embedUrl());
+        $this->assertEquals('https://drive.google.com/thumbnail?id=1AbC-123_xyz&sz=w800', $gdriveProgress->thumbnailUrl());
+
+        // 4. Endpoint convert-video menerima tautan Google Drive
+        $response3 = $this->actingAs($this->superAdmin)->postJson(route('admin.content.convert-video'), [
+            'video_url' => 'https://drive.google.com/file/d/1AbC-123_xyz/view?usp=sharing',
+            'video_quality' => '720p',
+        ]);
+        $response3->assertStatus(200)
+            ->assertJsonStructure(['success', 'message']);
     }
 }

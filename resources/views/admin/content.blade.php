@@ -254,6 +254,8 @@
                                     <div class="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
                                         <iframe src="{{ $selectedProgress->embedUrl() }}" style="position:absolute; left:0; width:100%; height:calc(100% + 95px); margin-top:-48px; border:0;" allowfullscreen></iframe>
                                     </div>
+                                @elseif ($selectedProgress->videoPlatform() === 'gdrive')
+                                    <iframe src="{{ $selectedProgress->embedUrl() }}" class="h-full w-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
                                 @else
                                     <iframe src="{{ $selectedProgress->embedUrl() }}" class="h-full w-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                 @endif

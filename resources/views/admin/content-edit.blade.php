@@ -28,7 +28,7 @@
         </a>
         <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b55322]">JEMAAT BALI / ADMINISTRASI PROGRAM</p>
         <h1 class="mt-1 font-serif text-3xl font-bold text-stone-900">{{ $progress->exists ? 'Edit Progres' : 'Tambah Progres' }}</h1>
-        <p class="mt-1 text-xs text-stone-500">{{ $progress->exists ? 'Perbarui dokumentasi pembangunan yang sudah tercatat.' : 'Catat progres pembangunan terbaru beserta media foto atau video tautan (YouTube, Instagram, TikTok).' }}</p>
+        <p class="mt-1 text-xs text-stone-500">{{ $progress->exists ? 'Perbarui dokumentasi pembangunan yang sudah tercatat.' : 'Catat progres pembangunan terbaru beserta media foto atau video tautan (Google Drive, YouTube, Instagram, TikTok).' }}</p>
     </div>
 
     <!-- Main Grid: Form on Left, Live Preview on Right -->
@@ -154,6 +154,16 @@
                         <div class="flex flex-wrap items-center gap-2 pt-0.5">
                             <span class="text-[11px] text-stone-500 font-medium">Format platform didukung:</span>
                             
+                            <!-- Google Drive badge -->
+                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 border border-sky-200/80 px-2.5 py-1 text-[11px] font-bold text-sky-700">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                                    <path d="M8.27 3.5H15.73L22.29 15H14.83L8.27 3.5Z" fill="#FBBF24"/>
+                                    <path d="M1.71 15L5.44 21.5H20.36L16.63 15H1.71Z" fill="#22C55E"/>
+                                    <path d="M1.71 15L8.27 3.5L12 9.96L5.44 21.5L1.71 15Z" fill="#0284C7"/>
+                                </svg>
+                                <span>Google Drive</span>
+                            </span>
+
                             <!-- YouTube badge -->
                             <span class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 border border-rose-200/80 px-2.5 py-1 text-[11px] font-bold text-rose-700">
                                 <svg class="w-3.5 h-3.5 fill-rose-600" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
@@ -336,7 +346,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-semibold text-stone-600">Media belum dipilih</p>
-                                <p class="text-[11px] text-stone-400 mt-0.5">Tempel link YouTube/IG/TikTok atau upload file foto/video</p>
+                                <p class="text-[11px] text-stone-400 mt-0.5">Tempel link Google Drive/YouTube/IG/TikTok atau upload file foto/video</p>
                             </div>
                         </div>
 
@@ -344,7 +354,7 @@
                         <div class="absolute bottom-2.5 left-2.5 z-10 pointer-events-none">
                             <span id="preview-media-type-badge" class="{{ ($initialMediaUrl || $initialEmbedUrl) ? 'inline-flex' : 'hidden' }} items-center gap-1.5 rounded-md bg-stone-900/80 backdrop-blur-xs px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
                                 <span id="preview-media-type-icon">
-                                    @if ($initialPlatform === 'youtube') 🔴 @elseif($initialPlatform === 'instagram') 🟣 @elseif($initialPlatform === 'tiktok') ⚫ @else 📷 @endif
+                                    @if ($initialPlatform === 'gdrive') 📁 @elseif ($initialPlatform === 'youtube') 🔴 @elseif($initialPlatform === 'instagram') 🟣 @elseif($initialPlatform === 'tiktok') ⚫ @else 📷 @endif
                                 </span>
                                 <span id="preview-media-type-text">
                                     {{ $progress->exists ? $progress->videoPlatformLabel() : 'Foto' }}
@@ -514,12 +524,24 @@
                 }
             }
 
-            // Parser URL Video (YouTube, Instagram, TikTok)
+            // Parser URL Video (Google Drive, YouTube, Instagram, TikTok)
             function parseVideoUrl(url) {
                 if (!url) return null;
                 url = url.trim();
 
-                // 1. YouTube
+                // 1. Google Drive
+                const gdriveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i);
+                if (gdriveMatch && gdriveMatch[1]) {
+                    return {
+                        platform: 'gdrive',
+                        id: gdriveMatch[1],
+                        label: 'Google Drive Video',
+                        icon: '📁',
+                        embed: `https://drive.google.com/file/d/${gdriveMatch[1]}/preview`,
+                    };
+                }
+
+                // 2. YouTube
                 const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
                 if (ytMatch && ytMatch[1]) {
                     return {
@@ -531,7 +553,7 @@
                     };
                 }
 
-                // 2. Instagram (Reels / Post / TV)
+                // 3. Instagram (Reels / Post / TV)
                 const igMatch = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
                 if (igMatch && igMatch[1]) {
                     return {
@@ -543,7 +565,7 @@
                     };
                 }
 
-                // 3. TikTok
+                // 4. TikTok
                 const ttMatch = url.match(/(?:tiktok\.com\/@[^\/]+\/video\/|tiktok\.com\/v\/)(\d+)/i);
                 if (ttMatch && ttMatch[1]) {
                     return {

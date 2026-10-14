@@ -74,6 +74,9 @@ class Progress extends Model
         if (preg_match('/(tiktok\.com)/i', $url)) {
             return 'tiktok';
         }
+        if (preg_match('/(drive\.google\.com|docs\.google\.com)/i', $url)) {
+            return 'gdrive';
+        }
 
         return 'other';
     }
@@ -103,6 +106,11 @@ class Progress extends Model
             return 'https://www.tiktok.com/player/v1/' . $m[1] . '?autoplay=1&music_info=0&description=0';
         }
 
+        // 4. Google Drive
+        if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+            return 'https://drive.google.com/file/d/' . $m[1] . '/preview';
+        }
+
         return $url;
     }
 
@@ -121,6 +129,11 @@ class Progress extends Model
             // YouTube thumbnail otomatis
             if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m)) {
                 return 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg';
+            }
+
+            // Google Drive thumbnail otomatis
+            if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+                return 'https://drive.google.com/thumbnail?id=' . $m[1] . '&sz=w800';
             }
         }
 
@@ -170,6 +183,7 @@ class Progress extends Model
             'youtube' => 'YouTube',
             'instagram' => 'Instagram',
             'tiktok' => 'TikTok',
+            'gdrive' => 'Google Drive',
             'mp4' => 'Video MP4',
             default => 'Video Lapangan',
         };
