@@ -53,4 +53,20 @@ class AdminLoginTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
     }
+
+    public function test_admin_dashboard_displays_dynamic_activities(): void
+    {
+        $this->seed();
+
+        $admin = User::where('email', 'admin@jemaatbali.or.id')->first();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Aktivitas terbaru');
+        $response->assertSee('Real-time');
+        $response->assertViewHas('aktivitas', function ($aktivitas) {
+            return $aktivitas instanceof \Illuminate\Support\Collection && $aktivitas->isNotEmpty();
+        });
+    }
 }

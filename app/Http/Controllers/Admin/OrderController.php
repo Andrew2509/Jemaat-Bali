@@ -82,33 +82,174 @@ class OrderController extends Controller
         }
         $daftarPrioritas = $daftarPrioritas->sortByDesc('timestamp')->values();
 
-        // Aktivitas terbaru matching design
-        $aktivitas = collect([
-            [
-                'waktu' => '09.15',
-                'tipe' => 'doc',
-                'judul' => 'Bukti donasi Clara Wijaya diterima',
-                'sub' => 'DN-010 · Rp500.000 · menunggu verifikasi',
-            ],
-            [
-                'waktu' => '08.40',
-                'tipe' => 'box',
-                'judul' => 'Pesanan Agatha siap dikirim',
-                'sub' => 'KS-001 · 2 kaos Keluarga Kudus · pembayaran terverifikasi',
-            ],
-            [
-                'waktu' => '08.10',
-                'tipe' => 'check',
-                'judul' => 'Donasi Agatha diverifikasi panitia',
-                'sub' => 'DN-004 · Rp300.000 · bagian dari KS-001',
-            ],
-            [
-                'waktu' => '07.45',
+        // Aktivitas terbaru dari database secara dinamis
+        $rawAktivitas = collect();
+
+        // 1. Donasi terbaru
+        $recentDonations = Donation::with('verifier')->latest('updated_at')->take(8)->get();
+        foreach ($recentDonations as $d) {
+            $ts = $d->updated_at?->timestamp ?? $d->created_at?->timestamp ?? 0;
+            $timeObj = $d->updated_at ?? $d->created_at;
+            $nominalFmt = 'Rp' . number_format($d->nominal, 0, ',', '.');
+
+            if ($d->status === 'terverifikasi') {
+                $verTs = $d->verified_at?->timestamp ?? $ts;
+                $rawAktivitas->push([
+                    'timestamp' => $verTs,
+                    'time' => $d->verified_at ?? $timeObj,
+                    'tipe' => 'check',
+                    'judul' => 'Donasi ' . $d->nama . ' diverifikasi' . ($d->verifier ? ' (' . $d->verifier->name . ')' : ''),
+                    'sub' => $d->kode . ' · ' . $nominalFmt . ' · terverifikasi',
+                    'url' => route('admin.donations.show', $d->id),
+                ]);
+            } elseif ($d->status === 'menunggu_verifikasi') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'doc',
+                    'judul' => 'Bukti donasi ' . $d->nama . ' diterima',
+                    'sub' => $d->kode . ' · ' . $nominalFmt . ' · menunggu verifikasi',
+                    'url' => route('admin.verification.show', ['id' => $d->id, 'tipe' => 'donasi']),
+                ]);
+            } elseif ($d->status === 'bukti_ulang') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'doc',
+                    'judul' => 'Minta bukti ulang donasi ' . $d->nama,
+                    'sub' => $d->kode . ' · ' . ($d->catatan_panitia ?: 'Bukti kurang jelas'),
+                    'url' => route('admin.verification.show', ['id' => $d->id, 'tipe' => 'donasi']),
+                ]);
+            } elseif ($d->status === 'ditolak') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'doc',
+                    'judul' => 'Donasi ' . $d->nama . ' ditolak',
+                    'sub' => $d->kode . ' · ' . $nominalFmt . ($d->catatan_panitia ? ' · ' . $d->catatan_panitia : ''),
+                    'url' => route('admin.donations.show', $d->id),
+                ]);
+            }
+        }
+
+        // 2. Pesanan kaos terbaru
+        $recentOrders = Order::with(['design', 'verifier'])->latest('updated_at')->take(8)->get();
+        foreach ($recentOrders as $o) {
+            $ts = $o->updated_at?->timestamp ?? $o->created_at?->timestamp ?? 0;
+            $timeObj = $o->updated_at ?? $o->created_at;
+            $designName = $o->design?->nama ?? 'Kaos';
+
+            if ($o->status_pengiriman === 'terkirim') {
+                $shipTs = $o->dikirim_at?->timestamp ?? $ts;
+                $rawAktivitas->push([
+                    'timestamp' => $shipTs,
+                    'time' => $o->dikirim_at ?? $timeObj,
+                    'tipe' => 'box',
+                    'judul' => 'Pesanan ' . $o->nama . ' telah dikirim',
+                    'sub' => $o->nomor_pesanan . ' · Resi: ' . ($o->resi ?: '-') . ' · ' . $o->jumlah . ' kaos',
+                    'url' => route('admin.orders.show', $o->id),
+                ]);
+            } elseif ($o->status_pengiriman === 'siap_kirim') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'box',
+                    'judul' => 'Pesanan ' . $o->nama . ' siap dikirim',
+                    'sub' => $o->nomor_pesanan . ' · ' . $o->jumlah . ' kaos ' . $designName . ' · siap kirim',
+                    'url' => route('admin.orders.show', $o->id),
+                ]);
+            } elseif ($o->status_pengiriman === 'produksi') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'box',
+                    'judul' => 'Pesanan ' . $o->nama . ' dalam produksi',
+                    'sub' => $o->nomor_pesanan . ' · ' . $o->jumlah . ' kaos ' . $designName . ' · proses produksi',
+                    'url' => route('admin.orders.show', $o->id),
+                ]);
+            } elseif ($o->status_pembayaran === 'terverifikasi') {
+                $verTs = $o->verified_at?->timestamp ?? $ts;
+                $rawAktivitas->push([
+                    'timestamp' => $verTs,
+                    'time' => $o->verified_at ?? $timeObj,
+                    'tipe' => 'check',
+                    'judul' => 'Pembayaran ' . $o->nama . ' diverifikasi' . ($o->verifier ? ' (' . $o->verifier->name . ')' : ''),
+                    'sub' => $o->nomor_pesanan . ' · Rp' . number_format($o->totalTagihan(), 0, ',', '.') . ' · terverifikasi',
+                    'url' => route('admin.orders.show', $o->id),
+                ]);
+            } elseif ($o->status_pembayaran === 'menunggu_verifikasi') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'doc',
+                    'judul' => 'Bukti pembayaran ' . $o->nama . ' diterima',
+                    'sub' => $o->nomor_pesanan . ' · Rp' . number_format($o->totalTagihan(), 0, ',', '.') . ' · menunggu verifikasi',
+                    'url' => route('admin.verification.show', ['id' => $o->id, 'tipe' => 'pesanan']),
+                ]);
+            } elseif ($o->status_pembayaran === 'bukti_ulang') {
+                $rawAktivitas->push([
+                    'timestamp' => $ts,
+                    'time' => $timeObj,
+                    'tipe' => 'doc',
+                    'judul' => 'Minta bukti ulang pesanan ' . $o->nama,
+                    'sub' => $o->nomor_pesanan . ' · ' . ($o->catatan_panitia ?: 'Bukti kurang jelas'),
+                    'url' => route('admin.verification.show', ['id' => $o->id, 'tipe' => 'pesanan']),
+                ]);
+            }
+        }
+
+        // 3. Progres pembangunan terbaru
+        $recentProgress = Progress::latest('updated_at')->take(4)->get();
+        foreach ($recentProgress as $p) {
+            $ts = $p->published_at?->timestamp ?? $p->updated_at?->timestamp ?? $p->created_at?->timestamp ?? 0;
+            $timeObj = $p->published_at ?? $p->updated_at ?? $p->created_at;
+            $rawAktivitas->push([
+                'timestamp' => $ts,
+                'time' => $timeObj,
                 'tipe' => 'article',
-                'judul' => 'Entri progres fondasi diperbarui',
-                'sub' => 'Pemasangan fondasi bangunan utama · terbit',
-            ],
-        ]);
+                'judul' => 'Entri progres ' . ($p->status === 'terbit' ? 'diterbitkan' : 'diperbarui'),
+                'sub' => $p->judul . ($p->tahap ? ' · Tahap ' . $p->tahap : ''),
+                'url' => route('admin.content.edit', $p->id),
+            ]);
+        }
+
+        // 4. Pengeluaran terbaru
+        $recentExpenses = Expense::latest('updated_at')->take(4)->get();
+        foreach ($recentExpenses as $e) {
+            $ts = $e->updated_at?->timestamp ?? $e->created_at?->timestamp ?? 0;
+            $timeObj = $e->updated_at ?? $e->created_at;
+            $rawAktivitas->push([
+                'timestamp' => $ts,
+                'time' => $timeObj,
+                'tipe' => 'doc',
+                'judul' => 'Pengeluaran: ' . $e->nama,
+                'sub' => 'Rp' . number_format($e->jumlah, 0, ',', '.') . ' · ' . $e->kategori,
+                'url' => route('admin.expenses.index'),
+            ]);
+        }
+
+        // Urutkan dan format waktu
+        $aktivitas = $rawAktivitas
+            ->sortByDesc('timestamp')
+            ->take(8)
+            ->map(function ($item) {
+                $time = $item['time'] ?? null;
+                if ($time instanceof \Illuminate\Support\Carbon) {
+                    if ($time->isToday()) {
+                        $item['waktu'] = $time->format('H.i');
+                    } elseif ($time->isYesterday()) {
+                        $item['waktu'] = 'Kmrn';
+                    } else {
+                        $item['waktu'] = $time->translatedFormat('d M');
+                    }
+                    $item['tanggal_lengkap'] = $time->translatedFormat('d M Y, H.i');
+                } else {
+                    $item['waktu'] = '—';
+                    $item['tanggal_lengkap'] = '';
+                }
+                return $item;
+            })
+            ->values();
 
         return view('admin.dashboard', [
             'donasiTerverifikasi' => $donasiTerverifikasi,
