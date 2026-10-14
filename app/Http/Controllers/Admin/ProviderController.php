@@ -123,38 +123,52 @@ class ProviderController extends Controller
             ->with('error', 'Gagal mengirim pesan: ' . $result['message']);
     }
 
+    private function sanitizeApiKey(?string $key): ?string
+    {
+        if ($key === null) {
+            return null;
+        }
+        $key = trim($key);
+        // Hapus jika ada prefix 'Key:' atau 'key:' atau 'Header:' atau kutip yang tidak sengaja tertempel
+        $key = preg_replace('/^(key|header\s*:\s*key)\s*:\s*/i', '', $key);
+        $key = trim($key, " \t\n\r\0\x0B\"'");
+        return $key === '' ? null : $key;
+    }
+
     /**
      * Simpan konfigurasi API Key RajaOngkir
      */
     public function updateRajaOngkir(Request $request, RajaOngkirService $service): RedirectResponse
     {
         $data = $request->validate([
-            'api_key' => ['nullable', 'string', 'max:255'],
+            'api_key' => ['nullable', 'string', 'max:500'],
             'base_url' => ['required', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $shippingSetting = $service->getSetting();
-
+        $sanitizedKey = $this->sanitizeApiKey($data['api_key'] ?? null);
+        $data['api_key'] = $sanitizedKey;
         $data['is_active'] = $request->boolean('is_active');
         $data['base_url'] = rtrim($data['base_url'], '/');
 
-        $keyChanged = isset($data['api_key']) && $data['api_key'] !== $shippingSetting->api_key;
+        $shippingSetting = $service->getSetting();
+        $oldKey = $shippingSetting->getEffectiveApiKey();
+        $keyChanged = ($sanitizedKey ?? '') !== ($oldKey ?? '');
 
-        $shippingSetting->fill($data);
-        if ($shippingSetting->exists) {
-            $shippingSetting->save();
-        }
+        // Persist ke database dan backup JSON
+        $shippingSetting->saveSettings($data);
+        $service->setSetting($shippingSetting);
 
         // Langsung tes koneksi jika API key terisi
-        if (!empty($shippingSetting->getEffectiveApiKey()) && ($keyChanged || !$shippingSetting->isConnected())) {
-            $testResult = $service->testConnection($shippingSetting->getEffectiveApiKey(), $shippingSetting->getEffectiveBaseUrl());
+        $effectiveKey = $shippingSetting->getEffectiveApiKey();
+        if (!empty($effectiveKey) && ($keyChanged || !$shippingSetting->isConnected())) {
+            $testResult = $service->testConnection($effectiveKey, $shippingSetting->getEffectiveBaseUrl());
             if ($testResult['success']) {
                 return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
-                    ->with('success', 'Konfigurasi RajaOngkir disimpan! ' . $testResult['message']);
+                    ->with('success', 'API Key RajaOngkir berhasil disimpan & terhubung! ' . $testResult['message']);
             } else {
                 return redirect()->route('admin.provider', ['tab' => 'rajaongkir'])
-                    ->with('warning', 'Konfigurasi disimpan, namun koneksi: ' . $testResult['message']);
+                    ->with('warning', 'API Key berhasil disimpan di sistem, namun tes respon RajaOngkir: ' . $testResult['message']);
             }
         }
 

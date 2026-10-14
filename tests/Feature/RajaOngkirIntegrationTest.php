@@ -163,4 +163,33 @@ class RajaOngkirIntegrationTest extends TestCase
         $this->assertEquals('mock_api_key_12345', $setting->api_key);
         $this->assertEquals('connected', $setting->status);
     }
+
+    public function test_admin_can_update_rajaongkir_with_key_header_prefix(): void
+    {
+        $user = User::where('email', 'admin@jemaatbali.or.id')->first();
+
+        Http::fake([
+            'https://rajaongkir.komerce.id/api/v1/destination/province' => Http::response([
+                'meta' => ['code' => 200, 'status' => 'success'],
+                'data' => [['id' => 1, 'name' => 'BALI']],
+            ], 200),
+        ]);
+
+        $response = $this->actingAs($user)->post(route('admin.provider.rajaongkir.update'), [
+            'api_key' => 'Key: clean_token_99999',
+            'base_url' => 'https://rajaongkir.komerce.id/api/v1',
+            'is_active' => 1,
+        ]);
+
+        $response->assertRedirect();
+
+        $setting = ShippingSetting::getSetting();
+        $this->assertEquals('clean_token_99999', $setting->getEffectiveApiKey());
+
+        // Verifikasi muncul di input value pada halaman provider
+        $pageResponse = $this->actingAs($user)->get(route('admin.provider', ['tab' => 'rajaongkir']));
+        $pageResponse->assertStatus(200)
+            ->assertSee('value="clean_token_99999"', false);
+    }
 }
+

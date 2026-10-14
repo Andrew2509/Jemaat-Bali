@@ -21,6 +21,11 @@ class RajaOngkirService
         return $this->setting;
     }
 
+    public function setSetting(ShippingSetting $setting): void
+    {
+        $this->setting = $setting;
+    }
+
     public function getApiKey(): ?string
     {
         return $this->setting->getEffectiveApiKey();
@@ -236,15 +241,13 @@ class RajaOngkirService
                 $json = $response->json();
                 $count = isset($json['data']) && is_array($json['data']) ? count($json['data']) : 0;
 
-                // Perbarui status setting jika tersimpan
-                if ($this->setting->exists) {
-                    $this->setting->update([
-                        'status' => 'connected',
-                        'provinces_count' => $count,
-                        'last_checked_at' => now(),
-                        'last_error' => null,
-                    ]);
-                }
+                // Perbarui status setting ke database & backup
+                $this->setting->saveSettings([
+                    'status' => 'connected',
+                    'provinces_count' => $count,
+                    'last_checked_at' => now(),
+                    'last_error' => null,
+                ]);
 
                 // Simpan cache provinsi jika berhasil
                 if ($count > 0) {
@@ -272,13 +275,11 @@ class RajaOngkirService
                 $errMsg .= ': ' . $json['message'];
             }
 
-            if ($this->setting->exists) {
-                $this->setting->update([
-                    'status' => 'error',
-                    'last_checked_at' => now(),
-                    'last_error' => $errMsg,
-                ]);
-            }
+            $this->setting->saveSettings([
+                'status' => 'error',
+                'last_checked_at' => now(),
+                'last_error' => $errMsg,
+            ]);
 
             return [
                 'success' => false,
@@ -288,13 +289,11 @@ class RajaOngkirService
             ];
         } catch (\Throwable $e) {
             $errMsg = 'Koneksi gagal: ' . $e->getMessage();
-            if ($this->setting->exists) {
-                $this->setting->update([
-                    'status' => 'error',
-                    'last_checked_at' => now(),
-                    'last_error' => $errMsg,
-                ]);
-            }
+            $this->setting->saveSettings([
+                'status' => 'error',
+                'last_checked_at' => now(),
+                'last_error' => $errMsg,
+            ]);
 
             return [
                 'success' => false,

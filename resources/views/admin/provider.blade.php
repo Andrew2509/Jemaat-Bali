@@ -25,6 +25,19 @@
                 <p class="font-medium leading-relaxed">{{ session('error') }}</p>
             </div>
         @endif
+        @if ($errors->any())
+            <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-3.5 text-xs text-red-800 shadow-2xs">
+                <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-red-200 text-xs font-bold text-red-900 mt-0.5">✕</span>
+                <div>
+                    <p class="font-bold">Terdapat kesalahan pengisian formulir:</p>
+                    <ul class="mt-1 list-disc pl-4 space-y-0.5">
+                        @foreach ($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
 
         {{-- Page Header --}}
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -197,13 +210,13 @@
                             API Key RajaOngkir <span class="text-stone-400 font-normal">(Header: Key)</span>
                         </label>
                         <div class="relative">
-                            <input type="password" id="rajaongkir_api_key" name="api_key" value="{{ old('api_key', $shippingSetting->api_key) }}" placeholder="Contoh: 8c3f... atau ambil dari akun RajaOngkir" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none pr-24">
-                            <button type="button" id="toggle-rajaongkir-key" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-600 hover:bg-stone-200 transition">
+                            <input type="password" id="rajaongkir_api_key" name="api_key" value="{{ old('api_key', $shippingSetting->getEffectiveApiKey()) }}" placeholder="Tempelkan API Key (contoh: 8c3f...)" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none pr-24">
+                            <button type="button" id="toggle-rajaongkir-key" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-600 hover:bg-stone-200 transition cursor-pointer">
                                 Lihat
                             </button>
                         </div>
                         <p class="mt-1 text-[11px] text-stone-500">
-                            Bisa juga diatur melalui file <code class="bg-stone-100 px-1 rounded">.env</code> dengan variabel <code class="bg-stone-100 px-1 rounded">RAJAONGKIR_API_KEY</code>.
+                            Masukkan kode token API saja (sistem otomatis membersihkan jika ada tulisan <code>Key:</code> di depannya).
                         </p>
                     </div>
 
