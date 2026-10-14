@@ -28,7 +28,7 @@
         </a>
         <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b55322]">JEMAAT BALI / ADMINISTRASI PROGRAM</p>
         <h1 class="mt-1 font-serif text-3xl font-bold text-stone-900">{{ $progress->exists ? 'Edit Progres' : 'Tambah Progres' }}</h1>
-        <p class="mt-1 text-xs text-stone-500">{{ $progress->exists ? 'Perbarui dokumentasi pembangunan yang sudah tercatat.' : 'Catat progres pembangunan terbaru beserta media foto atau video tautan (Google Drive, YouTube, Instagram, TikTok).' }}</p>
+        <p class="mt-1 text-xs text-stone-500">{{ $progress->exists ? 'Perbarui dokumentasi pembangunan yang sudah tercatat.' : 'Catat progres pembangunan terbaru beserta media foto atau tautan video Google Drive.' }}</p>
     </div>
 
     <!-- Main Grid: Form on Left, Live Preview on Right -->
@@ -108,19 +108,19 @@
                     </div>
                 </div>
 
-                <!-- BAGIAN MEDIA: PILIHAN LINK (YouTube, IG, TikTok) ATAU UPLOAD FILE -->
+                <!-- BAGIAN MEDIA: PILIHAN LINK GOOGLE DRIVE ATAU UPLOAD FILE -->
                 <div class="rounded-2xl border border-[#e8e4dc] bg-[#faf8f5] p-4.5 space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/70 pb-3">
                         <div>
                             <p class="text-xs font-bold text-stone-900">Media Dokumentasi</p>
-                            <p class="text-[11px] text-stone-500 mt-0.5">Bisa gunakan link video eksternal atau upload file langsung</p>
+                            <p class="text-[11px] text-stone-500 mt-0.5">Gunakan tautan video Google Drive atau unggah berkas langsung</p>
                         </div>
                         
                         <!-- Segmented Switcher -->
                         <div class="inline-flex rounded-xl bg-stone-200/80 p-0.5 text-xs font-semibold shadow-inner">
                             <button type="button" id="tab-btn-link" onclick="switchMediaTab('link')"
                                 class="rounded-lg px-3 py-1.5 text-xs transition cursor-pointer font-bold {{ $previewVideoUrl || (!$initialMediaUrl && !$previewVideoUrl) ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-600 hover:text-stone-900' }}">
-                                <span>🔗 Link Video (YouTube / IG / TikTok)</span>
+                                <span>🔗 Link Google Drive</span>
                             </button>
                             <button type="button" id="tab-btn-file" onclick="switchMediaTab('file')"
                                 class="rounded-lg px-3 py-1.5 text-xs transition cursor-pointer font-bold {{ $initialMediaUrl && !$previewVideoUrl ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-600 hover:text-stone-900' }}">
@@ -129,11 +129,11 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: TAUTAN LINK (YOUTUBE / INSTAGRAM / TIKTOK) -->
+                    <!-- TAB 1: TAUTAN LINK GOOGLE DRIVE -->
                     <div id="media-tab-link" class="{{ $previewVideoUrl || (!$initialMediaUrl && !$previewVideoUrl) ? '' : 'hidden' }} space-y-3">
                         <div>
                             <label for="video_url" class="block text-xs font-semibold text-stone-700 mb-1">
-                                Tautan / URL Video <span class="text-[#b55322]">*</span>
+                                Tautan / URL Video Google Drive <span class="text-[#b55322]">*</span>
                             </label>
                             <div class="relative">
                                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
@@ -142,7 +142,7 @@
                                     </svg>
                                 </span>
                                 <input type="text" id="video_url" name="video_url" value="{{ $previewVideoUrl }}"
-                                    placeholder="https://www.youtube.com/... atau https://www.instagram.com/reel/... atau https://www.tiktok.com/..."
+                                    placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
                                     class="w-full rounded-xl border border-[#e8e4dc] bg-white pl-10 pr-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 focus:border-[#b55322] focus:outline-none transition">
                             </div>
                             @error('video_url')
@@ -152,7 +152,7 @@
 
                         <!-- Platform Badges & Guide -->
                         <div class="flex flex-wrap items-center gap-2 pt-0.5">
-                            <span class="text-[11px] text-stone-500 font-medium">Format platform didukung:</span>
+                            <span class="text-[11px] text-stone-500 font-medium">Platform video didukung:</span>
                             
                             <!-- Google Drive badge -->
                             <span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 border border-sky-200/80 px-2.5 py-1 text-[11px] font-bold text-sky-700">
@@ -161,25 +161,7 @@
                                     <path d="M1.71 15L5.44 21.5H20.36L16.63 15H1.71Z" fill="#22C55E"/>
                                     <path d="M1.71 15L8.27 3.5L12 9.96L5.44 21.5L1.71 15Z" fill="#0284C7"/>
                                 </svg>
-                                <span>Google Drive</span>
-                            </span>
-
-                            <!-- YouTube badge -->
-                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 border border-rose-200/80 px-2.5 py-1 text-[11px] font-bold text-rose-700">
-                                <svg class="w-3.5 h-3.5 fill-rose-600" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                <span>YouTube (Video / Shorts)</span>
-                            </span>
-
-                            <!-- Instagram badge -->
-                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 border border-purple-200/80 px-2.5 py-1 text-[11px] font-bold text-purple-700">
-                                <svg class="w-3.5 h-3.5 fill-purple-600" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                                <span>Instagram (Reels / Post)</span>
-                            </span>
-
-                            <!-- TikTok badge -->
-                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-stone-900 border border-stone-800 px-2.5 py-1 text-[11px] font-bold text-white">
-                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-                                <span>TikTok</span>
+                                <span>Google Drive (Akses: Siapa saja yang memiliki link)</span>
                             </span>
                         </div>
 
@@ -324,18 +306,8 @@
                         <!-- Dynamic Video File MP4 -->
                         <video id="preview-video" src="{{ $initialMediaUrl ?: '' }}" controls class="{{ $initialMediaUrl && $initialMediaTipe === 'video' && !$previewVideoUrl ? 'h-full w-full object-cover bg-stone-900' : 'hidden' }}"></video>
 
-                        <!-- Dynamic Embed Iframe (YouTube / Instagram / TikTok) -->
-                        @php
-                            $iframeStyle = 'position:absolute; inset:0; width:100%; height:100%; border:0;';
-                            if ($initialPlatform === 'youtube') {
-                                $iframeStyle = 'position:absolute; left:0; width:100%; height:calc(100% + 140px); margin-top:-65px; border:0;';
-                            } elseif ($initialPlatform === 'instagram') {
-                                $iframeStyle = 'position:absolute; left:0; width:100%; height:calc(100% + 180px); margin-top:-65px; border:0;';
-                            } elseif ($initialPlatform === 'tiktok') {
-                                $iframeStyle = 'position:absolute; left:0; width:100%; height:calc(100% + 95px); margin-top:-48px; border:0;';
-                            }
-                        @endphp
-                        <iframe id="preview-iframe" src="{{ $initialEmbedUrl ?: '' }}" style="{{ $iframeStyle }}" class="{{ $initialEmbedUrl ? '' : 'hidden' }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <!-- Dynamic Embed Iframe (Google Drive) -->
+                        <iframe id="preview-iframe" src="{{ $initialEmbedUrl ?: '' }}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" class="{{ $initialEmbedUrl ? '' : 'hidden' }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
                         <!-- Fallback Placeholder -->
                         <div id="preview-placeholder" class="{{ ($initialMediaUrl || $initialEmbedUrl) ? 'hidden' : 'flex flex-col items-center justify-center gap-2 text-stone-400 p-4 text-center' }}">
@@ -346,7 +318,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-semibold text-stone-600">Media belum dipilih</p>
-                                <p class="text-[11px] text-stone-400 mt-0.5">Tempel link Google Drive/YouTube/IG/TikTok atau upload file foto/video</p>
+                                <p class="text-[11px] text-stone-400 mt-0.5">Tempel link Google Drive atau upload file foto/video</p>
                             </div>
                         </div>
 
@@ -354,7 +326,7 @@
                         <div class="absolute bottom-2.5 left-2.5 z-10 pointer-events-none">
                             <span id="preview-media-type-badge" class="{{ ($initialMediaUrl || $initialEmbedUrl) ? 'inline-flex' : 'hidden' }} items-center gap-1.5 rounded-md bg-stone-900/80 backdrop-blur-xs px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
                                 <span id="preview-media-type-icon">
-                                    @if ($initialPlatform === 'gdrive') 📁 @elseif ($initialPlatform === 'youtube') 🔴 @elseif($initialPlatform === 'instagram') 🟣 @elseif($initialPlatform === 'tiktok') ⚫ @else 📷 @endif
+                                    @if ($initialPlatform === 'gdrive') 📁 @elseif ($initialMediaTipe === 'video') 🎥 @else 📷 @endif
                                 </span>
                                 <span id="preview-media-type-text">
                                     {{ $progress->exists ? $progress->videoPlatformLabel() : 'Foto' }}
@@ -524,12 +496,12 @@
                 }
             }
 
-            // Parser URL Video (Google Drive, YouTube, Instagram, TikTok)
+            // Parser URL Video (Google Drive)
             function parseVideoUrl(url) {
                 if (!url) return null;
                 url = url.trim();
 
-                // 1. Google Drive
+                // Google Drive
                 const gdriveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i);
                 if (gdriveMatch && gdriveMatch[1]) {
                     return {
@@ -541,48 +513,12 @@
                     };
                 }
 
-                // 2. YouTube
-                const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-                if (ytMatch && ytMatch[1]) {
-                    return {
-                        platform: 'youtube',
-                        id: ytMatch[1],
-                        label: 'YouTube Video',
-                        icon: '🔴',
-                        embed: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0`,
-                    };
-                }
-
-                // 3. Instagram (Reels / Post / TV)
-                const igMatch = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
-                if (igMatch && igMatch[1]) {
-                    return {
-                        platform: 'instagram',
-                        id: igMatch[1],
-                        label: 'Instagram (Reels / Post)',
-                        icon: '🟣',
-                        embed: `https://www.instagram.com/reel/${igMatch[1]}/embed/`,
-                    };
-                }
-
-                // 4. TikTok
-                const ttMatch = url.match(/(?:tiktok\.com\/@[^\/]+\/video\/|tiktok\.com\/v\/)(\d+)/i);
-                if (ttMatch && ttMatch[1]) {
-                    return {
-                        platform: 'tiktok',
-                        id: ttMatch[1],
-                        label: 'TikTok Video',
-                        icon: '⚫',
-                        embed: `https://www.tiktok.com/player/v1/${ttMatch[1]}?autoplay=1&music_info=0&description=0`,
-                    };
-                }
-
                 // Fallback valid URL
                 if (url.startsWith('http://') || url.startsWith('https://')) {
                     return {
                         platform: 'other',
                         id: null,
-                        label: 'Link Video Web',
+                        label: 'Tautan Video',
                         icon: '🎬',
                         embed: url,
                     };
@@ -650,15 +586,7 @@
                     if (prevIframe.src !== parsed.embed) {
                         prevIframe.src = parsed.embed;
                     }
-                    if (parsed.platform === 'youtube') {
-                        prevIframe.style.cssText = 'position:absolute; left:0; width:100%; height:calc(100% + 140px); margin-top:-65px; border:0;';
-                    } else if (parsed.platform === 'instagram') {
-                        prevIframe.style.cssText = 'position:absolute; left:0; width:100%; height:calc(100% + 180px); margin-top:-65px; border:0;';
-                    } else if (parsed.platform === 'tiktok') {
-                        prevIframe.style.cssText = 'position:absolute; left:0; width:100%; height:calc(100% + 95px); margin-top:-48px; border:0;';
-                    } else {
-                        prevIframe.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; border:0;';
-                    }
+                    prevIframe.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; border:0;';
                     prevIframe.classList.remove('hidden');
 
                     // Update Badge

@@ -242,23 +242,8 @@
                             @if ($selectedProgress->tipe === 'foto' && $selectedProgress->mediaUrl())
                                 <img src="{{ $selectedProgress->mediaUrl() }}" alt="{{ $selectedProgress->teks_alt ?: $selectedProgress->judul }}" class="h-full w-full object-cover">
                             @elseif ($selectedProgress->embedUrl())
-                                @if ($selectedProgress->videoPlatform() === 'youtube')
-                                    <div class="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
-                                        <iframe src="{{ $selectedProgress->embedUrl() }}" style="position:absolute; left:0; width:100%; height:calc(100% + 140px); margin-top:-65px; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                    </div>
-                                @elseif ($selectedProgress->videoPlatform() === 'instagram')
-                                    <div class="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
-                                        <iframe src="{{ $selectedProgress->embedUrl() }}" style="position:absolute; left:0; width:100%; height:calc(100% + 180px); margin-top:-65px; border:0;" allowfullscreen></iframe>
-                                    </div>
-                                @elseif ($selectedProgress->videoPlatform() === 'tiktok')
-                                    <div class="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
-                                        <iframe src="{{ $selectedProgress->embedUrl() }}" style="position:absolute; left:0; width:100%; height:calc(100% + 95px); margin-top:-48px; border:0;" allowfullscreen></iframe>
-                                    </div>
-                                @elseif ($selectedProgress->videoPlatform() === 'gdrive')
-                                    <iframe src="{{ $selectedProgress->embedUrl() }}" class="h-full w-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                                @else
-                                    <iframe src="{{ $selectedProgress->embedUrl() }}" class="h-full w-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                @endif
+                                <iframe src="{{ $selectedProgress->embedUrl() }}" class="h-full w-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
                             @elseif ($selectedProgress->mediaUrl())
                                 <video src="{{ $selectedProgress->mediaUrl() }}" controls class="h-full w-full object-cover"></video>
                             @else
@@ -321,11 +306,11 @@
                             <textarea name="deskripsi" rows="3" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none leading-relaxed" required>{{ old('deskripsi', $selectedProgress->deskripsi) }}</textarea>
                         </div>
 
-                        <!-- Tautan Video (YouTube, Instagram, TikTok) -->
+                        <!-- Tautan Video Google Drive -->
                         <div>
-                            <label class="block text-xs font-semibold text-stone-700 mb-1">Tautan Video (YouTube / Instagram / TikTok)</label>
-                            <input type="url" name="video_url" value="{{ old('video_url', $selectedProgress->video_url) }}" placeholder="https://www.youtube.com/... atau tiktok / ig" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
-                            <p class="mt-1 text-[10px] text-stone-400">Isi tautan video bila ingin menampilkan video dari medsos.</p>
+                            <label class="block text-xs font-semibold text-stone-700 mb-1">Tautan Video Google Drive</label>
+                            <input type="url" name="video_url" value="{{ old('video_url', $selectedProgress->video_url) }}" placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
+                            <p class="mt-1 text-[10px] text-stone-400">Pastikan akses link di Google Drive disetel ke: "Siapa saja yang memiliki link".</p>
                         </div>
 
                         <!-- Teks Alternatif Foto -->

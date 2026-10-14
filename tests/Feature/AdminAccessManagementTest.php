@@ -272,7 +272,7 @@ class AdminAccessManagementTest extends TestCase
 
         // 2. URL tanpa skema https:// dinormalisasi otomatis
         $response2 = $this->actingAs($this->superAdmin)->postJson(route('admin.content.convert-video'), [
-            'video_url' => 'www.youtube.com/watch?v=sample12345',
+            'video_url' => 'drive.google.com/file/d/sample12345/view?usp=sharing',
             'video_quality' => '720p',
         ]);
 

@@ -56,7 +56,7 @@ class Progress extends Model
     }
 
     /**
-     * Deteksi platform video: 'youtube', 'instagram', 'tiktok', 'mp4', atau 'other'
+     * Deteksi platform video: 'gdrive', 'mp4', atau 'other'
      */
     public function videoPlatform(): ?string
     {
@@ -65,15 +65,6 @@ class Progress extends Model
             return $this->tipe === 'video' ? 'mp4' : null;
         }
 
-        if (preg_match('/(youtube\.com|youtu\.be)/i', $url)) {
-            return 'youtube';
-        }
-        if (preg_match('/(instagram\.com|instagr\.am)/i', $url)) {
-            return 'instagram';
-        }
-        if (preg_match('/(tiktok\.com)/i', $url)) {
-            return 'tiktok';
-        }
         if (preg_match('/(drive\.google\.com|docs\.google\.com)/i', $url)) {
             return 'gdrive';
         }
@@ -91,22 +82,7 @@ class Progress extends Model
             return null;
         }
 
-        // 1. YouTube (Watch, Shorts, Embed, youtu.be)
-        if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m)) {
-            return 'https://www.youtube-nocookie.com/embed/' . $m[1] . '?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0';
-        }
-
-        // 2. Instagram (Reels, Post, TV)
-        if (preg_match('/(?:instagram\.com|instagr\.am)\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i', $url, $m)) {
-            return 'https://www.instagram.com/reel/' . $m[1] . '/embed/';
-        }
-
-        // 3. TikTok (Video standard & webapp)
-        if (preg_match('/(?:tiktok\.com\/@[^\/]+\/video\/|tiktok\.com\/v\/)(\d+)/i', $url, $m)) {
-            return 'https://www.tiktok.com/player/v1/' . $m[1] . '?autoplay=1&music_info=0&description=0';
-        }
-
-        // 4. Google Drive
+        // Google Drive
         if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
             return 'https://drive.google.com/file/d/' . $m[1] . '/preview';
         }
@@ -126,11 +102,6 @@ class Progress extends Model
 
         $url = $this->video_url;
         if ($url) {
-            // YouTube thumbnail otomatis
-            if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m)) {
-                return 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg';
-            }
-
             // Google Drive thumbnail otomatis
             if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
                 return 'https://drive.google.com/thumbnail?id=' . $m[1] . '&sz=w800';
@@ -141,37 +112,11 @@ class Progress extends Model
     }
 
     /**
-     * Normalisasi URL video (resolve redirect shortlink TikTok vt.tiktok.com atau query string berlebih)
+     * Normalisasi URL video
      */
     public static function normalizeVideoUrl(?string $url): ?string
     {
-        if (!$url) {
-            return null;
-        }
-
-        $url = trim($url);
-
-        // Jika shortlink TikTok vt.tiktok.com atau vm.tiktok.com
-        if (preg_match('/(?:vt|vm)\.tiktok\.com\/[a-zA-Z0-9_\-]+/i', $url)) {
-            try {
-                $ch = curl_init($url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_NOBODY, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-                curl_exec($ch);
-                $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-                curl_close($ch);
-                if ($effective && $effective !== $url) {
-                    return $effective;
-                }
-            } catch (\Throwable $e) {
-                // Abaikan bila timeout atau error jaringan
-            }
-        }
-
-        return $url;
+        return $url ? trim($url) : null;
     }
 
     /**
@@ -180,9 +125,6 @@ class Progress extends Model
     public function videoPlatformLabel(): string
     {
         return match ($this->videoPlatform()) {
-            'youtube' => 'YouTube',
-            'instagram' => 'Instagram',
-            'tiktok' => 'TikTok',
             'gdrive' => 'Google Drive',
             'mp4' => 'Video MP4',
             default => 'Video Lapangan',

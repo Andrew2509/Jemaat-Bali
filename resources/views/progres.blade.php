@@ -130,26 +130,7 @@
                     if (fileUrl) {
                         box.innerHTML = '<video style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000;" src="' + fileUrl + '" controls autoplay playsinline></video>';
                     } else if (embedUrl) {
-                        if (platform === 'youtube') {
-                            box.innerHTML = 
-                                '<div style="position:relative; width:100%; height:100%; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center;">' +
-                                    '<iframe style="position:absolute; left:0; width:100%; margin-top:-65px; height:calc(100% + 140px); border:0;" src="' + embedUrl + '" title="Video progres" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
-                                '</div>';
-                        } else if (platform === 'instagram') {
-                            box.innerHTML = 
-                                '<div style="position:relative; width:100%; height:100%; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center;">' +
-                                    '<iframe style="width:100%; height:calc(100% + 180px); margin-top:-65px; border:0;" src="' + embedUrl + '" title="Video progres" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
-                                '</div>';
-                        } else if (platform === 'tiktok') {
-                            box.innerHTML = 
-                                '<div style="position:relative; width:100%; height:100%; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center;">' +
-                                    '<iframe style="width:100%; height:calc(100% + 90px); margin-top:-48px; border:0;" src="' + embedUrl + '" title="Video progres" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
-                                '</div>';
-                        } else if (platform === 'gdrive') {
-                            box.innerHTML = '<iframe style="position:absolute; inset:0; width:100%; height:100%; border:0;" src="' + embedUrl + '" title="Video progres Google Drive" allow="autoplay; fullscreen" allowfullscreen></iframe>';
-                        } else {
-                            box.innerHTML = '<iframe style="position:absolute; inset:0; width:100%; height:100%; border:0;" src="' + embedUrl + '" title="Video progres" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-                        }
+                        box.innerHTML = '<iframe style="position:absolute; inset:0; width:100%; height:100%; border:0;" src="' + embedUrl + '" title="Video progres" allow="autoplay; fullscreen" allowfullscreen></iframe>';
                     }
                 });
             });

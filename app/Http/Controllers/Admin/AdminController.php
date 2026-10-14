@@ -827,7 +827,7 @@ class AdminController extends Controller
             'video_quality' => ['nullable', 'string', Rule::in(['480p', '720p', '1080p'])],
         ], [
             'video_url.required' => 'Silakan masukkan tautan video terlebih dahulu.',
-            'video_url.url' => 'Format tautan video tidak valid. Pastikan menyertakan tautan lengkap (contoh: https://www.youtube.com/watch?v=... atau https://vt.tiktok.com/...).',
+            'video_url.url' => 'Format tautan video tidak valid. Pastikan menyertakan tautan Google Drive lengkap (contoh: https://drive.google.com/file/d/.../view?usp=sharing).',
         ]);
 
         if ($validator->fails()) {
