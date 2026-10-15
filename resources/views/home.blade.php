@@ -174,12 +174,6 @@
                     @if ($isCanva && $canvaEmbedUrl)
                         {{-- Tampilan Canva Presentasi Langsung: Menampilkan Sampul Depan & Slide Interaktif --}}
                         <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
-                            {{-- Tombol Buka Layar Penuh Melayang di Pojok Kanan Atas --}}
-                            <a href="{{ route('proposal') }}" class="absolute top-3.5 right-3.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/60 hover:bg-black/85 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs transition hover:scale-105">
-                                <span>Layar Penuh</span>
-                                <span>&rarr;</span>
-                            </a>
-
                             {{-- Iframe Canva Player --}}
                             <div class="relative w-full aspect-[16/9] min-h-[300px] sm:min-h-[420px] md:min-h-[460px] bg-stone-950">
                                 <iframe id="home-canva-frame"
