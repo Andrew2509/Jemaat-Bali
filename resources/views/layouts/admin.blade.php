@@ -17,10 +17,14 @@
         <aside class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[#e8e4dc] bg-white select-none">
             <!-- Brand Logo -->
             <div class="flex items-center gap-3 border-b border-[#e8e4dc] px-6 py-5">
-                <span class="grid h-10 w-10 place-items-center rounded-full bg-[#b55322] font-serif text-sm font-bold text-white shadow-xs shrink-0">{{ $programInfo->initials ?? 'JB' }}</span>
-                <div>
-                    <p class="font-serif text-[17px] font-bold text-stone-900 leading-tight">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</p>
-                    <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-0.5">BANGUN BERSAMA</p>
+                @if (!empty($programInfo->logo_url))
+                    <img src="{{ $programInfo->logo_url }}" alt="{{ $programInfo->nama_program ?? 'Logo' }}" class="h-10 w-10 rounded-full object-cover shadow-xs shrink-0 border border-stone-200 bg-white">
+                @else
+                    <span class="grid h-10 w-10 place-items-center rounded-full bg-[#b55322] font-serif text-sm font-bold text-white shadow-xs shrink-0">{{ $programInfo->initials ?? 'JB' }}</span>
+                @endif
+                <div class="min-w-0 flex-1">
+                    <p class="font-serif text-[17px] font-bold text-stone-900 leading-tight truncate">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</p>
+                    <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-0.5 truncate">{{ $programInfo->tagline_or_default ?? 'BANGUN BERSAMA' }}</p>
                 </div>
             </div>
 

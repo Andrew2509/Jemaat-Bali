@@ -10,6 +10,8 @@ class ProgramInfo extends Model
 
     protected $fillable = [
         'nama_program',
+        'logo_path',
+        'tagline',
         'deskripsi',
         'whatsapp',
         'email',
@@ -76,6 +78,33 @@ class ProgramInfo extends Model
     public static function first(): ?Model
     {
         return cache()->rememberForever('program_info', fn () => static::query()->first());
+    }
+
+    /**
+     * URL logo resmi jika diunggah
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!empty($this->logo_path)) {
+            return asset('storage/' . $this->logo_path);
+        }
+        return null;
+    }
+
+    /**
+     * Cek apakah logo gambar tersedia
+     */
+    public function hasLogo(): bool
+    {
+        return !empty($this->logo_path);
+    }
+
+    /**
+     * Teks tagline / slogan / subjudul program (default: BANGUN BERSAMA)
+     */
+    public function getTaglineOrDefaultAttribute(): string
+    {
+        return !empty(trim((string) $this->tagline)) ? trim($this->tagline) : 'BANGUN BERSAMA';
     }
 
     /**

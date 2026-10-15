@@ -17,10 +17,14 @@
     <header class="sticky top-0 z-40 border-b border-stone-200/80 bg-white transition-all">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-                <span class="grid h-9 w-9 place-items-center rounded-full bg-primary font-display text-sm font-extrabold text-white shadow-sm transition group-hover:scale-105">{{ $programInfo->initials ?? 'JB' }}</span>
+                @if (!empty($programInfo->logo_url))
+                    <img src="{{ $programInfo->logo_url }}" alt="{{ $programInfo->nama_program ?? 'Logo' }}" class="h-9 w-9 rounded-full object-cover shadow-sm transition group-hover:scale-105 border border-stone-200 bg-white">
+                @else
+                    <span class="grid h-9 w-9 place-items-center rounded-full bg-primary font-display text-sm font-extrabold text-white shadow-sm transition group-hover:scale-105">{{ $programInfo->initials ?? 'JB' }}</span>
+                @endif
                 <div class="flex flex-col">
                     <span class="font-display text-base font-extrabold tracking-tight text-ink sm:text-lg leading-tight">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
-                    <span class="text-[10px] font-medium uppercase tracking-wider text-muted hidden sm:block">Bangun Bersama</span>
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-muted hidden sm:block">{{ $programInfo->tagline_or_default ?? 'Bangun Bersama' }}</span>
                 </div>
             </a>
 
@@ -77,7 +81,11 @@
         <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
             <div>
                 <div class="flex items-center gap-2.5">
-                    <span class="grid h-9 w-9 place-items-center rounded-full bg-primary font-display text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
+                    @if (!empty($programInfo->logo_url))
+                        <img src="{{ $programInfo->logo_url }}" alt="{{ $programInfo->nama_program ?? 'Logo' }}" class="h-9 w-9 rounded-full object-cover shadow-xs border border-stone-200 bg-white">
+                    @else
+                        <span class="grid h-9 w-9 place-items-center rounded-full bg-primary font-display text-sm font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
+                    @endif
                     <span class="font-display text-base font-extrabold">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
                 </div>
                 <p class="mt-3 text-sm leading-relaxed text-muted">

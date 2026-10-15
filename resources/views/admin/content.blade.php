@@ -760,9 +760,75 @@
         <section id="program-section" class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6">
             <h2 class="font-serif text-lg font-bold text-stone-900">Informasi program &amp; kontak</h2>
 
-            <form id="info-form" method="POST" action="{{ route('admin.content.info') }}" class="mt-4 space-y-3.5">
+            <form id="info-form" method="POST" action="{{ route('admin.content.info') }}" enctype="multipart/form-data" class="mt-4 space-y-4">
                 @csrf
                 <input type="hidden" id="info-form-judul-proposal" name="judul_proposal" value="{{ old('judul_proposal', $programInfo->judul_proposal ?? 'Proposal pembangunan') }}">
+
+                <!-- Upload Logo & Slogan Subjudul -->
+                <div class="rounded-xl border border-[#e8e4dc] bg-[#faf8f5] p-4 space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">Logo Program</label>
+                        <p class="text-[11px] text-stone-500 mb-2.5">Logo ini tampil di sudut kiri atas sidebar admin &amp; navbar publik menggantikan inisial huruf bulat.</p>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <!-- Preview Box -->
+                            <div class="relative shrink-0 flex items-center gap-3">
+                                <div id="logo-preview-wrapper" class="relative">
+                                    @if(!empty($programInfo->logo_url))
+                                        <img id="logo-preview-img" src="{{ $programInfo->logo_url }}" alt="Logo Program" class="h-14 w-14 rounded-full object-cover border-2 border-[#b55322]/40 shadow-xs bg-white">
+                                        <div id="logo-preview-badge" class="hidden grid h-14 w-14 place-items-center rounded-full bg-[#b55322] font-serif text-lg font-bold text-white shadow-xs">
+                                            {{ $programInfo->initials ?? 'JB' }}
+                                        </div>
+                                    @else
+                                        <img id="logo-preview-img" src="" alt="Logo Program" class="hidden h-14 w-14 rounded-full object-cover border-2 border-[#b55322]/40 shadow-xs bg-white">
+                                        <div id="logo-preview-badge" class="grid h-14 w-14 place-items-center rounded-full bg-[#b55322] font-serif text-lg font-bold text-white shadow-xs">
+                                            {{ $programInfo->initials ?? 'JB' }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-stone-900" id="logo-status-text">
+                                        {{ !empty($programInfo->logo_path) ? 'Logo kustom terpasang' : 'Menggunakan inisial huruf bulat' }}
+                                    </p>
+                                    <p class="text-[10px] text-stone-400 mt-0.5">Rekomendasi rasio 1:1 (persegi/bulat)</p>
+                                </div>
+                            </div>
+
+                            <!-- Input button & delete checkbox -->
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <label for="logo_file" class="inline-flex items-center gap-2 rounded-xl bg-white border border-[#e8e4dc] px-3.5 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-400 cursor-pointer shadow-2xs transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-4 h-4 text-[#b55322]">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                        </svg>
+                                        <span id="logo_file_label">Pilih Berkas Logo Baru...</span>
+                                    </label>
+                                    <input type="file" id="logo_file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden">
+                                </div>
+                                <p class="text-[10px] text-stone-400">Format yang didukung: PNG, JPG, JPEG, WEBP, atau SVG (Maks. 2 MB).</p>
+
+                                @if(!empty($programInfo->logo_path))
+                                    <div class="pt-0.5">
+                                        <label class="inline-flex items-center gap-1.5 text-xs text-rose-700 hover:text-rose-800 cursor-pointer">
+                                            <input type="checkbox" name="hapus_logo" value="1" class="rounded border-stone-300 text-rose-600 focus:ring-rose-500">
+                                            <span>Hapus logo kustom (kembalikan ke inisial huruf bulat)</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tagline / Kata Subjudul (Bangun Bersama) -->
+                    <div class="pt-3 border-t border-[#ede8df]">
+                        <label for="tagline" class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+                            Kata Slogan / Subjudul Program
+                        </label>
+                        <input type="text" id="tagline" name="tagline" value="{{ old('tagline', $programInfo->tagline ?? 'BANGUN BERSAMA') }}" placeholder="Contoh: BANGUN BERSAMA" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none uppercase tracking-wider font-semibold">
+                        <p class="text-[10px] text-stone-400 mt-1">Teks ini tampil tepat di bawah nama program pada header sidebar admin dan navbar beranda (bawaan: <span class="font-bold">BANGUN BERSAMA</span>).</p>
+                    </div>
+                </div>
+
                 <div>
                     <label for="nama_program" class="block text-xs font-semibold text-stone-700 mb-1">Nama program</label>
                     <input type="text" id="nama_program" name="nama_program" value="{{ old('nama_program', $programInfo->nama_program ?? 'Pembangunan Jemaat Bali') }}" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none" required>
@@ -903,13 +969,45 @@
                 });
             }
 
-            // File input preview
+            // File input preview video
             var fileInput = document.getElementById('video_file_input');
             if (fileInput) {
                 fileInput.addEventListener('change', function () {
                     if (this.files && this.files[0] && previewContainer) {
                         var fileUrl = URL.createObjectURL(this.files[0]);
                         previewContainer.innerHTML = '<video controls autoplay muted loop playsinline class="h-full w-full object-cover"><source src="' + fileUrl + '" type="' + this.files[0].type + '"></video>';
+                    }
+                });
+            }
+
+            // Logo file instant image preview
+            var logoInput = document.getElementById('logo_file');
+            var logoImg = document.getElementById('logo-preview-img');
+            var logoBadge = document.getElementById('logo-preview-badge');
+            var logoLabel = document.getElementById('logo_file_label');
+            var logoStatus = document.getElementById('logo-status-text');
+
+            if (logoInput) {
+                logoInput.addEventListener('change', function () {
+                    if (this.files && this.files[0]) {
+                        var file = this.files[0];
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            if (logoImg) {
+                                logoImg.src = e.target.result;
+                                logoImg.classList.remove('hidden');
+                            }
+                            if (logoBadge) {
+                                logoBadge.classList.add('hidden');
+                            }
+                            if (logoLabel) {
+                                logoLabel.textContent = file.name;
+                            }
+                            if (logoStatus) {
+                                logoStatus.textContent = 'Berkas dipilih: ' + file.name;
+                            }
+                        };
+                        reader.readAsDataURL(file);
                     }
                 });
             }
