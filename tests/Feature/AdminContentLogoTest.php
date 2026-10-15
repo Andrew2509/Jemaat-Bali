@@ -26,8 +26,8 @@ class AdminContentLogoTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.content'));
 
         $response->assertStatus(200);
-        $response->assertSee('Logo Program');
-        $response->assertSee('Kata Slogan / Subjudul Program');
+        $response->assertSee('Logo program');
+        $response->assertSee('Slogan / Subjudul');
         $response->assertSee('BANGUN BERSAMA');
     }
 
