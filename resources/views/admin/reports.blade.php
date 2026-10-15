@@ -248,7 +248,7 @@
     </div>
 
     <!-- Metrics Row: Dana Pembangunan -->
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2">
         <!-- Card 1: Dana Pembangunan (Total) -->
         <div class="rounded-2xl bg-[#444d41] p-5 text-white flex flex-col justify-between shadow-2xs">
             <div class="flex items-center justify-between">
@@ -261,23 +261,7 @@
             <p class="mt-2 text-xs text-white/60">Total donasi + omzet kaos terverifikasi</p>
         </div>
 
-        <!-- Card 2: Belanja Pembangunan -->
-        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-stone-500">Pengeluaran</p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b55322" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
-                    <circle cx="6" cy="6" r="3"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
-                    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
-                    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
-                </svg>
-            </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($belanjaPembangunan, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">Total pengeluaran (produksi + operasional)</p>
-        </div>
-
-        <!-- Card 3: Saldo Pembangunan -->
+        <!-- Card 2: Saldo Pembangunan -->
         <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between">
                 <p class="text-xs font-medium text-stone-500">Saldo Pembangunan</p>
@@ -286,7 +270,7 @@
                 </svg>
             </div>
             <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">Dana pembangunan dikurangi belanja</p>
+            <p class="mt-2 text-xs text-stone-400">Dana pembangunan dikurangi semua pengeluaran</p>
         </div>
     </div>
 
