@@ -539,8 +539,8 @@ class AdminController extends Controller
         $donasiSajaFromTable = $donasis->reject(fn($d) => in_array($d->nama, $ordersWithDonationNames));
         $donasiDariKaosFromTable = $donasis->filter(fn($d) => in_array($d->nama, $ordersWithDonationNames));
 
-        $donasiSajaTerverifikasi = $donasiSajaFromTable->merge(
-            $donasiSajaOrders->map(fn($o) => (object) [
+        $donasiSajaTerverifikasi = collect($donasiSajaFromTable->toArray())->merge(
+            $donasiSajaOrders->map(fn($o) => [
                 'id' => 'order-' . $o->id,
                 'kode' => $o->nomor_pesanan,
                 'nama' => $o->nama,
@@ -550,8 +550,8 @@ class AdminController extends Controller
             ])
         );
 
-        $donasiDariKaosTerverifikasi = $donasiDariKaosFromTable->merge(
-            $orders->filter(fn($o) => (int) $o->donasi > 0)->map(fn($o) => (object) [
+        $donasiDariKaosTerverifikasi = collect($donasiDariKaosFromTable->toArray())->merge(
+            $orders->filter(fn($o) => (int) $o->donasi > 0)->map(fn($o) => [
                 'id' => 'order-donasi-' . $o->id,
                 'kode' => $o->nomor_pesanan,
                 'nama' => $o->nama,
