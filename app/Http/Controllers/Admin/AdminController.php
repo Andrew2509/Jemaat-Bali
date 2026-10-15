@@ -595,28 +595,31 @@ class AdminController extends Controller
             ];
         }
 
-        $donasiPerBulan = [];
-        $omzetPerBulan = [];
+        $danaPembangunanPerBulan = [];
         foreach ($months as $key => $m) {
-            $donasiPerBulan[$key] = $donasis->filter(function ($d) use ($m) {
+            $totalBulan = 0;
+
+            $totalBulan += $donasis->filter(function ($d) use ($m) {
                 return $d->tanggal && $d->tanggal->year == $m['year'] && $d->tanggal->month == $m['month'];
             })->sum('nominal');
 
             if ($jenis !== 'kaos') {
-                $donasiPerBulan[$key] += $donasiSajaOrders->filter(function ($o) use ($m) {
+                $totalBulan += $donasiSajaOrders->filter(function ($o) use ($m) {
                     return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
                 })->sum('total');
             }
 
-            $omzetPerBulan[$key] = $orders->filter(function ($o) use ($m) {
+            $totalBulan += $orders->filter(function ($o) use ($m) {
                 return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
             })->sum('subtotal_kaos');
+
+            $danaPembangunanPerBulan[$key] = $totalBulan;
         }
 
         return view('admin.reports', compact(
             'donasis', 'orders', 'expenses', 'totalDonasi', 'omzetKaos', 'ongkir',
             'biayaProduksi', 'danaBersihKaos', 'penerimaan', 'pengeluaran', 'saldo',
-            'donasiPerBulan', 'omzetPerBulan', 'months', 'from', 'to', 'jenis',
+            'danaPembangunanPerBulan', 'months', 'from', 'to', 'jenis',
             'belanjaPembangunan', 'danaPembangunan', 'saldoPembangunan',
             'donasiSajaTerverifikasi', 'donasiDariKaosTerverifikasi'
         ));

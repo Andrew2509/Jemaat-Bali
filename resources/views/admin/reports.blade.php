@@ -247,37 +247,24 @@
         </span>
     </div>
 
-    <!-- 4 Metrics Row matching design -->
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <!-- Card 1 -->
-        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
+    <!-- Metrics Row: Dana Pembangunan -->
+    <div class="grid gap-4 sm:grid-cols-3">
+        <!-- Card 1: Dana Pembangunan (Total) -->
+        <div class="rounded-2xl bg-[#444d41] p-5 text-white flex flex-col justify-between shadow-2xs">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-stone-500">Donasi terverifikasi</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="#b55322" class="h-4.5 w-4.5">
+                <p class="text-xs font-semibold text-white/70">Dana Pembangunan</p>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-4.5 w-4.5 text-white/70">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                 </svg>
             </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($totalDonasi, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">Donasi Saja + donasi dari kaos</p>
+            <p class="mt-3 font-serif text-[26px] font-bold text-white leading-none">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-white/60">Total donasi + omzet kaos terverifikasi</p>
         </div>
 
-        <!-- Card 2 -->
+        <!-- Card 2: Belanja Pembangunan -->
         <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-stone-500">Omzet kaos</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="#b55322" class="h-4.5 w-4.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l1.5 2.25a3 3 0 0 0 4.5 0l1.5-2.25 5.25 2.25-1.5 4.5h-2.25V20.25a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V11.25H4.5L3 6.75 8.25 4.5z" />
-                </svg>
-            </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($omzetKaos, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">{{ $orders->sum('jumlah') }} kaos dari {{ $orders->count() }} pesanan terverifikasi</p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-stone-500">Biaya produksi kaos</p>
-                <!-- Scissors icon matching mockup -->
+                <p class="text-xs font-medium text-stone-500">Belanja Pembangunan</p>
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b55322" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
                     <circle cx="6" cy="6" r="3"/>
                     <circle cx="6" cy="18" r="3"/>
@@ -286,20 +273,20 @@
                     <line x1="8.12" y1="8.12" x2="12" y2="12"/>
                 </svg>
             </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($biayaProduksi, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">{{ $orders->sum('jumlah') }} kaos &times; estimasi Rp85.000</p>
+            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($belanjaPembangunan, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-stone-400">Total pengeluaran pembangunan</p>
         </div>
 
-        <!-- Card 4: Dark Forest Olive Card -->
-        <div class="rounded-2xl bg-[#444d41] p-5 text-white flex flex-col justify-between shadow-2xs">
+        <!-- Card 3: Saldo Pembangunan -->
+        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-white/70">Dana bersih kaos</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-4.5 w-4.5 text-white/70">
+                <p class="text-xs font-medium text-stone-500">Saldo Pembangunan</p>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="#444d41" class="h-4.5 w-4.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
                 </svg>
             </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-white leading-none">Rp{{ number_format($danaBersihKaos, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-white/60">Omzet kaos dikurangi biaya produksi</p>
+            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-stone-400">Dana pembangunan dikurangi belanja</p>
         </div>
     </div>
 
@@ -310,15 +297,11 @@
             <div>
                 <div class="flex items-start justify-between">
                     <div>
-                        <h2 class="font-serif text-lg font-bold text-stone-900">Penerimaan per bulan</h2>
+                        <h2 class="font-serif text-lg font-bold text-stone-900">Dana Pembangunan per bulan</h2>
                         <div class="mt-2 flex items-center gap-4 text-xs">
                             <span class="inline-flex items-center gap-1.5 text-stone-600 font-medium">
                                 <span class="h-2 w-2 rounded-xs bg-[#444d41]"></span>
-                                Donasi
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 text-stone-600 font-medium">
-                                <span class="h-2 w-2 rounded-xs bg-[#b55322]"></span>
-                                Omzet kaos
+                                Dana Pembangunan
                             </span>
                             <span class="text-[9px] uppercase font-bold tracking-wider text-stone-400">DALAM RUPIAH</span>
                         </div>
@@ -356,31 +339,21 @@
                     <div class="absolute inset-0 left-9 flex items-end justify-around pb-0.5">
                         @foreach($months as $key => $m)
                             @php
-                                $dVal = $donasiPerBulan[$key] ?? 0;
-                                $oVal = $omzetPerBulan[$key] ?? 0;
+                                $danaVal = $danaPembangunanPerBulan[$key] ?? 0;
                                 $maxRef = 6000000;
-                                $hDonasi = $dVal > 0 ? max(6, min(140, round(($dVal / $maxRef) * 140))) : 0;
-                                $hOmzet = $oVal > 0 ? max(6, min(140, round(($oVal / $maxRef) * 140))) : 0;
-                                
-                                $labelDonasi = $dVal >= 1000000 
-                                    ? number_format($dVal / 1000000, 2, ',', '.') . ' jt' 
-                                    : ($dVal > 0 ? number_format($dVal / 1000, 0, ',', '.') . ' rb' : '0');
+                                $hDana = $danaVal > 0 ? max(6, min(140, round(($danaVal / $maxRef) * 140))) : 0;
+                                $labelDana = $danaVal >= 1000000
+                                    ? number_format($danaVal / 1000000, 2, ',', '.') . ' jt'
+                                    : ($danaVal > 0 ? number_format($danaVal / 1000, 0, ',', '.') . ' rb' : '0');
                             @endphp
                             <div class="flex flex-col items-center flex-1 max-w-[100px]">
-                                <div class="flex items-end gap-1.5 h-36">
+                                <div class="flex items-end justify-center h-36">
                                     <div class="relative flex flex-col items-center justify-end h-full">
-                                        @if($dVal > 0)
-                                            <span class="text-[9px] font-bold text-stone-700 mb-1 whitespace-nowrap">{{ $labelDonasi }}</span>
-                                            <div class="w-7 sm:w-8 rounded-t-xs bg-[#444d41] transition-all duration-300" style="height: {{ $hDonasi }}px;" title="Donasi: Rp{{ number_format($dVal, 0, ',', '.') }}"></div>
+                                        @if($danaVal > 0)
+                                            <span class="text-[9px] font-bold text-stone-700 mb-1 whitespace-nowrap">{{ $labelDana }}</span>
+                                            <div class="w-8 sm:w-9 rounded-t-xs bg-[#444d41] transition-all duration-300" style="height: {{ $hDana }}px;" title="Dana Pembangunan: Rp{{ number_format($danaVal, 0, ',', '.') }}"></div>
                                         @else
-                                            <div class="w-7 sm:w-8 rounded-t-xs bg-stone-100" style="height: 4px;" title="Donasi: Rp0"></div>
-                                        @endif
-                                    </div>
-                                    <div class="relative flex flex-col items-center justify-end h-full">
-                                        @if($oVal > 0)
-                                            <div class="w-3 sm:w-3.5 rounded-t-xs bg-[#b55322] transition-all duration-300" style="height: {{ $hOmzet }}px;" title="Omzet Kaos: Rp{{ number_format($oVal, 0, ',', '.') }}"></div>
-                                        @else
-                                            <div class="w-3 sm:w-3.5 rounded-t-xs bg-stone-100" style="height: 4px;" title="Omzet Kaos: Rp0"></div>
+                                            <div class="w-8 sm:w-9 rounded-t-xs bg-stone-100" style="height: 4px;" title="Dana Pembangunan: Rp0"></div>
                                         @endif
                                     </div>
                                 </div>
@@ -403,22 +376,11 @@
                         <div class="flex items-center px-4 py-3">
                             <div class="w-36 shrink-0 font-bold text-stone-900 flex items-center gap-1.5">
                                 <span class="h-2 w-2 rounded-xs bg-[#444d41]"></span>
-                                Donasi
+                                Dana Pembangunan
                             </div>
                             @foreach($months as $key => $m)
                                 <div class="flex-1 text-center font-semibold text-stone-700">
-                                    {{ number_format($donasiPerBulan[$key] ?? 0, 0, ',', '.') }}
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="flex items-center px-4 py-3">
-                            <div class="w-36 shrink-0 font-bold text-stone-900 flex items-center gap-1.5">
-                                <span class="h-2 w-2 rounded-xs bg-[#b55322]"></span>
-                                Omzet kaos
-                            </div>
-                            @foreach($months as $key => $m)
-                                <div class="flex-1 text-center font-semibold text-stone-700">
-                                    {{ number_format($omzetPerBulan[$key] ?? 0, 0, ',', '.') }}
+                                    {{ number_format($danaPembangunanPerBulan[$key] ?? 0, 0, ',', '.') }}
                                 </div>
                             @endforeach
                         </div>
@@ -427,22 +389,14 @@
             </div>
         </div>
 
-        <!-- Right: Dana untuk pembangunan -->
+        <!-- Right: Dana Pembangunan -->
         <div class="rounded-2xl border border-[#e8e4dc] bg-white p-6 lg:col-span-4 flex flex-col justify-between space-y-5">
             <div>
-                <h2 class="font-serif text-lg font-bold text-stone-900">Dana untuk pembangunan</h2>
+                <h2 class="font-serif text-lg font-bold text-stone-900">Dana Pembangunan</h2>
                 <p class="mt-3 font-serif text-3xl font-bold text-[#b55322] leading-none">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</p>
-                <p class="mt-2 text-xs text-stone-500 leading-relaxed">Donasi terverifikasi + dana bersih kaos, sebelum belanja pembangunan.</p>
+                <p class="mt-2 text-xs text-stone-500 leading-relaxed">Donasi + omzet kaos terverifikasi, sebelum belanja pembangunan.</p>
 
                 <div class="mt-5 space-y-2.5 text-xs border-t border-stone-100 pt-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-stone-500">Donasi</span>
-                        <span class="font-semibold text-stone-900">Rp{{ number_format($totalDonasi, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-stone-500">Dana bersih kaos</span>
-                        <span class="font-semibold text-stone-900">+ Rp{{ number_format($danaBersihKaos, 0, ',', '.') }}</span>
-                    </div>
                     <div class="flex items-center justify-between">
                         <span class="text-stone-500">Belanja pembangunan</span>
                         <span class="font-semibold text-stone-900">&minus; Rp{{ number_format($belanjaPembangunan, 0, ',', '.') }}</span>
@@ -453,7 +407,6 @@
                 <div class="mt-5 rounded-xl bg-[#f5f2ec] p-4">
                     <p class="text-[11px] font-semibold text-stone-500">Saldo pembangunan</p>
                     <p class="mt-1 font-serif text-2xl font-bold text-stone-900 leading-tight">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
-                    <p class="mt-1 text-[11px] text-stone-400">Belum termasuk Rp1.000.000 donasi tertunda.</p>
                 </div>
             </div>
 
