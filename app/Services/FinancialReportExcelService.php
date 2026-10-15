@@ -42,7 +42,7 @@ class FinancialReportExcelService
 
         // Ambil Data Terverifikasi
         $donasiQuery = Donation::where('status', 'terverifikasi')->whereBetween('tanggal', [$fromStr, $toStr]);
-        $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59']);
+        $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59'])->whereNotIn('jenis', ['donasi_saja']);
         $expenseQuery = Expense::whereBetween('tanggal', [$fromStr, $toStr]);
         $donasiSajaOrders = Order::where('jenis', 'donasi_saja')
             ->where('status_pembayaran', 'terverifikasi')
@@ -576,7 +576,7 @@ class FinancialReportExcelService
 
         $allDonasi = $donasis->merge(
             collect($donasiSajaOrders ?? [])->map(fn($o) => (object) [
-                'tanggal' => $o->created_at,
+                'tanggal' => $o->created_at ? Carbon::parse($o->created_at) : Carbon::parse('2026-01-01'),
                 'kode' => $o->nomor_pesanan,
                 'nama' => $o->nama,
                 'telepon' => $o->nomor,

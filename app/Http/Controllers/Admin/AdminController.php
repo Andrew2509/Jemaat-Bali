@@ -496,7 +496,7 @@ class AdminController extends Controller
         $toStr = $toDate->format('Y-m-d');
 
         $donasiQuery = Donation::where('status', 'terverifikasi')->whereBetween('tanggal', [$fromStr, $toStr]);
-        $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59']);
+        $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59'])->whereNotIn('jenis', ['donasi_saja']);
         $expenseQuery = Expense::whereBetween('tanggal', [$fromStr, $toStr]);
 
         $donasiSajaOrders = Order::where('jenis', 'donasi_saja')
@@ -518,7 +518,7 @@ class AdminController extends Controller
             $expenses = $expenseQuery->get();
         }
 
-        $totalDonasi = $donasis->sum('nominal') + $donasiSajaOrders->sum('total');
+        $totalDonasi = $donasis->sum('nominal') + ($jenis === 'kaos' ? 0 : $donasiSajaOrders->sum('total'));
         $omzetKaos = $orders->sum('subtotal_kaos');
         $ongkir = $orders->sum('ongkir') > 0 ? $orders->sum('ongkir') : ($expenses->where('kategori', 'Pengiriman')->sum('jumlah') ?: 80000);
         if ($jenis === 'donasi') {
@@ -602,9 +602,11 @@ class AdminController extends Controller
                 return $d->tanggal && $d->tanggal->year == $m['year'] && $d->tanggal->month == $m['month'];
             })->sum('nominal');
 
-            $donasiPerBulan[$key] += $donasiSajaOrders->filter(function ($o) use ($m) {
-                return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
-            })->sum('total');
+            if ($jenis !== 'kaos') {
+                $donasiPerBulan[$key] += $donasiSajaOrders->filter(function ($o) use ($m) {
+                    return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
+                })->sum('total');
+            }
 
             $omzetPerBulan[$key] = $orders->filter(function ($o) use ($m) {
                 return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
@@ -685,9 +687,11 @@ class AdminController extends Controller
                 $tgl = $d->tanggal ? Carbon::parse($d->tanggal)->format('d/m/Y') : '-';
                 fputcsv($handle, [$no++, $tgl, 'Donasi', $d->kode, 'Penerimaan Donasi', $d->nama, (int) $d->nominal, 0, $d->catatan ?: '-']);
             }
-            foreach ($donasiSajaOrders as $o) {
-                $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
-                fputcsv($handle, [$no++, $tgl, 'Donasi', $o->nomor_pesanan, 'Penerimaan Donasi', $o->nama, (int) $o->total, 0, $o->catatan ?: '-']);
+            if ($jenis !== 'kaos') {
+                foreach ($donasiSajaOrders as $o) {
+                    $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
+                    fputcsv($handle, [$no++, $tgl, 'Donasi', $o->nomor_pesanan, 'Penerimaan Donasi', $o->nama, (int) $o->total, 0, $o->catatan ?: '-']);
+                }
             }
             foreach ($orders as $o) {
                 $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
