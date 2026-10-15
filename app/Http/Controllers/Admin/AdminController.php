@@ -869,4 +869,97 @@ class AdminController extends Controller
 
         return redirect()->route('admin.content')->with('success', 'Informasi program dan kontak berhasil diperbarui.');
     }
+
+    /**
+     * Perbarui video pembuka beranda (Hero Video Home)
+     */
+    public function updateHeroVideo(Request $request)
+    {
+        $data = $request->validate([
+            'hero_video_type' => ['required', 'string', 'in:default,file,gdrive'],
+            'video_file' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov,mkv', 'max:102400'],
+            'video_url' => ['nullable', 'string', 'max:1000'],
+            'poster_file' => ['nullable', 'file', 'mimes:jpeg,png,webp,jpg', 'max:10240'],
+        ], [
+            'hero_video_type.required' => 'Pilih jenis video pembuka beranda.',
+            'video_file.mimes' => 'Format file video harus berupa MP4, WEBM, MOV, atau OGG.',
+            'video_file.max' => 'Ukuran berkas video maksimal 100 MB.',
+            'poster_file.mimes' => 'Format file poster harus berupa JPG, PNG, atau WEBP.',
+            'poster_file.max' => 'Ukuran poster maksimal 10 MB.',
+        ]);
+
+        $info = ProgramInfo::first();
+        if (!$info) {
+            $info = ProgramInfo::create([
+                'nama_program' => 'Pembangunan Jemaat Bali',
+                'deskripsi' => 'Penggalangan dana pembangunan bersama.',
+                'whatsapp' => '0812-0000-0000',
+                'email' => 'admin@jemaatbali.or.id',
+                'judul_proposal' => 'Proposal pembangunan',
+            ]);
+        }
+
+        $type = $data['hero_video_type'];
+        $updateData = [
+            'hero_video_type' => $type,
+        ];
+
+        // 1. Upload Video File Baru jika ada
+        if ($request->hasFile('video_file')) {
+            $path = $request->file('video_file')->store('hero', 'public');
+            $updateData['hero_video_path'] = $path;
+            if ($type !== 'default') {
+                $updateData['hero_video_type'] = 'file';
+            }
+        }
+
+        // 2. Simpan URL Google Drive jika ada
+        if ($request->filled('video_url')) {
+            $updateData['hero_video_url'] = trim($data['video_url']);
+        } elseif ($type === 'gdrive' && empty($info->hero_video_url)) {
+            return redirect()->route('admin.content')->withErrors([
+                'video_url' => 'Tautan video Google Drive wajib diisi ketika memilih opsi Link Drive.',
+            ])->withInput();
+        }
+
+        // 3. Upload Poster / Cover Baru jika ada
+        if ($request->hasFile('poster_file')) {
+            $posterPath = $request->file('poster_file')->store('hero/posters', 'public');
+            $updateData['hero_video_poster'] = $posterPath;
+        }
+
+        // Validasi kelengkapan data
+        if ($type === 'file' && empty($updateData['hero_video_path']) && empty($info->hero_video_path)) {
+            return redirect()->route('admin.content')->withErrors([
+                'video_file' => 'Silakan pilih berkas video MP4/WEBM untuk diunggah.',
+            ])->withInput();
+        }
+
+        $info->update($updateData);
+        cache()->forget('program_info');
+
+        $typeLabel = match ($info->getHeroVideoType()) {
+            'file' => 'Berkas Video MP4 Lokal',
+            'gdrive' => 'Tautan Google Drive',
+            default => 'Video Bawaan Sistem',
+        };
+
+        return redirect()->route('admin.content')->with('success', "Video pembuka beranda berhasil diperbarui menggunakan {$typeLabel}.");
+    }
+
+    /**
+     * Kembalikan video pembuka beranda ke bawaan sistem
+     */
+    public function resetHeroVideo()
+    {
+        $info = ProgramInfo::first();
+        if ($info) {
+            $info->update([
+                'hero_video_type' => 'default',
+            ]);
+            cache()->forget('program_info');
+        }
+
+        return redirect()->route('admin.content')->with('success', 'Video pembuka beranda telah dikembalikan ke video bawaan sistem.');
+    }
 }

@@ -15,6 +15,11 @@ class HomeController extends Controller
         $isCanva = $programInfo ? $programInfo->isCanvaProposal() : false;
         $canvaEmbedUrl = $programInfo?->canva_embed_url;
 
+        $heroVideoType = $programInfo ? $programInfo->getHeroVideoType() : 'default';
+        $heroVideoUrl = $programInfo ? $programInfo->getActiveHeroVideoUrl() : asset('videos/hero-bg.mp4');
+        $heroVideoEmbedUrl = $programInfo ? $programInfo->getHeroVideoEmbedUrl() : null;
+        $heroPosterUrl = $programInfo ? $programInfo->getHeroPosterUrl() : asset('images/hero-poster.jpg');
+
         return view('home', [
             'progressTerbaru' => Progress::published()->latest('tanggal')->latest('id')->take(6)->get(),
             'designs' => Design::where('aktif', true)->latest('id')->get(),
@@ -23,6 +28,10 @@ class HomeController extends Controller
             'programInfo' => $programInfo,
             'isCanva' => $isCanva,
             'canvaEmbedUrl' => $canvaEmbedUrl,
+            'heroVideoType' => $heroVideoType,
+            'heroVideoUrl' => $heroVideoUrl,
+            'heroVideoEmbedUrl' => $heroVideoEmbedUrl,
+            'heroPosterUrl' => $heroPosterUrl,
         ]);
     }
 }

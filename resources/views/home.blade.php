@@ -5,12 +5,24 @@
 
 @section('content')
     {{-- ================= HERO VIDEO DIAM (FIXED / TIDAK IKUT SCROLL) ================= --}}
-    <div id="hero-video-wrapper" class="fixed top-0 left-0 right-0 z-0 h-[440px] sm:h-[520px] lg:h-[600px] w-full overflow-hidden pointer-events-none transition-opacity duration-200" aria-hidden="true">
-        <video id="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ asset('images/hero-poster.jpg') }}"
-            class="h-full w-full object-cover object-center">
-            <source src="{{ asset('videos/hero-bg.mp4') }}" type="video/mp4">
-            <source src="{{ asset('videos/hero-bg.webm') }}" type="video/webm">
-        </video>
+    <div id="hero-video-wrapper" class="fixed top-0 left-0 right-0 z-0 h-[440px] sm:h-[520px] lg:h-[600px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
+        @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
+            <div class="relative h-full w-full bg-stone-900">
+                <iframe src="{{ $heroVideoEmbedUrl }}"
+                    class="h-full w-full object-cover border-0"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        @else
+            <video id="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ $heroPosterUrl }}"
+                class="h-full w-full object-cover object-center">
+                <source src="{{ $heroVideoUrl }}" type="video/mp4">
+                @if ($heroVideoType === 'default')
+                    <source src="{{ asset('videos/hero-bg.webm') }}" type="video/webm">
+                @endif
+            </video>
+        @endif
     </div>
 
     {{-- Spacer transparan seukuran hero --}}

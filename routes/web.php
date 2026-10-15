@@ -118,6 +118,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/konten/proposal', [ProposalController::class, 'upload'])->name('content.proposal');
         Route::post('/konten/proposal/pengaturan', [ProposalController::class, 'updateSettings'])->name('content.proposal.settings');
         Route::post('/konten/info', [AdminController::class, 'contentInfo'])->name('content.info');
+        Route::post('/konten/hero-video', [AdminController::class, 'updateHeroVideo'])->name('content.hero_video');
+        Route::post('/konten/hero-video/reset', [AdminController::class, 'resetHeroVideo'])->name('content.hero_video.reset');
     });
 
     // 9. Provider Integrasi (WhatsApp Fonnte & RajaOngkir API)

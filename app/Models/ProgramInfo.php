@@ -17,6 +17,10 @@ class ProgramInfo extends Model
         'proposal_tipe',
         'proposal_canva_url',
         'size_chart',
+        'hero_video_type',
+        'hero_video_path',
+        'hero_video_url',
+        'hero_video_poster',
     ];
 
     protected function casts(): array
@@ -149,5 +153,109 @@ class ProgramInfo extends Model
         }
 
         return !empty($this->canva_embed_url) && $this->proposal_tipe !== 'pdf';
+    }
+
+    /**
+     * Tipe video pembuka beranda aktif: 'default', 'file', atau 'gdrive'
+     */
+    public function getHeroVideoType(): string
+    {
+        $type = $this->hero_video_type ?? 'default';
+        if ($type === 'file' && !empty($this->hero_video_path)) {
+            return 'file';
+        }
+        if ($type === 'gdrive' && !empty($this->hero_video_url)) {
+            return 'gdrive';
+        }
+        if ($type === 'default') {
+            return 'default';
+        }
+        if (!empty($this->hero_video_path)) {
+            return 'file';
+        }
+        if (!empty($this->hero_video_url)) {
+            return 'gdrive';
+        }
+        return 'default';
+    }
+
+    /**
+     * URL embed video Google Drive untuk iframe
+     */
+    public function getHeroVideoEmbedUrl(): ?string
+    {
+        $url = trim($this->hero_video_url ?? '');
+        if (!$url) {
+            return null;
+        }
+
+        if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+            return 'https://drive.google.com/file/d/' . $m[1] . '/preview';
+        }
+
+        return $url;
+    }
+
+    /**
+     * ID Google Drive untuk thumbnail / preview
+     */
+    public function getHeroGoogleDriveId(): ?string
+    {
+        $url = trim($this->hero_video_url ?? '');
+        if (!$url) {
+            return null;
+        }
+        if (preg_match('/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i', $url, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
+     * URL file video untuk tag HTML5 <video>
+     */
+    public function getHeroVideoFileUrl(): ?string
+    {
+        if (!empty($this->hero_video_path)) {
+            return asset('storage/' . $this->hero_video_path);
+        }
+        return null;
+    }
+
+    /**
+     * URL aktif untuk pemutaran video hero di halaman depan
+     */
+    public function getActiveHeroVideoUrl(): string
+    {
+        $type = $this->getHeroVideoType();
+        if ($type === 'file' && $this->getHeroVideoFileUrl()) {
+            return $this->getHeroVideoFileUrl();
+        }
+        if ($type === 'gdrive' && $this->getHeroVideoEmbedUrl()) {
+            return $this->getHeroVideoEmbedUrl();
+        }
+        return asset('videos/hero-bg.mp4');
+    }
+
+    /**
+     * URL poster / thumbnail hero video
+     */
+    public function getHeroPosterUrl(): string
+    {
+        if (!empty($this->hero_video_poster)) {
+            return asset('storage/' . $this->hero_video_poster);
+        }
+        if ($this->getHeroVideoType() === 'gdrive' && $driveId = $this->getHeroGoogleDriveId()) {
+            return 'https://drive.google.com/thumbnail?id=' . $driveId . '&sz=w1200';
+        }
+        return asset('images/hero-poster.jpg');
+    }
+
+    /**
+     * Cek apakah menggunakan video kustom (file atau link drive)
+     */
+    public function hasCustomHeroVideo(): bool
+    {
+        return $this->getHeroVideoType() !== 'default';
     }
 }

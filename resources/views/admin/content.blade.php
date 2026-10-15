@@ -33,6 +33,7 @@
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#e8e4dc]">
         <nav class="flex gap-8 -mb-px">
             <a href="{{ route('admin.content') }}" class="border-b-2 border-[#b55322] pb-3 text-xs font-bold text-[#b55322]">Progres pembangunan</a>
+            <a href="#hero-video-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Video Pembuka Beranda</a>
             <a href="#proposal-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Proposal Pembangunan</a>
             <a href="#program-section" class="border-b-2 border-transparent pb-3 text-xs font-semibold text-stone-500 hover:text-stone-900 transition">Program &amp; kontak</a>
         </nav>
@@ -366,6 +367,262 @@
 
     </div>
 
+    <!-- Hero Video Section Card (Upload File & Link Google Drive) -->
+    @php
+        $heroType = $programInfo ? $programInfo->getHeroVideoType() : 'default';
+        $heroFileUrl = $programInfo ? $programInfo->getHeroVideoFileUrl() : null;
+        $heroFilePath = $programInfo ? $programInfo->hero_video_path : null;
+        $heroDriveUrl = $programInfo ? $programInfo->hero_video_url : '';
+        $heroEmbedUrl = $programInfo ? $programInfo->getHeroVideoEmbedUrl() : null;
+        $heroDriveId = $programInfo ? $programInfo->getHeroGoogleDriveId() : null;
+        $heroPosterUrl = $programInfo ? $programInfo->getHeroPosterUrl() : asset('images/hero-poster.jpg');
+        $heroActiveUrl = $programInfo ? $programInfo->getActiveHeroVideoUrl() : asset('videos/hero-bg.mp4');
+    @endphp
+    <section id="hero-video-section" class="mt-6 rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs">
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#f0ede6] pb-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg bg-[#faefe8] text-[#b55322]">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                    </span>
+                    <h2 class="font-serif text-lg font-bold text-stone-900">Video Pembuka Beranda (Hero Video Home)</h2>
+                </div>
+                <p class="text-xs text-stone-500 mt-1">
+                    Atur video yang tampil di bagian paling awal / latar belakang beranda. Bisa berupa <strong>Upload Berkas Video (MP4)</strong> atau <strong>Tautan Google Drive</strong>.
+                </p>
+            </div>
+
+            <!-- Status Pill Badge -->
+            <div>
+                @if ($heroType === 'file')
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-800">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Berkas Video Lokal Aktif</span>
+                    </span>
+                @elseif ($heroType === 'gdrive')
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-800">
+                        <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span>Tautan Google Drive Aktif</span>
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] border border-[#e8e4dc] px-3 py-1 text-xs font-semibold text-stone-700">
+                        <span class="h-2 w-2 rounded-full bg-stone-400"></span>
+                        <span>Video Bawaan Sistem (Default)</span>
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <!-- Master-Detail Grid: Form (Left) & Live Preview (Right) -->
+        <div class="mt-5 grid gap-6 lg:grid-cols-12 items-start">
+            
+            <!-- Left: Settings Form -->
+            <div class="lg:col-span-7 xl:col-span-7">
+                <form method="POST" action="{{ route('admin.content.hero_video') }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+
+                    <!-- Pilihan Sumber Video -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-2">Pilih Sumber Video Beranda</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            {{-- 1. Upload File --}}
+                            <label class="hero-type-card flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition {{ $heroType === 'file' ? 'border-[#b55322] bg-[#faefe8]/40 ring-1 ring-[#b55322]/20' : 'border-[#e8e4dc] bg-stone-50/40 hover:bg-stone-50' }}">
+                                <input type="radio" name="hero_video_type" value="file" @checked($heroType === 'file') class="mt-0.5 text-[#b55322] focus:ring-[#b55322]">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-900">Upload Berkas</p>
+                                    <p class="text-[11px] text-stone-500 mt-0.5 leading-tight">File MP4 / WEBM dari komputer (Maks 100MB)</p>
+                                </div>
+                            </label>
+
+                            {{-- 2. Link Google Drive --}}
+                            <label class="hero-type-card flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition {{ $heroType === 'gdrive' ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/20' : 'border-[#e8e4dc] bg-stone-50/40 hover:bg-stone-50' }}">
+                                <input type="radio" name="hero_video_type" value="gdrive" @checked($heroType === 'gdrive') class="mt-0.5 text-blue-600 focus:ring-blue-500">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-900">Link Google Drive</p>
+                                    <p class="text-[11px] text-stone-500 mt-0.5 leading-tight">Tautan video sharing Google Drive</p>
+                                </div>
+                            </label>
+
+                            {{-- 3. Default Sistem --}}
+                            <label class="hero-type-card flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition {{ $heroType === 'default' ? 'border-stone-400 bg-stone-100 ring-1 ring-stone-400/20' : 'border-[#e8e4dc] bg-stone-50/40 hover:bg-stone-50' }}">
+                                <input type="radio" name="hero_video_type" value="default" @checked($heroType === 'default') class="mt-0.5 text-stone-700 focus:ring-stone-500">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-900">Bawaan Sistem</p>
+                                    <p class="text-[11px] text-stone-500 mt-0.5 leading-tight">Gunakan video default hero-bg.mp4</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Panel 1: Upload File Video -->
+                    <div id="hero-panel-file" class="{{ $heroType === 'file' ? '' : 'hidden' }} space-y-3 rounded-xl border border-[#e8e4dc] bg-[#fbf9f6] p-4">
+                        <div class="flex items-center justify-between">
+                            <label for="video_file_input" class="block text-xs font-bold text-stone-800">
+                                Pilih File Video <span class="{{ $heroFilePath ? 'text-stone-400 font-normal' : 'text-rose-500' }}">{{ $heroFilePath ? '(opsional jika tidak ingin ganti)' : '*' }}</span>
+                            </label>
+                            <span class="text-[11px] text-stone-400">Format: MP4, WEBM, MOV &middot; Maks: 100 MB</span>
+                        </div>
+
+                        <input type="file" id="video_file_input" name="video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-[#faefe8] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#b55322] hover:file:bg-[#f5dfd2] focus:outline-none cursor-pointer">
+
+                        @if ($heroFilePath)
+                            <div class="flex items-center justify-between rounded-xl bg-white border border-[#e8e4dc] p-3 text-xs text-stone-700">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs">
+                                        MP4
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-stone-900 truncate">{{ basename($heroFilePath) }}</p>
+                                        <p class="text-[11px] text-stone-400">File tersimpan di server &middot; Siap diputar</p>
+                                    </div>
+                                </div>
+                                @if ($heroFileUrl)
+                                    <a href="{{ $heroFileUrl }}" target="_blank" class="shrink-0 text-xs font-semibold text-[#b55322] hover:underline">
+                                        Buka file &rarr;
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Panel 2: Link Google Drive -->
+                    <div id="hero-panel-gdrive" class="{{ $heroType === 'gdrive' ? '' : 'hidden' }} space-y-3 rounded-xl border border-blue-200 bg-blue-50/30 p-4">
+                        <div>
+                            <label for="hero_video_url_input" class="block text-xs font-bold text-stone-800 mb-1">
+                                Tautan Berbagi Video Google Drive <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="url" id="hero_video_url_input" name="video_url" value="{{ old('video_url', $heroDriveUrl) }}" placeholder="https://drive.google.com/file/d/1a2B3c4D5e.../view?usp=sharing" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 focus:border-blue-500 focus:outline-none">
+                            <p class="mt-1 text-[11px] text-stone-500">
+                                Pastikan setelan akses tautan di Google Drive telah diubah menjadi: <strong>"Siapa saja yang memiliki link"</strong> (Anyone with the link).
+                            </p>
+                        </div>
+
+                        <div id="gdrive-detected-box" class="{{ $heroDriveId ? '' : 'hidden' }} flex items-center justify-between rounded-xl bg-white border border-blue-100 p-2.5 text-xs text-blue-900">
+                            <span class="flex items-center gap-1.5">
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span>ID Berkas Google Drive: <code id="gdrive-file-id" class="font-mono font-bold text-stone-800">{{ $heroDriveId }}</code></span>
+                            </span>
+                            @if ($heroEmbedUrl)
+                                <a href="{{ $heroEmbedUrl }}" target="_blank" class="text-[11px] font-semibold text-blue-700 hover:underline">
+                                    Pratinjau Drive &rarr;
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: Default Sistem -->
+                    <div id="hero-panel-default" class="{{ $heroType === 'default' ? '' : 'hidden' }} rounded-xl border border-stone-200 bg-[#fbf9f6] p-4 text-xs text-stone-600 space-y-1">
+                        <p class="font-bold text-stone-800 flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-stone-500">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Menggunakan Video Standar Proyek</span>
+                        </p>
+                        <p class="text-[11px] text-stone-500">
+                            Sistem akan memutar berkas bawaan <code class="font-mono text-stone-700">videos/hero-bg.mp4</code> yang tersimpan di aset website.
+                        </p>
+                    </div>
+
+                    <!-- Poster / Cover Image Video (Opsional) -->
+                    <div class="rounded-xl border border-[#e8e4dc] bg-white p-3.5 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label for="poster_file_input" class="block text-xs font-semibold text-stone-800">
+                                Cover / Poster Gambar <span class="text-stone-400 font-normal">(opsional)</span>
+                            </label>
+                            <span class="text-[10px] text-stone-400">JPG, PNG, WEBP &middot; Maks: 10 MB</span>
+                        </div>
+                        <p class="text-[11px] text-stone-400">
+                            Ditampilkan sebagai thumbnail statis saat video sedang memuat atau di koneksi lambat.
+                        </p>
+                        <input type="file" id="poster_file_input" name="poster_file" accept="image/jpeg,image/png,image/webp,image/jpg" class="w-full rounded-xl border border-[#e8e4dc] bg-[#fbf9f6] px-3.5 py-2 text-xs text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-200 file:px-2.5 file:py-1 file:text-[11px] file:font-semibold file:text-stone-700 hover:file:bg-stone-300 focus:outline-none cursor-pointer">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <div class="flex items-center gap-2">
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-[#b55322] hover:bg-[#9d4419] px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                </svg>
+                                <span>Simpan Video Beranda</span>
+                            </button>
+
+                            <a href="{{ route('home') }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-50 transition">
+                                <span>Lihat di Beranda</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Tombol Reset Terpisah -->
+                @if ($heroType !== 'default')
+                    <div class="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+                        <span>Ingin menggunakan video bawaan asli?</span>
+                        <form method="POST" action="{{ route('admin.content.hero_video.reset') }}" onsubmit="return confirm('Apakah Anda yakin ingin mengembalikan video beranda ke video bawaan sistem?');" class="inline">
+                            @csrf
+                            <button type="submit" class="text-xs font-semibold text-stone-500 hover:text-stone-800 underline cursor-pointer">
+                                Reset ke Video Bawaan
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Right: Real-time Live Preview Player -->
+            <div class="lg:col-span-5 xl:col-span-5 space-y-3">
+                <div class="rounded-2xl border border-[#e8e4dc] bg-[#1c1917] p-4 text-white shadow-xs space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-stone-200">Pratinjau Video Beranda</span>
+                        </div>
+                        <span class="rounded bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-stone-300 uppercase">
+                            {{ $heroType }}
+                        </span>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div id="hero-preview-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-inner">
+                        @if ($heroType === 'gdrive' && $heroEmbedUrl)
+                            <iframe id="hero-preview-iframe" src="{{ $heroEmbedUrl }}" class="h-full w-full border-0 object-cover" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        @else
+                            <video id="hero-preview-video" controls autoplay muted loop playsinline poster="{{ $heroPosterUrl }}" class="h-full w-full object-cover">
+                                <source src="{{ $heroActiveUrl }}" type="video/mp4">
+                            </video>
+                        @endif
+                    </div>
+
+                    <!-- Player Meta Info -->
+                    <div class="text-[11px] text-stone-400 space-y-1 pt-1 border-t border-white/10">
+                        <div class="flex justify-between">
+                            <span>Status:</span>
+                            <span class="text-white font-medium capitalize">{{ $heroType === 'default' ? 'Bawaan Sistem' : ($heroType === 'file' ? 'File Unggahan Lokal' : 'Google Drive') }}</span>
+                        </div>
+                        @if ($heroType === 'file' && $heroFilePath)
+                            <div class="flex justify-between truncate">
+                                <span>Berkas:</span>
+                                <span class="text-white font-mono truncate max-w-[200px]">{{ basename($heroFilePath) }}</span>
+                            </div>
+                        @elseif ($heroType === 'gdrive' && $heroDriveId)
+                            <div class="flex justify-between">
+                                <span>Drive ID:</span>
+                                <span class="text-white font-mono">{{ $heroDriveId }}</span>
+                            </div>
+                        @endif
+                        <p class="text-[10px] text-stone-400 italic pt-1">
+                            * Di halaman Beranda publik, video diposisikan di latar belakang paling atas secara otomatis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <!-- Bottom Row: Proposal PDF (left) & Informasi Program & Kontak (right) -->
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
         <!-- Proposal Section Card -->
@@ -585,6 +842,75 @@
                 });
                 proposalInput.addEventListener('input', function () {
                     hiddenInput.value = proposalInput.value;
+                });
+            }
+
+            // Hero Video Type Switcher
+            document.querySelectorAll('input[name="hero_video_type"]').forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    var val = this.value;
+                    var panelFile = document.getElementById('hero-panel-file');
+                    var panelGdrive = document.getElementById('hero-panel-gdrive');
+                    var panelDefault = document.getElementById('hero-panel-default');
+
+                    if (panelFile) panelFile.classList.toggle('hidden', val !== 'file');
+                    if (panelGdrive) panelGdrive.classList.toggle('hidden', val !== 'gdrive');
+                    if (panelDefault) panelDefault.classList.toggle('hidden', val !== 'default');
+
+                    document.querySelectorAll('.hero-type-card').forEach(function (card) {
+                        var r = card.querySelector('input');
+                        if (r && r.checked) {
+                            card.classList.remove('border-[#e8e4dc]', 'bg-stone-50/40');
+                            if (r.value === 'file') {
+                                card.classList.add('border-[#b55322]', 'bg-[#faefe8]/40', 'ring-1', 'ring-[#b55322]/20');
+                            } else if (r.value === 'gdrive') {
+                                card.classList.add('border-blue-500', 'bg-blue-50/40', 'ring-1', 'ring-blue-500/20');
+                            } else {
+                                card.classList.add('border-stone-400', 'bg-stone-100', 'ring-1', 'ring-stone-400/20');
+                            }
+                        } else if (r) {
+                            card.classList.remove('border-[#b55322]', 'bg-[#faefe8]/40', 'border-blue-500', 'bg-blue-50/40', 'border-stone-400', 'bg-stone-100', 'ring-1', 'ring-[#b55322]/20', 'ring-blue-500/20', 'ring-stone-400/20');
+                            card.classList.add('border-[#e8e4dc]', 'bg-stone-50/40');
+                        }
+                    });
+                });
+            });
+
+            // Google Drive Live Detection & Live Preview
+            var driveInput = document.getElementById('hero_video_url_input');
+            var driveDetectedBox = document.getElementById('gdrive-detected-box');
+            var driveIdSpan = document.getElementById('gdrive-file-id');
+            var previewContainer = document.getElementById('hero-preview-container');
+
+            function extractDriveId(url) {
+                if (!url) return null;
+                var match = url.match(/(?:drive\.google\.com\/(?:file\/d\/|(?:open|uc)\?(?:[^\s"&]*&)*id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i);
+                return match ? match[1] : null;
+            }
+
+            if (driveInput) {
+                driveInput.addEventListener('input', function () {
+                    var id = extractDriveId(this.value.trim());
+                    if (id) {
+                        if (driveDetectedBox) driveDetectedBox.classList.remove('hidden');
+                        if (driveIdSpan) driveIdSpan.textContent = id;
+                        if (previewContainer) {
+                            previewContainer.innerHTML = '<iframe src="https://drive.google.com/file/d/' + id + '/preview" class="h-full w-full border-0 object-cover" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+                        }
+                    } else {
+                        if (driveDetectedBox && !driveInput.value.trim()) driveDetectedBox.classList.add('hidden');
+                    }
+                });
+            }
+
+            // File input preview
+            var fileInput = document.getElementById('video_file_input');
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    if (this.files && this.files[0] && previewContainer) {
+                        var fileUrl = URL.createObjectURL(this.files[0]);
+                        previewContainer.innerHTML = '<video controls autoplay muted loop playsinline class="h-full w-full object-cover"><source src="' + fileUrl + '" type="' + this.files[0].type + '"></video>';
+                    }
                 });
             }
         });
