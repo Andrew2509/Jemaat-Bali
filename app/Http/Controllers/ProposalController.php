@@ -15,6 +15,7 @@ class ProposalController extends Controller
         $programInfo = \App\Models\ProgramInfo::first();
         $isCanva = $programInfo ? $programInfo->isCanvaProposal() : false;
         $canvaEmbedUrl = $programInfo?->canva_embed_url;
+        $canvaEmbedUrlEn = $programInfo?->canva_embed_url_en;
 
         return view('proposal', [
             'adaFile' => file_exists($path),
@@ -24,13 +25,14 @@ class ProposalController extends Controller
             'updatedAt' => file_exists($path) ? date('d M Y, H:i', filemtime($path)) : null,
             'isCanva' => $isCanva,
             'canvaEmbedUrl' => $canvaEmbedUrl,
+            'canvaEmbedUrlEn' => $canvaEmbedUrlEn,
             'programInfo' => $programInfo,
         ]);
     }
 
     public function upload(Request $request)
     {
-        if ($request->has('proposal_tipe') || $request->has('proposal_canva_url') || ($request->has('judul_proposal') && !$request->hasFile('proposal'))) {
+        if ($request->has('proposal_tipe') || $request->has('proposal_canva_url') || $request->has('proposal_canva_url_en') || ($request->has('judul_proposal') && !$request->hasFile('proposal'))) {
             return $this->updateSettings($request);
         }
 
@@ -62,17 +64,20 @@ class ProposalController extends Controller
         $data = $request->validate([
             'proposal_tipe' => ['required', 'in:canva,pdf'],
             'proposal_canva_url' => ['nullable', 'string', 'max:3000'],
+            'proposal_canva_url_en' => ['nullable', 'string', 'max:3000'],
             'judul_proposal' => ['nullable', 'string', 'max:120'],
         ]);
 
         $info = \App\Models\ProgramInfo::first();
         $canvaUrl = array_key_exists('proposal_canva_url', $data) ? $data['proposal_canva_url'] : ($info->proposal_canva_url ?? null);
+        $canvaUrlEn = array_key_exists('proposal_canva_url_en', $data) ? $data['proposal_canva_url_en'] : ($info->proposal_canva_url_en ?? null);
         $judul = !empty($data['judul_proposal']) ? $data['judul_proposal'] : ($info->judul_proposal ?? 'Proposal pembangunan');
 
         if ($info) {
             $info->update([
                 'proposal_tipe' => $data['proposal_tipe'],
                 'proposal_canva_url' => $canvaUrl,
+                'proposal_canva_url_en' => $canvaUrlEn,
                 'judul_proposal' => $judul,
             ]);
         } else {
@@ -84,6 +89,7 @@ class ProposalController extends Controller
                 'judul_proposal' => $judul,
                 'proposal_tipe' => $data['proposal_tipe'],
                 'proposal_canva_url' => $canvaUrl,
+                'proposal_canva_url_en' => $canvaUrlEn,
             ]);
         }
 

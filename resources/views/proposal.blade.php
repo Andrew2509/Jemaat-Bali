@@ -24,8 +24,20 @@
                         </p>
                     </div>
 
-                    {{-- Action button: Fullscreen --}}
-                    <div class="flex items-center gap-2.5">
+                    {{-- Action button: Language Switch + Fullscreen --}}
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        @if (!empty($canvaEmbedUrlEn))
+                            <div class="inline-flex rounded-full border border-stone-300 bg-white p-0.5 shadow-sm">
+                                <button type="button" data-canva-lang="id" data-canva-src="{{ $canvaEmbedUrl }}"
+                                    class="canva-lang-btn rounded-full px-3.5 py-1.5 text-xs font-bold transition bg-stone-900 text-white">
+                                    ID
+                                </button>
+                                <button type="button" data-canva-lang="en" data-canva-src="{{ $canvaEmbedUrlEn }}"
+                                    class="canva-lang-btn rounded-full px-3.5 py-1.5 text-xs font-bold transition text-stone-600 hover:text-stone-900">
+                                    EN
+                                </button>
+                            </div>
+                        @endif
                         <button type="button" id="btn-fullscreen-canva" title="Layar Penuh"
                             class="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-bold text-stone-800 shadow-sm transition hover:bg-stone-50 hover:scale-105">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -121,6 +133,22 @@
                     }
                 });
             }
+
+            var langButtons = document.querySelectorAll('.canva-lang-btn');
+            var canvaFrame = document.getElementById('canva-frame');
+            langButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (canvaFrame && btn.dataset.canvaSrc) {
+                        canvaFrame.setAttribute('src', btn.dataset.canvaSrc);
+                    }
+                    langButtons.forEach(function (other) {
+                        other.classList.remove('bg-stone-900', 'text-white');
+                        other.classList.add('text-stone-600', 'hover:text-stone-900');
+                    });
+                    btn.classList.remove('text-stone-600', 'hover:text-stone-900');
+                    btn.classList.add('bg-stone-900', 'text-white');
+                });
+            });
 
             if (btnToPdf && pdfView && canvaView) {
                 btnToPdf.addEventListener('click', function () {

@@ -18,6 +18,7 @@ class ProgramInfo extends Model
         'judul_proposal',
         'proposal_tipe',
         'proposal_canva_url',
+        'proposal_canva_url_en',
         'size_chart',
         'hero_video_type',
         'hero_video_path',
@@ -145,7 +146,31 @@ class ProgramInfo extends Model
      */
     public function getCanvaEmbedUrlAttribute(): ?string
     {
-        $val = trim($this->proposal_canva_url ?? '');
+        return $this->normalizeCanvaUrl($this->proposal_canva_url);
+    }
+
+    /**
+     * URL sematan Canva versi bahasa Inggris
+     */
+    public function getCanvaEmbedUrlEnAttribute(): ?string
+    {
+        return $this->normalizeCanvaUrl($this->proposal_canva_url_en);
+    }
+
+    /**
+     * Cek apakah tersedia versi bahasa Inggris
+     */
+    public function hasCanvaVersionEn(): bool
+    {
+        return !empty($this->canva_embed_url_en);
+    }
+
+    /**
+     * Normalisasi tautan atau kode sematan Canva menjadi URL embed siap iframe
+     */
+    protected function normalizeCanvaUrl(?string $raw): ?string
+    {
+        $val = trim($raw ?? '');
         if (!$val) {
             return null;
         }

@@ -673,11 +673,15 @@
                     </div>
 
                     <!-- Kolom Input Canva (Tampil jika mode Canva) -->
-                    <div id="canva-setting-box" class="{{ $isCanva ? '' : 'hidden' }} space-y-3 pt-1">
-                        <div>
+                    <div id="canva-setting-box" class="{{ $isCanva ? '' : 'hidden' }} space-y-4 pt-1">
+                        {{-- Versi Indonesia --}}
+                        <div class="rounded-xl border border-[#e8e4dc] bg-stone-50/40 p-3">
                             <div class="flex items-center justify-between mb-1.5">
                                 <label class="block text-xs font-semibold text-stone-700">
-                                    Tautan atau Kode Sematan Canva <span class="text-purple-600 font-bold">*</span>
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <span class="inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">ID</span>
+                                        Tautan Canva Versi Indonesia <span class="text-purple-600 font-bold">*</span>
+                                    </span>
                                 </label>
                                 @if($programInfo?->canva_embed_url)
                                     <a href="{{ $programInfo->canva_embed_url }}" target="_blank" class="text-[11px] font-semibold text-purple-700 hover:underline inline-flex items-center gap-1">
@@ -689,6 +693,28 @@
                                 @endif
                             </div>
                             <textarea name="proposal_canva_url" rows="3" placeholder="Tempelkan Tautan penyematan cerdas (https://www.canva.com/design/...) atau Kode penyematan HTML dari Canva..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-purple-600 focus:outline-none leading-relaxed font-mono">{{ old('proposal_canva_url', $programInfo->proposal_canva_url ?? '') }}</textarea>
+                        </div>
+
+                        {{-- Versi Inggris --}}
+                        <div class="rounded-xl border border-[#e8e4dc] bg-stone-50/40 p-3">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-stone-700">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <span class="inline-flex items-center rounded-md bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">EN</span>
+                                        Tautan Canva Versi Inggris
+                                    </span>
+                                </label>
+                                @if($programInfo?->canva_embed_url_en)
+                                    <a href="{{ $programInfo->canva_embed_url_en }}" target="_blank" class="text-[11px] font-semibold text-purple-700 hover:underline inline-flex items-center gap-1">
+                                        <span>Uji Pratinjau</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3 w-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                            <textarea name="proposal_canva_url_en" rows="3" placeholder="Kosongkan jika belum ada versi bahasa Inggris. Tempelkan tautan atau kode sematan Canva di sini..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-purple-600 focus:outline-none leading-relaxed font-mono">{{ old('proposal_canva_url_en', $programInfo->proposal_canva_url_en ?? '') }}</textarea>
+                            <p class="mt-1.5 text-[11px] text-stone-500">Tombol <strong>EN</strong> di halaman proposal hanya muncul bila tautan ini diisi.</p>
                         </div>
 
                         <!-- Petunjuk Canva -->
