@@ -129,15 +129,6 @@
                     </a>
                 @endif
 
-                @if (Auth::user()->hasPermission('donations.view'))
-                    <a href="{{ route('admin.donations') }}" class="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[13px] font-semibold transition {{ request()->routeIs('admin.donations*') ? 'bg-[#f8eee7] text-[#b55322]' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                        </svg>
-                        <span>Donasi</span>
-                    </a>
-                @endif
-
                 @if (Auth::user()->hasPermission('reports.view'))
                     <a href="{{ route('admin.reports') }}" class="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[13px] font-semibold transition {{ request()->routeIs('admin.reports*') ? 'bg-[#f8eee7] text-[#b55322]' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
