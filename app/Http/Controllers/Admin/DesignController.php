@@ -57,6 +57,7 @@ class DesignController extends Controller
             'design' => new Design([
                 'harga' => 150000,
                 'aktif' => true,
+                'ukuran' => Design::ALL_UKURAN,
             ]),
         ]);
     }
@@ -71,9 +72,13 @@ class DesignController extends Controller
             'harga' => ['required', 'integer', 'min:10000'],
             'deskripsi' => ['required', 'string', 'max:1000'],
             'aktif' => ['required', 'boolean'],
+            'ukuran' => ['nullable', 'array'],
+            'ukuran.*' => ['string', Rule::in(Design::ALL_UKURAN)],
             'gambar' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:10240'],
             'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
         ]);
+
+        $data['ukuran'] = $request->has('ukuran') ? array_values((array) $request->input('ukuran')) : [];
 
         if ($request->hasFile('gambar')) {
             $file = $request->file('gambar');
@@ -115,9 +120,13 @@ class DesignController extends Controller
             'harga' => ['required', 'integer', 'min:10000'],
             'deskripsi' => ['required', 'string', 'max:1000'],
             'aktif' => ['required', 'boolean'],
+            'ukuran' => ['nullable', 'array'],
+            'ukuran.*' => ['string', Rule::in(Design::ALL_UKURAN)],
             'gambar' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:10240'],
             'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
         ]);
+
+        $data['ukuran'] = $request->has('ukuran') ? array_values((array) $request->input('ukuran')) : [];
 
         if ($request->hasFile('gambar')) {
             $file = $request->file('gambar');

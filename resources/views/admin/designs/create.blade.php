@@ -11,6 +11,11 @@
         $initialAktif = old('aktif', $design->exists ? ($design->aktif ? 1 : 0) : 1);
         $initialGambarUrl = $design->exists ? $design->gambarUrl() : null;
         $initialVideoUrl = $design->exists ? $design->video360Url() : null;
+        $allSizes = \App\Models\Design::ALL_UKURAN;
+        $initialUkuran = old('ukuran', $design->exists ? $design->pilihanUkuran() : $allSizes);
+        if (!is_array($initialUkuran)) {
+            $initialUkuran = $allSizes;
+        }
     @endphp
 
     <!-- Top Back & Header -->
@@ -81,6 +86,54 @@
                     <textarea id="deskripsi" name="deskripsi" rows="3" placeholder="Jelaskan makna desain, bahan pakaian (katun combed 30s), atau edisi kampanye pembangunan..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 focus:border-[#b55322] focus:outline-none leading-relaxed" required>{{ $initialDeskripsi }}</textarea>
                     @error('deskripsi')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Pilihan Ukuran Tersedia (Stok Pakaian) -->
+                <div class="rounded-xl border border-[#e8e4dc] bg-[#fbf9f6] p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800">
+                                Pilihan Ukuran Tersedia <span class="text-stone-400 font-normal">&mdash; Stok Pakaian</span>
+                            </label>
+                            <p class="text-[11px] text-stone-500 mt-0.5">
+                                Klik kotak ukuran untuk mengaktifkan / menonaktifkan jika stok ukuran tertentu habis.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" id="btn-select-all-sizes" class="rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-stone-700 hover:bg-stone-50 transition cursor-pointer shadow-2xs">
+                                Aktifkan Semua
+                            </button>
+                            <button type="button" id="btn-reset-sizes" class="rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-stone-500 hover:text-stone-800 transition cursor-pointer shadow-2xs">
+                                Nonaktifkan Semua
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-2 sm:gap-2.5 pt-1.5">
+                        @foreach ($allSizes as $s)
+                            @php
+                                $isChecked = in_array($s, $initialUkuran);
+                            @endphp
+                            <label class="size-toggle-card group relative flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all cursor-pointer {{ $isChecked ? 'border-[#b55322] bg-white shadow-2xs' : 'border-stone-200 bg-stone-100/70 opacity-60 hover:opacity-100' }}" title="Klik untuk {{ $isChecked ? 'menonaktifkan (stok habis)' : 'mengaktifkan (stok tersedia)' }}">
+                                <input type="checkbox" name="ukuran[]" value="{{ $s }}" class="sr-only size-checkbox" {{ $isChecked ? 'checked' : '' }} data-size="{{ $s }}">
+                                
+                                <span class="size-label font-serif text-sm font-bold {{ $isChecked ? 'text-[#b55322]' : 'text-stone-400 line-through' }}">
+                                    {{ $s }}
+                                </span>
+                                
+                                <span class="size-status mt-1 text-[9px] font-bold uppercase tracking-wider {{ $isChecked ? 'text-emerald-700' : 'text-stone-400' }}">
+                                    {{ $isChecked ? 'Tersedia' : 'Habis' }}
+                                </span>
+
+                                <span class="size-badge-check absolute top-1 right-1 grid h-3.5 w-3.5 place-items-center rounded-full text-[8px] font-bold text-white {{ $isChecked ? 'bg-[#b55322]' : 'bg-stone-300' }}">
+                                    {{ $isChecked ? '✓' : '✕' }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('ukuran')
+                        <p class="mt-2 text-xs text-rose-500">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -279,12 +332,21 @@
 
                         <!-- Available Sizes Preview -->
                         <div class="border-t border-stone-100 pt-2.5">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1.5">Pilihan Ukuran:</span>
-                            <div class="flex items-center gap-1.5 text-xs">
-                                @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $size)
-                                    <span class="grid h-7 w-7 place-items-center rounded-lg border border-[#e8e4dc] bg-[#fbf9f6] text-[11px] font-bold text-stone-700">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Pilihan Ukuran:</span>
+                                <span class="text-[10px] text-stone-400 italic">Klik untuk aktif / nonaktif</span>
+                            </div>
+                            <div id="preview-sizes-container" class="flex items-center gap-1.5 text-xs flex-wrap">
+                                @foreach ($allSizes as $size)
+                                    @php
+                                        $isAvail = in_array($size, $initialUkuran);
+                                    @endphp
+                                    <button type="button"
+                                        class="preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer {{ $isAvail ? 'border-[#e8e4dc] bg-[#fbf9f6] text-stone-700 hover:border-[#b55322]' : 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50' }}"
+                                        data-size="{{ $size }}"
+                                        title="{{ $size }} — {{ $isAvail ? 'Tersedia (Klik untuk ubah ke Habis)' : 'Habis (Klik untuk ubah ke Tersedia)' }}">
                                         {{ $size }}
-                                    </span>
+                                    </button>
                                 @endforeach
                             </div>
                         </div>
@@ -326,6 +388,14 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-3 w-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                         </span>
                         <span class="chk-text">Deskripsi &amp; bahan pakaian dijelaskan</span>
+                    </li>
+
+                    <!-- Check 4: Ukuran -->
+                    <li id="chk-ukuran" class="flex items-center gap-2.5 text-stone-400 transition">
+                        <span class="chk-icon grid h-5 w-5 shrink-0 place-items-center rounded-full bg-stone-100 text-stone-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-3 w-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        </span>
+                        <span class="chk-text">Pilihan ukuran stok diatur</span>
                     </li>
 
                     <!-- Check 4: Gambar -->
@@ -538,11 +608,124 @@
             inputGambar.addEventListener('change', syncGambar);
             inputVideo.addEventListener('change', syncVideo);
 
+            // Size Selection Logic
+            const sizeCheckboxes = document.querySelectorAll('.size-checkbox');
+            const previewSizeBtns = document.querySelectorAll('.preview-size-btn');
+            const btnSelectAllSizes = document.getElementById('btn-select-all-sizes');
+            const btnResetSizes = document.getElementById('btn-reset-sizes');
+            const chkUkuran = document.getElementById('chk-ukuran');
+
+            function updateSizeCard(checkbox) {
+                const card = checkbox.closest('.size-toggle-card');
+                const label = card ? card.querySelector('.size-label') : null;
+                const status = card ? card.querySelector('.size-status') : null;
+                const checkBadge = card ? card.querySelector('.size-badge-check') : null;
+                const size = checkbox.value;
+                const isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    if (card) {
+                        card.classList.add('border-[#b55322]', 'bg-white', 'shadow-2xs');
+                        card.classList.remove('border-stone-200', 'bg-stone-100/70', 'opacity-60');
+                        card.title = 'Klik untuk menonaktifkan (stok habis)';
+                    }
+                    if (label) {
+                        label.classList.add('text-[#b55322]');
+                        label.classList.remove('text-stone-400', 'line-through');
+                    }
+                    if (status) {
+                        status.textContent = 'Tersedia';
+                        status.classList.add('text-emerald-700');
+                        status.classList.remove('text-stone-400');
+                    }
+                    if (checkBadge) {
+                        checkBadge.textContent = '✓';
+                        checkBadge.classList.add('bg-[#b55322]');
+                        checkBadge.classList.remove('bg-stone-300');
+                    }
+                } else {
+                    if (card) {
+                        card.classList.remove('border-[#b55322]', 'bg-white', 'shadow-2xs');
+                        card.classList.add('border-stone-200', 'bg-stone-100/70', 'opacity-60');
+                        card.title = 'Klik untuk mengaktifkan (stok tersedia)';
+                    }
+                    if (label) {
+                        label.classList.remove('text-[#b55322]');
+                        label.classList.add('text-stone-400', 'line-through');
+                    }
+                    if (status) {
+                        status.textContent = 'Habis';
+                        status.classList.remove('text-emerald-700');
+                        status.classList.add('text-stone-400');
+                    }
+                    if (checkBadge) {
+                        checkBadge.textContent = '✕';
+                        checkBadge.classList.remove('bg-[#b55322]');
+                        checkBadge.classList.add('bg-stone-300');
+                    }
+                }
+
+                // Sync to preview buttons
+                previewSizeBtns.forEach(btn => {
+                    if (btn.dataset.size === size) {
+                        if (isChecked) {
+                            btn.className = 'preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer border-[#e8e4dc] bg-[#fbf9f6] text-stone-700 hover:border-[#b55322]';
+                            btn.title = size + ' — Tersedia (Klik untuk ubah ke Habis)';
+                        } else {
+                            btn.className = 'preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50';
+                            btn.title = size + ' — Habis (Klik untuk ubah ke Tersedia)';
+                        }
+                    }
+                });
+
+                // Update checklist: at least 1 size is selected
+                let anyChecked = false;
+                sizeCheckboxes.forEach(cb => { if (cb.checked) anyChecked = true; });
+                if (chkUkuran) setChecklist(chkUkuran, anyChecked);
+            }
+
+            sizeCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function () {
+                    updateSizeCard(this);
+                });
+            });
+
+            previewSizeBtns.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const size = this.dataset.size;
+                    const targetCb = document.querySelector('.size-checkbox[value="' + size + '"]');
+                    if (targetCb) {
+                        targetCb.checked = !targetCb.checked;
+                        updateSizeCard(targetCb);
+                    }
+                });
+            });
+
+            if (btnSelectAllSizes) {
+                btnSelectAllSizes.addEventListener('click', function () {
+                    sizeCheckboxes.forEach(cb => {
+                        cb.checked = true;
+                        updateSizeCard(cb);
+                    });
+                });
+            }
+
+            if (btnResetSizes) {
+                btnResetSizes.addEventListener('click', function () {
+                    sizeCheckboxes.forEach(cb => {
+                        cb.checked = false;
+                        updateSizeCard(cb);
+                    });
+                });
+            }
+
             // Initial Trigger
             syncNama();
             syncHarga();
             syncDeskripsi();
             syncAktif();
+            sizeCheckboxes.forEach(cb => updateSizeCard(cb));
 
             @if ($design->exists && $design->gambar)
                 setChecklist(chkGambar, true);

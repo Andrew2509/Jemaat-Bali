@@ -259,6 +259,19 @@
                             </div>
                         </div>
 
+                        {{-- Pilihan Ukuran Stok --}}
+                        <div class="rounded-xl border border-[#e8e4dc] p-3 text-xs bg-[#fbf9f6]">
+                            <span class="text-stone-400 block text-[10px] uppercase font-bold tracking-wider mb-1.5">Pilihan Ukuran Stok:</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                @foreach (\App\Models\Design::ALL_UKURAN as $s)
+                                    @php $isReady = $selectedDesign->isUkuranTersedia($s); @endphp
+                                    <span class="grid h-6 w-6 place-items-center rounded-md border text-[10px] font-bold {{ $isReady ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50' }}" title="{{ $s }} — {{ $isReady ? 'Tersedia' : 'Habis' }}">
+                                        {{ $s }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+
                         <!-- Actions -->
                         <div class="pt-2 space-y-2">
                             <a href="{{ route('admin.designs.edit', $selectedDesign->id) }}" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#b55322] hover:bg-[#9d4419] py-2.5 text-xs font-bold text-white shadow-2xs transition">

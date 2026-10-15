@@ -100,9 +100,19 @@
                 <div class="flex flex-col justify-center lg:col-span-4">
                     <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-ink">Ukuran</p>
                     <div class="mt-3 flex flex-wrap items-center gap-2">
+                        @php
+                            $availableSizes = $selected ? $selected->pilihanUkuran() : ['S', 'M', 'L', 'XL', 'XXL'];
+                            $defaultSelectedSize = in_array('L', $availableSizes) ? 'L' : ($availableSizes[0] ?? 'L');
+                        @endphp
                         @foreach ($ukuran as $u)
+                            @php
+                                $isAvailable = in_array($u, $availableSizes);
+                                $isSelected = $u === $defaultSelectedSize;
+                            @endphp
                             <button type="button" data-size="{{ $u }}"
-                                class="size-pill grid h-11 {{ $u === 'XXL' ? 'px-4' : 'w-11' }} place-items-center rounded-full text-sm font-bold transition {{ $u === 'L' ? 'bg-stone-900 text-white' : 'bg-stone-100 text-ink hover:bg-stone-200' }}">
+                                {{ $isAvailable ? '' : 'disabled' }}
+                                title="{{ $u }} — {{ $isAvailable ? 'Tersedia' : 'Habis' }}"
+                                class="size-pill grid h-11 {{ $u === 'XXL' ? 'px-4' : 'w-11' }} place-items-center rounded-full text-sm font-bold transition {{ !$isAvailable ? 'bg-stone-100 text-stone-300 line-through opacity-40 cursor-not-allowed' : ($isSelected ? 'bg-stone-900 text-white cursor-pointer' : 'bg-stone-100 text-ink hover:bg-stone-200 cursor-pointer') }}">
                                 {{ $u }}
                             </button>
                         @endforeach
@@ -123,7 +133,7 @@
                         <button type="button" id="fav" class="btn w-full border-2 border-primary py-3 text-xs font-bold uppercase tracking-[0.12em] text-primary hover:bg-primary/5">
                             Simpan Favorit
                         </button>
-                        <a id="pesan" href="{{ route('checkout.pemesanan', ['desain' => $selected->id, 'ukuran' => 'L']) }}"
+                        <a id="pesan" href="{{ route('checkout.pemesanan', ['desain' => $selected->id, 'ukuran' => $defaultSelectedSize]) }}"
                             class="btn btn-primary w-full py-3 text-xs font-bold uppercase tracking-[0.12em]">
                             Pesan Sekarang
                         </a>
@@ -275,7 +285,7 @@
             if (sizeWrap && pesanLink) {
                 sizeWrap.addEventListener('click', function (e) {
                     var btn = e.target.closest('.size-pill');
-                    if (!btn) return;
+                    if (!btn || btn.disabled) return;
                     sizeWrap.querySelectorAll('.size-pill').forEach(function (p) {
                         p.classList.remove('bg-stone-900', 'text-white');
                         p.classList.add('bg-stone-100', 'text-ink');

@@ -781,6 +781,7 @@
                                         data-harga="{{ $design->harga }}"
                                         data-deskripsi="{{ $design->deskripsi }}"
                                         data-img="{{ asset($cleanImg) }}"
+                                        data-sizes="{{ json_encode($design->pilihanUkuran()) }}"
                                         title="{{ $design->nama }} — Rp {{ number_format($design->harga, 0, ',', '.') }}">
                                         <div class="relative h-14 w-full sm:h-16 flex items-center justify-center p-1">
                                             <img src="{{ asset($cleanImg) }}" alt="{{ $design->nama }}"
@@ -788,13 +789,6 @@
                                         </div>
                                     </button>
                                 @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Badge Pill di Pojok Kanan Bawah (Sesuai Badge "Klarna." di Gambar) --}}
-                        <div class="relative z-20">
-                            <div class="rounded-xl bg-[#ffb3c7] px-4 py-2 font-display text-[11px] sm:text-xs font-black text-stone-900 tracking-wider shadow-sm">
-                                BCA • QRIS
                             </div>
                         </div>
                     </div>
@@ -841,9 +835,19 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex items-center gap-1">
                                 <span class="text-xs font-bold uppercase tracking-wider text-stone-600 mr-1">Size:</span>
+                                @php
+                                    $defaultSizes = $defaultDesign ? $defaultDesign->pilihanUkuran() : ['S', 'M', 'L', 'XL', 'XXL'];
+                                    $initialActiveSize = in_array('L', $defaultSizes) ? 'L' : ($defaultSizes[0] ?? 'L');
+                                @endphp
                                 @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $sz)
+                                    @php
+                                        $isAvail = in_array($sz, $defaultSizes);
+                                        $isSel = $sz === $initialActiveSize;
+                                    @endphp
                                     <button type="button" data-size="{{ $sz }}"
-                                        class="size-choice-btn grid h-9 w-9 place-items-center rounded-xl border text-xs font-black transition {{ $sz === 'L' ? 'border-stone-900 bg-stone-900 text-white shadow-xs' : 'border-stone-300 bg-white text-stone-700 hover:border-stone-900' }}">
+                                        {{ $isAvail ? '' : 'disabled' }}
+                                        title="{{ $sz }} — {{ $isAvail ? 'Tersedia' : 'Habis' }}"
+                                        class="size-choice-btn grid h-9 w-9 place-items-center rounded-xl border text-xs font-black transition {{ !$isAvail ? 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50 cursor-not-allowed' : ($isSel ? 'border-stone-900 bg-stone-900 text-white shadow-xs' : 'border-stone-300 bg-white text-stone-700 hover:border-stone-900') }}">
                                         {{ $sz }}
                                     </button>
                                 @endforeach
@@ -903,7 +907,11 @@
                 let activeName = @json(preg_replace('/["\'“”]/', '', $defaultDesign->nama ?? 'Kaos Flame Streetwear'));
                 let activePrice = {{ $defaultDesign->harga ?? 185000 }};
                 let activeDesc = @json($defaultDesign->deskripsi ?? '');
-                let activeSize = 'L';
+                @php
+                    $homeInitSizes = $defaultDesign ? $defaultDesign->pilihanUkuran() : ['S', 'M', 'L', 'XL', 'XXL'];
+                @endphp
+                let activeSizes = @json($homeInitSizes);
+                let activeSize = activeSizes.includes('L') ? 'L' : (activeSizes[0] || 'L');
                 let activeQty = 1;
 
                 function formatRupiah(num) {
@@ -926,10 +934,18 @@
 
                     // Update tombol ukuran
                     sizeBtns.forEach(btn => {
-                        if (btn.dataset.size === activeSize) {
-                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-900 bg-stone-900 text-xs font-black text-white shadow-xs transition';
+                        const s = btn.dataset.size;
+                        const isAvail = activeSizes.includes(s);
+                        btn.disabled = !isAvail;
+                        if (!isAvail) {
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-200 bg-stone-100 text-xs font-black text-stone-300 line-through opacity-50 cursor-not-allowed transition';
+                            btn.title = s + ' — Habis';
+                        } else if (s === activeSize) {
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-900 bg-stone-900 text-xs font-black text-white shadow-xs transition cursor-pointer';
+                            btn.title = s + ' — Terpilih';
                         } else {
-                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-300 bg-white text-xs font-black text-stone-700 hover:border-stone-900 transition';
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-300 bg-white text-xs font-black text-stone-700 hover:border-stone-900 transition cursor-pointer';
+                            btn.title = s + ' — Tersedia';
                         }
                     });
                 }
@@ -949,6 +965,17 @@
                         activePrice = Number(this.dataset.harga || 150000);
                         activeDesc = this.dataset.deskripsi;
 
+                        if (this.dataset.sizes) {
+                            try {
+                                activeSizes = JSON.parse(this.dataset.sizes);
+                            } catch (e) {
+                                activeSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+                            }
+                            if (!activeSizes.includes(activeSize) && activeSizes.length > 0) {
+                                activeSize = activeSizes[0];
+                            }
+                        }
+
                         if (heroImg && this.dataset.img) {
                             heroImg.style.opacity = '0';
                             heroImg.style.transform = 'scale(0.95)';
@@ -966,6 +993,7 @@
                 // Pilih Ukuran
                 sizeBtns.forEach(btn => {
                     btn.addEventListener('click', function () {
+                        if (this.disabled) return;
                         activeSize = this.dataset.size;
                         syncUI();
                     });

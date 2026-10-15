@@ -292,6 +292,7 @@
                                         <option value="" data-harga="0" data-nama="Belum dipilih">Pilih desain &blacktriangledown;</option>
                                         @foreach ($designs as $d)
                                             <option value="{{ $d->id }}" data-harga="{{ $d->harga }}" data-nama="{{ $d->nama }}"
+                                                data-sizes="{{ json_encode($d->pilihanUkuran()) }}"
                                                 @selected(old('design_id', $selectedDesign->id ?? null) == $d->id)>
                                                 {{ $d->nama }} &mdash; Rp {{ number_format($d->harga, 0, ',', '.') }}
                                             </option>
@@ -566,6 +567,23 @@
                 const selOpt = kdDesain?.options[kdDesain.selectedIndex];
                 const harga = parseInt(selOpt?.dataset.harga || '0', 10) || 0;
                 const nama = selOpt?.dataset.nama || 'Belum dipilih';
+
+                // Sync ukuran availability based on chosen design
+                if (selOpt && selOpt.dataset.sizes && kdUkuran) {
+                    try {
+                        const avail = JSON.parse(selOpt.dataset.sizes);
+                        Array.from(kdUkuran.options).forEach(opt => {
+                            if (!opt.value) return;
+                            const isAv = avail.includes(opt.value);
+                            opt.disabled = !isAv;
+                            opt.textContent = isAv ? opt.value : opt.value + ' (Habis)';
+                        });
+                        if (kdUkuran.value && !avail.includes(kdUkuran.value)) {
+                            kdUkuran.value = avail[0] || '';
+                        }
+                    } catch (e) {}
+                }
+
                 const ukuran = kdUkuran?.value || '—';
                 const qty = Math.max(1, parseInt(kdJumlah?.value || '1', 10) || 1);
                 const subtotal = harga * qty;

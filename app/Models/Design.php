@@ -26,6 +26,7 @@ class Design extends Model
         'gambar',
         'video_360',
         'aktif',
+        'ukuran',
     ];
 
     protected function casts(): array
@@ -33,7 +34,33 @@ class Design extends Model
         return [
             'harga' => 'integer',
             'aktif' => 'boolean',
+            'ukuran' => 'array',
         ];
+    }
+
+    public const ALL_UKURAN = ['S', 'M', 'L', 'XL', 'XXL'];
+
+    /**
+     * Mengambil daftar ukuran yang tersedia untuk desain ini.
+     * Jika belum disetel (null/kosong), otomatis default semua ukuran ['S', 'M', 'L', 'XL', 'XXL'].
+     *
+     * @return array<string>
+     */
+    public function pilihanUkuran(): array
+    {
+        if (is_array($this->ukuran) && count($this->ukuran) > 0) {
+            return array_values($this->ukuran);
+        }
+
+        return self::ALL_UKURAN;
+    }
+
+    /**
+     * Periksa apakah ukuran tertentu aktif/tersedia untuk desain ini.
+     */
+    public function isUkuranTersedia(string $size): bool
+    {
+        return in_array(strtoupper(trim($size)), array_map('strtoupper', $this->pilihanUkuran()), true);
     }
 
     public function orders(): HasMany

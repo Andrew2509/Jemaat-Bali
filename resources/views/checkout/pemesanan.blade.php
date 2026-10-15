@@ -228,7 +228,12 @@
                             <select id="ukuran" name="ukuran" class="input @error('ukuran') input-error @enderror" required>
                                 <option value="">— Pilih —</option>
                                 @foreach ($ukuran as $u)
-                                    <option value="{{ $u }}" @selected(old('ukuran') === $u || request('ukuran') === $u)>{{ $u }}</option>
+                                    @php
+                                        $isAvail = $selected ? $selected->isUkuranTersedia($u) : true;
+                                    @endphp
+                                    <option value="{{ $u }}" {{ $isAvail ? '' : 'disabled' }} @selected((old('ukuran') === $u || request('ukuran') === $u) && $isAvail)>
+                                        {{ $u }} {{ $isAvail ? '' : '(Habis)' }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('ukuran')<p class="error-text">{{ $message }}</p>@enderror
