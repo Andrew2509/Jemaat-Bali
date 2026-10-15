@@ -44,6 +44,10 @@ class FinancialReportExcelService
         $donasiQuery = Donation::where('status', 'terverifikasi')->whereBetween('tanggal', [$fromStr, $toStr]);
         $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59']);
         $expenseQuery = Expense::whereBetween('tanggal', [$fromStr, $toStr]);
+        $donasiSajaOrders = Order::where('jenis', 'donasi_saja')
+            ->where('status_pembayaran', 'terverifikasi')
+            ->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59'])
+            ->get();
 
         if ($jenis === 'donasi') {
             $donasis = $donasiQuery->orderBy('tanggal')->get();
@@ -60,7 +64,7 @@ class FinancialReportExcelService
         }
 
         // Kalkulasi Metrik
-        $totalDonasi = $donasis->sum('nominal');
+        $totalDonasi = $donasis->sum('nominal') + $donasiSajaOrders->sum('total');
         $omzetKaos = $orders->sum('subtotal_kaos');
         $donasiDariKaos = $orders->sum('donasi');
         $ongkir = $orders->sum('ongkir') > 0 ? $orders->sum('ongkir') : ($expenses->where('kategori', 'Pengiriman')->sum('jumlah') ?: 0);
@@ -111,12 +115,12 @@ class FinancialReportExcelService
         // 2. Sheet Buku Kas (Arus Kas Masuk & Keluar)
         $sheetBukuKas = $spreadsheet->createSheet();
         $sheetBukuKas->setTitle('Buku Kas (Arus Kas)');
-        $this->buildSheetBukuKas($sheetBukuKas, $fromDate, $toDate, $donasis, $orders, $expenses);
+        $this->buildSheetBukuKas($sheetBukuKas, $fromDate, $toDate, $donasis, $orders, $expenses, $donasiSajaOrders);
 
         // 3. Sheet Rincian Donasi
         $sheetDonasi = $spreadsheet->createSheet();
         $sheetDonasi->setTitle('Rincian Donasi');
-        $this->buildSheetDonasi($sheetDonasi, $fromDate, $toDate, $donasis);
+        $this->buildSheetDonasi($sheetDonasi, $fromDate, $toDate, $donasis, $donasiSajaOrders);
 
         // 4. Sheet Rincian Penjualan Kaos
         $sheetKaos = $spreadsheet->createSheet();
@@ -351,7 +355,7 @@ class FinancialReportExcelService
         $sheet->getColumnDimension('H')->setWidth(22);
     }
 
-    private function buildSheetBukuKas(Worksheet $sheet, Carbon $fromDate, Carbon $toDate, $donasis, $orders, $expenses): void
+    private function buildSheetBukuKas(Worksheet $sheet, Carbon $fromDate, Carbon $toDate, $donasis, $orders, $expenses, $donasiSajaOrders = null): void
     {
         $sheet->setShowGridLines(true);
 
@@ -401,6 +405,19 @@ class FinancialReportExcelService
                 'debit' => (int) $d->nominal,
                 'kredit' => 0,
                 'catatan' => $d->catatan ?: ($d->metode_pembayaran ? 'Via ' . $d->metode_pembayaran : '-'),
+            ]);
+        }
+
+        foreach ($donasiSajaOrders ?? [] as $o) {
+            $transactions->push([
+                'tanggal' => $o->created_at ? Carbon::parse($o->created_at) : Carbon::parse('2026-07-01'),
+                'ref' => $o->nomor_pesanan,
+                'jenis' => 'Donasi',
+                'kategori' => 'Penerimaan Donasi',
+                'uraian' => 'Donasi dari ' . $o->nama,
+                'debit' => (int) $o->total,
+                'kredit' => 0,
+                'catatan' => $o->catatan ?: ($o->metode ? 'Via ' . $o->metode : '-'),
             ]);
         }
 
@@ -523,7 +540,7 @@ class FinancialReportExcelService
         ]);
     }
 
-    private function buildSheetDonasi(Worksheet $sheet, Carbon $fromDate, Carbon $toDate, $donasis): void
+    private function buildSheetDonasi(Worksheet $sheet, Carbon $fromDate, Carbon $toDate, $donasis, $donasiSajaOrders = null): void
     {
         $sheet->setShowGridLines(true);
 
@@ -557,8 +574,20 @@ class FinancialReportExcelService
         $sheet->getStyle('G5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
+        $allDonasi = $donasis->merge(
+            collect($donasiSajaOrders ?? [])->map(fn($o) => (object) [
+                'tanggal' => $o->created_at,
+                'kode' => $o->nomor_pesanan,
+                'nama' => $o->nama,
+                'telepon' => $o->nomor,
+                'metode_pembayaran' => $o->metode,
+                'nominal' => (int) $o->total,
+                'catatan' => $o->catatan,
+            ])
+        );
+
         $r = 6;
-        foreach ($donasis as $idx => $d) {
+        foreach ($allDonasi->sortBy('tanggal') as $idx => $d) {
             $sheet->setCellValue("A{$r}", $idx + 1);
             $sheet->setCellValue("B{$r}", $d->tanggal ? Carbon::parse($d->tanggal)->format('d/m/Y') : '-');
             $sheet->setCellValue("C{$r}", $d->kode);
@@ -585,11 +614,11 @@ class FinancialReportExcelService
         }
 
         $lastDataRow = $r - 1;
-        if ($donasis->count() > 0) {
+        if ($allDonasi->count() > 0) {
             $sheet->mergeCells("A{$r}:F{$r}");
             $sheet->setCellValue("A{$r}", 'TOTAL PENERIMAAN DONASI');
             $sheet->setCellValue("G{$r}", "=SUM(G6:G{$lastDataRow})");
-            $sheet->setCellValue("H{$r}", $donasis->count() . ' donatur');
+            $sheet->setCellValue("H{$r}", $allDonasi->count() . ' donatur');
 
             $sheet->getStyle("A{$r}:H{$r}")->getFont()->setBold(true);
             $sheet->getStyle("A{$r}:H{$r}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('F1F5F9');

@@ -499,6 +499,11 @@ class AdminController extends Controller
         $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59']);
         $expenseQuery = Expense::whereBetween('tanggal', [$fromStr, $toStr]);
 
+        $donasiSajaOrders = Order::where('jenis', 'donasi_saja')
+            ->where('status_pembayaran', 'terverifikasi')
+            ->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59'])
+            ->get();
+
         if ($jenis === 'donasi') {
             $donasis = $donasiQuery->get();
             $orders = collect();
@@ -513,7 +518,7 @@ class AdminController extends Controller
             $expenses = $expenseQuery->get();
         }
 
-        $totalDonasi = $donasis->sum('nominal');
+        $totalDonasi = $donasis->sum('nominal') + $donasiSajaOrders->sum('total');
         $omzetKaos = $orders->sum('subtotal_kaos');
         $ongkir = $orders->sum('ongkir') > 0 ? $orders->sum('ongkir') : ($expenses->where('kategori', 'Pengiriman')->sum('jumlah') ?: 80000);
         if ($jenis === 'donasi') {
@@ -531,8 +536,30 @@ class AdminController extends Controller
         $saldo = $penerimaan - $pengeluaran;
 
         $ordersWithDonationNames = Order::where('donasi', '>', 0)->pluck('nama')->toArray();
-        $donasiSajaTerverifikasi = $donasis->reject(fn($d) => in_array($d->nama, $ordersWithDonationNames));
-        $donasiDariKaosTerverifikasi = $donasis->filter(fn($d) => in_array($d->nama, $ordersWithDonationNames));
+        $donasiSajaFromTable = $donasis->reject(fn($d) => in_array($d->nama, $ordersWithDonationNames));
+        $donasiDariKaosFromTable = $donasis->filter(fn($d) => in_array($d->nama, $ordersWithDonationNames));
+
+        $donasiSajaTerverifikasi = $donasiSajaFromTable->merge(
+            $donasiSajaOrders->map(fn($o) => (object) [
+                'id' => 'order-' . $o->id,
+                'kode' => $o->nomor_pesanan,
+                'nama' => $o->nama,
+                'nominal' => (int) $o->total,
+                'tanggal' => $o->created_at,
+                'catatan' => $o->catatan,
+            ])
+        );
+
+        $donasiDariKaosTerverifikasi = $donasiDariKaosFromTable->merge(
+            $orders->filter(fn($o) => (int) $o->donasi > 0)->map(fn($o) => (object) [
+                'id' => 'order-donasi-' . $o->id,
+                'kode' => $o->nomor_pesanan,
+                'nama' => $o->nama,
+                'nominal' => (int) $o->donasi,
+                'tanggal' => $o->created_at,
+                'catatan' => null,
+            ])
+        );
 
         // Generate bulan dinamis untuk chart & ringkasan bulanan
         $startMonth = Carbon::parse($from)->copy()->startOfMonth();
@@ -574,6 +601,10 @@ class AdminController extends Controller
             $donasiPerBulan[$key] = $donasis->filter(function ($d) use ($m) {
                 return $d->tanggal && $d->tanggal->year == $m['year'] && $d->tanggal->month == $m['month'];
             })->sum('nominal');
+
+            $donasiPerBulan[$key] += $donasiSajaOrders->filter(function ($o) use ($m) {
+                return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
+            })->sum('total');
 
             $omzetPerBulan[$key] = $orders->filter(function ($o) use ($m) {
                 return $o->created_at && $o->created_at->year == $m['year'] && $o->created_at->month == $m['month'];
@@ -624,6 +655,10 @@ class AdminController extends Controller
             $donasiQuery = Donation::where('status', 'terverifikasi')->whereBetween('tanggal', [$fromStr, $toStr]);
             $orderQuery = Order::where('status_pembayaran', 'terverifikasi')->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59']);
             $expenseQuery = Expense::whereBetween('tanggal', [$fromStr, $toStr]);
+            $donasiSajaOrders = Order::where('jenis', 'donasi_saja')
+                ->where('status_pembayaran', 'terverifikasi')
+                ->whereBetween('created_at', [$fromStr . ' 00:00:00', $toStr . ' 23:59:59'])
+                ->get();
 
             if ($jenis === 'donasi') {
                 $donasis = $donasiQuery->orderBy('tanggal')->get();
@@ -649,6 +684,10 @@ class AdminController extends Controller
             foreach ($donasis as $d) {
                 $tgl = $d->tanggal ? Carbon::parse($d->tanggal)->format('d/m/Y') : '-';
                 fputcsv($handle, [$no++, $tgl, 'Donasi', $d->kode, 'Penerimaan Donasi', $d->nama, (int) $d->nominal, 0, $d->catatan ?: '-']);
+            }
+            foreach ($donasiSajaOrders as $o) {
+                $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
+                fputcsv($handle, [$no++, $tgl, 'Donasi', $o->nomor_pesanan, 'Penerimaan Donasi', $o->nama, (int) $o->total, 0, $o->catatan ?: '-']);
             }
             foreach ($orders as $o) {
                 $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
