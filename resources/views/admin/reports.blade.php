@@ -463,20 +463,11 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-12 gap-3 items-center px-4 py-3.5">
-                        <div class="col-span-8">
-                            <p class="font-bold text-stone-900">Ongkir</p>
-                            <p class="text-stone-400 mt-0.5">Dana titipan pengiriman</p>
-                        </div>
-                        <div class="col-span-4 text-right font-semibold text-stone-900">
-                            Rp{{ number_format($ongkir, 0, ',', '.') }}
-                        </div>
-                    </div>
                 </div>
 
                 <div class="mt-3 flex items-center justify-between border-t border-stone-200 px-4 pt-3.5 text-xs">
-                    <span class="font-bold text-stone-700">Total penerimaan</span>
-                    <span class="font-bold text-[#b55322] text-sm">Rp{{ number_format($penerimaan, 0, ',', '.') }}</span>
+                    <span class="font-bold text-stone-700">Total dana pembangunan</span>
+                    <span class="font-bold text-[#b55322] text-sm">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
