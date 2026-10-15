@@ -138,7 +138,7 @@ class PublicPagesTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('id="canva-frame"', false);
         $response->assertSee('canva.com/design/DAHX81gWwu8/view?embed', false);
-        $response->assertSee('Presentasi Canva Interaktif', false);
+        $response->assertSee('btn-fullscreen-canva', false);
     }
 
     public function test_home_page_displays_canva_embed_player_when_canva_mode_is_active(): void
@@ -155,7 +155,7 @@ class PublicPagesTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('id="home-canva-frame"', false);
         $response->assertSee('canva.com/design/DAHX81gWwu8/view?embed', false);
-        $response->assertSee('Canva Interaktif', false);
+        $response->assertSee('Buka Proposal Layar Penuh', false);
     }
 
     public function test_admin_can_update_proposal_settings(): void

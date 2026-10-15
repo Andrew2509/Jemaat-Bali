@@ -16,17 +16,7 @@
                 {{-- Header Bar Canva --}}
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-purple-800">
-                                ✦ Presentasi Canva Interaktif
-                            </span>
-                            @if ($adaFile)
-                                <button type="button" id="btn-toggle-to-pdf" class="text-xs font-semibold text-stone-500 hover:text-stone-900 underline transition cursor-pointer">
-                                    Beralih ke Buku PDF &rarr;
-                                </button>
-                            @endif
-                        </div>
-                        <h1 class="mt-2 font-display text-2xl font-extrabold text-stone-900 sm:text-3xl">
+                        <h1 class="font-display text-2xl font-extrabold text-stone-900 sm:text-3xl">
                             {{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}
                         </h1>
                         <p class="mt-1 text-xs sm:text-sm text-stone-500">

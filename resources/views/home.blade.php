@@ -174,22 +174,11 @@
                     @if ($isCanva && $canvaEmbedUrl)
                         {{-- Tampilan Canva Presentasi Langsung: Menampilkan Sampul Depan & Slide Interaktif --}}
                         <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
-                            {{-- Header Bar Player --}}
-                            <div class="flex items-center justify-between border-b border-stone-800 bg-stone-900/95 px-4 py-3 sm:px-6 text-white backdrop-blur-xs">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-purple-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse"></span>
-                                        Canva Interaktif
-                                    </span>
-                                    <span class="text-xs font-medium text-stone-300 truncate max-w-[200px] sm:max-w-md">
-                                        {{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}
-                                    </span>
-                                </div>
-                                <a href="{{ route('proposal') }}" class="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:scale-105 shrink-0">
-                                    <span>Layar Penuh</span>
-                                    <span>&rarr;</span>
-                                </a>
-                            </div>
+                            {{-- Tombol Buka Layar Penuh Melayang di Pojok Kanan Atas --}}
+                            <a href="{{ route('proposal') }}" class="absolute top-3.5 right-3.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/60 hover:bg-black/85 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs transition hover:scale-105">
+                                <span>Layar Penuh</span>
+                                <span>&rarr;</span>
+                            </a>
 
                             {{-- Iframe Canva Player --}}
                             <div class="relative w-full aspect-[16/9] min-h-[300px] sm:min-h-[420px] md:min-h-[460px] bg-stone-950">
@@ -210,10 +199,6 @@
                                 </svg>
                                 <span>Klik atau geser pada tampilan di atas untuk menelusuri halaman proposal.</span>
                             </p>
-                            <a href="{{ route('proposal') }}" class="font-bold text-[#b05525] hover:underline inline-flex items-center gap-1">
-                                <span>Buka Halaman Khusus</span>
-                                <span>&rarr;</span>
-                            </a>
                         </div>
                     @else
                         {{-- Mode Buku PDF (Sampul PDF.js atau Fallback Card) --}}
@@ -379,7 +364,7 @@
                             {{-- Tombol Aksi: Putar Video / Lihat Dokumentasi --}}
                             <div class="mt-6 flex items-center gap-3.5">
                                 @if ($p->tipe === 'video' && ($p->embedUrl() || $p->mediaUrl()))
-                                    <button type="button" 
+                                    <button type="button"
                                         class="btn-play-progres grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full bg-amber-400 text-stone-950 shadow-md transition hover:scale-105 hover:bg-amber-300"
                                         data-embed="{{ $p->embedUrl() }}"
                                         data-file="{{ $p->mediaUrl() }}"
