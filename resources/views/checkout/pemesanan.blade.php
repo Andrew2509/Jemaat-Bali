@@ -224,7 +224,12 @@
 
                     <div class="mt-5 grid gap-5 sm:grid-cols-3">
                         <div>
-                            <label for="ukuran" class="label">Ukuran <span class="text-error">*</span></label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label for="ukuran" class="label !mb-0">Ukuran <span class="text-error">*</span></label>
+                                <button type="button" data-open-size-chart class="text-[11px] font-bold text-primary hover:underline cursor-pointer inline-flex items-center gap-1">
+                                    <span>📏 Panduan Ukuran</span>
+                                </button>
+                            </div>
                             <select id="ukuran" name="ukuran" class="input @error('ukuran') input-error @enderror" required>
                                 <option value="">— Pilih —</option>
                                 @foreach ($ukuran as $u)
@@ -410,6 +415,9 @@
             </aside>
         </div>
     </section>
+
+    {{-- Modal Panduan Ukuran Kaos --}}
+    @include('components.size-chart-modal')
 @endsection
 
 @push('scripts')

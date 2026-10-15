@@ -16,7 +16,51 @@ class ProgramInfo extends Model
         'judul_proposal',
         'proposal_tipe',
         'proposal_canva_url',
+        'size_chart',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'size_chart' => 'array',
+        ];
+    }
+
+    /**
+     * Format default tabel panduan ukuran kaos
+     */
+    public static function defaultSizeChart(): array
+    {
+        return [
+            'title' => 'Panduan Ukuran Kaos (cm)',
+            'note' => 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
+            'columns' => ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'],
+            'rows' => [
+                ['S', '47', '67', '20'],
+                ['M', '50', '70', '21'],
+                ['L', '53', '73', '22'],
+                ['XL', '56', '75', '23'],
+                ['XXL', '59', '77', '24'],
+            ],
+        ];
+    }
+
+    /**
+     * Ambil data tabel panduan ukuran yang valid
+     */
+    public function getSizeChart(): array
+    {
+        if (!empty($this->size_chart) && is_array($this->size_chart) && !empty($this->size_chart['columns']) && !empty($this->size_chart['rows'])) {
+            return [
+                'title' => $this->size_chart['title'] ?? 'Panduan Ukuran Kaos (cm)',
+                'note' => $this->size_chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
+                'columns' => (array) $this->size_chart['columns'],
+                'rows' => (array) $this->size_chart['rows'],
+            ];
+        }
+
+        return static::defaultSizeChart();
+    }
 
     protected static function booted(): void
     {

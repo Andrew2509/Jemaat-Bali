@@ -75,6 +75,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // 4. Koleksi Kaos
     Route::middleware('permission:designs.view')->get('/koleksi-kaos', [AdminDesignController::class, 'index'])->name('designs');
     Route::middleware('permission:designs.manage')->group(function () {
+        Route::get('/koleksi-kaos/tabel-ukuran', [AdminDesignController::class, 'sizeChart'])->name('designs.size_chart');
+        Route::post('/koleksi-kaos/tabel-ukuran', [AdminDesignController::class, 'updateSizeChart'])->name('designs.size_chart.update');
         Route::get('/koleksi-kaos/tambah', [AdminDesignController::class, 'create'])->name('designs.create');
         Route::post('/koleksi-kaos/tambah', [AdminDesignController::class, 'store'])->name('designs.store');
         Route::get('/koleksi-kaos/{design}/edit', [AdminDesignController::class, 'edit'])->name('designs.edit');

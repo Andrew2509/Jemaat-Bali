@@ -698,45 +698,46 @@
                         {{-- Konten Teks Kiri Bawah: Tabel Ukuran Tepat di Atas Teks Isi / Deskripsi --}}
                         <div class="relative z-10 pl-8 sm:pl-10 mt-4 max-w-xs sm:max-w-sm">
                             {{-- Tabel Panduan Ukuran (Size Chart) --}}
+                            @php
+                                $homeSizeChart = $defaultDesign ? $defaultDesign->getSizeChart() : ($programInfo ? $programInfo->getSizeChart() : \App\Models\ProgramInfo::defaultSizeChart());
+                                $chartCols = $homeSizeChart['columns'] ?? ['Size', 'S', 'M', 'L', 'XL', 'XXL'];
+                                $chartRows = $homeSizeChart['rows'] ?? [
+                                    ['Lebar', '47', '50', '53', '56', '59'],
+                                    ['Panjang', '67', '70', '73', '75', '77'],
+                                ];
+                                $chartTitle = $homeSizeChart['title'] ?? 'Tabel Ukuran (cm)';
+                                $chartNote = $homeSizeChart['note'] ?? 'Toleransi ±1 cm';
+                            @endphp
                             <div class="mb-2 sm:mb-2.5">
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white/90 flex items-center gap-1.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-amber-300">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                                         </svg>
-                                        Tabel Ukuran (cm)
+                                        {{ $chartTitle }}
                                     </span>
-                                    <span class="text-[9px] font-semibold text-white/60">Toleransi ±1 cm</span>
+                                    @if ($chartNote)
+                                        <span class="text-[9px] font-semibold text-white/60">{{ $chartNote }}</span>
+                                    @endif
                                 </div>
-                                <div class="overflow-hidden rounded-xl border border-white/20 bg-black/30 backdrop-blur-xs shadow-xs">
-                                    <table class="w-full text-center text-[10px] sm:text-[11px] text-white">
+                                <div class="overflow-x-auto rounded-xl border border-white/20 bg-black/30 backdrop-blur-xs shadow-xs">
+                                    <table class="w-full text-center text-[10px] sm:text-[11px] text-white border-collapse">
                                         <thead>
                                             <tr class="border-b border-white/15 bg-black/35 font-black uppercase tracking-wider text-white/80">
-                                                <th class="py-1 px-2 text-left pl-2.5">Size</th>
-                                                <th class="py-1 px-1.5">S</th>
-                                                <th class="py-1 px-1.5">M</th>
-                                                <th class="py-1 px-1.5 text-amber-300">L</th>
-                                                <th class="py-1 px-1.5">XL</th>
-                                                <th class="py-1 px-1.5 pr-2.5">XXL</th>
+                                                @foreach ($chartCols as $cIdx => $col)
+                                                    <th class="py-1 px-1.5 {{ $cIdx === 0 ? 'text-left pl-2.5' : '' }} {{ $col === 'L' ? 'text-amber-300' : '' }}">{{ $col }}</th>
+                                                @endforeach
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/10 font-mono font-semibold">
-                                            <tr class="hover:bg-white/5 transition">
-                                                <td class="py-1 px-2 text-left pl-2.5 font-sans font-bold text-white/70">Lebar</td>
-                                                <td class="py-1 px-1.5 text-white/90">47</td>
-                                                <td class="py-1 px-1.5 text-white/90">50</td>
-                                                <td class="py-1 px-1.5 font-bold text-amber-300">53</td>
-                                                <td class="py-1 px-1.5 text-white/90">56</td>
-                                                <td class="py-1 px-1.5 pr-2.5 text-white/90">59</td>
-                                            </tr>
-                                            <tr class="hover:bg-white/5 transition">
-                                                <td class="py-1 px-2 text-left pl-2.5 font-sans font-bold text-white/70">Panjang</td>
-                                                <td class="py-1 px-1.5 text-white/90">67</td>
-                                                <td class="py-1 px-1.5 text-white/90">70</td>
-                                                <td class="py-1 px-1.5 font-bold text-amber-300">73</td>
-                                                <td class="py-1 px-1.5 text-white/90">75</td>
-                                                <td class="py-1 px-1.5 pr-2.5 text-white/90">77</td>
-                                            </tr>
+                                            @foreach ($chartRows as $row)
+                                                <tr class="hover:bg-white/5 transition">
+                                                    @foreach ($chartCols as $cIdx => $col)
+                                                        @php $val = $row[$cIdx] ?? ''; @endphp
+                                                        <td class="py-1 px-1.5 {{ $cIdx === 0 ? 'text-left pl-2.5 font-sans font-bold text-white/70' : 'text-white/90' }} {{ $col === 'L' ? 'font-bold text-amber-300' : '' }}">{{ $val }}</td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>

@@ -187,6 +187,8 @@
 
     {{-- Modal Pilihan: Beli Kaos Saja vs Kaos + Donasi --}}
     @include('components.order-choice-modal')
+    {{-- Modal Panduan Ukuran Kaos --}}
+    @include('components.size-chart-modal')
 @endsection
 
 @push('scripts')

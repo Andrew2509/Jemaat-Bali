@@ -27,6 +27,7 @@ class Design extends Model
         'video_360',
         'aktif',
         'ukuran',
+        'size_chart',
     ];
 
     protected function casts(): array
@@ -35,7 +36,26 @@ class Design extends Model
             'harga' => 'integer',
             'aktif' => 'boolean',
             'ukuran' => 'array',
+            'size_chart' => 'array',
         ];
+    }
+
+    /**
+     * Ambil data tabel panduan ukuran untuk desain ini atau fallback ke default program info
+     */
+    public function getSizeChart(): array
+    {
+        if (!empty($this->size_chart) && is_array($this->size_chart) && !empty($this->size_chart['columns']) && !empty($this->size_chart['rows'])) {
+            return [
+                'title' => $this->size_chart['title'] ?? 'Panduan Ukuran Kaos (cm)',
+                'note' => $this->size_chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
+                'columns' => (array) $this->size_chart['columns'],
+                'rows' => (array) $this->size_chart['rows'],
+            ];
+        }
+
+        $programInfo = ProgramInfo::first();
+        return $programInfo ? $programInfo->getSizeChart() : ProgramInfo::defaultSizeChart();
     }
 
     public const ALL_UKURAN = ['S', 'M', 'L', 'XL', 'XXL'];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Design;
+use App\Models\ProgramInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -46,6 +47,93 @@ class DesignController extends Controller
             'totalAktif',
             'totalNonaktif'
         ));
+    }
+
+    /**
+     * Show size chart table editor for the collection or specific design.
+     */
+    public function sizeChart(Request $request)
+    {
+        $programInfo = ProgramInfo::first() ?? new ProgramInfo();
+        $design = null;
+        if ($request->filled('design_id')) {
+            $design = Design::find($request->query('design_id'));
+        }
+
+        $sizeChart = $design ? $design->getSizeChart() : $programInfo->getSizeChart();
+        $designs = Design::latest('id')->get();
+
+        return view('admin.designs.size-chart', compact('sizeChart', 'programInfo', 'design', 'designs'));
+    }
+
+    /**
+     * Update size chart table (columns, rows, title, note).
+     */
+    public function updateSizeChart(Request $request)
+    {
+        $request->validate([
+            'title' => ['required', 'string', 'max:150'],
+            'note' => ['nullable', 'string', 'max:500'],
+            'columns' => ['required', 'array', 'min:1'],
+            'columns.*' => ['required', 'string', 'max:100'],
+            'rows' => ['required', 'array', 'min:1'],
+            'rows.*' => ['required', 'array'],
+        ]);
+
+        $columns = array_values(array_map('trim', $request->input('columns', [])));
+        $numCols = count($columns);
+
+        $rawRows = (array) $request->input('rows', []);
+        $cleanRows = [];
+
+        foreach ($rawRows as $row) {
+            $rowValues = is_array($row) ? array_values($row) : [];
+            $normalizedRow = [];
+            for ($i = 0; $i < $numCols; $i++) {
+                $normalizedRow[] = isset($rowValues[$i]) ? trim((string) $rowValues[$i]) : '';
+            }
+            $cleanRows[] = $normalizedRow;
+        }
+
+        $chartData = [
+            'title' => trim($request->input('title', 'Panduan Ukuran Kaos (cm)')),
+            'note' => trim($request->input('note', 'Toleransi ukuran ±1 cm')),
+            'columns' => $columns,
+            'rows' => $cleanRows,
+        ];
+
+        if ($request->filled('design_id')) {
+            $design = Design::findOrFail($request->input('design_id'));
+            if ($request->boolean('reset_to_global')) {
+                $design->size_chart = null;
+                $design->save();
+                return redirect()->route('admin.designs.size_chart', ['design_id' => $design->id])
+                    ->with('success', "Tabel ukuran kaos \"{$design->nama}\" direset mengikuti tabel standar koleksi.");
+            }
+
+            $design->size_chart = $chartData;
+            $design->save();
+
+            return redirect()->route('admin.designs.size_chart', ['design_id' => $design->id])
+                ->with('success', "Tabel ukuran kaos khusus \"{$design->nama}\" berhasil diperbarui!");
+        }
+
+        $programInfo = ProgramInfo::first();
+        if (! $programInfo) {
+            $programInfo = ProgramInfo::create([
+                'nama_program' => 'Pembangunan Gereja',
+                'deskripsi' => 'Program penggalangan dana pembangunan',
+                'whatsapp' => '08120000000',
+                'email' => 'admin@jemaatbali.or.id',
+                'judul_proposal' => 'Proposal Pembangunan',
+            ]);
+        }
+
+        $programInfo->size_chart = $chartData;
+        $programInfo->save();
+
+        return redirect()->route('admin.designs.size_chart')
+            ->with('success', 'Tabel ukuran standar Koleksi Kaos Pembangunan berhasil diperbarui dan diterapkan ke website!');
     }
 
     /**

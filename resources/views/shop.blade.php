@@ -301,7 +301,12 @@
                                     @error('design_id')<p class="error-text">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="kd-ukuran" class="label">Ukuran Kaos <span class="text-error">*</span></label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label for="kd-ukuran" class="label !mb-0">Ukuran Kaos <span class="text-error">*</span></label>
+                                        <button type="button" data-open-size-chart class="text-[11px] font-bold text-[#b05525] hover:underline cursor-pointer inline-flex items-center gap-1">
+                                            <span>📏 Panduan Ukuran</span>
+                                        </button>
+                                    </div>
                                     <select id="kd-ukuran" name="ukuran" class="input @error('ukuran') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
                                         <option value="">Pilih ukuran &blacktriangledown;</option>
                                         @foreach ($ukuran as $u)
@@ -453,6 +458,9 @@
             </aside>
         </div>
     </section>
+
+    {{-- Modal Panduan Ukuran Kaos --}}
+    @include('components.size-chart-modal')
 @endsection
 
 @push('scripts')

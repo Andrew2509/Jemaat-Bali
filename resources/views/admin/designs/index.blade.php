@@ -22,6 +22,10 @@
             <p class="mt-1 text-sm text-stone-500">Kelola katalog desain pakaian, harga donasi kaos, dan unggah desain baru untuk website publik.</p>
         </div>
         <div class="flex items-center gap-3">
+            <a href="{{ route('admin.designs.size_chart') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 px-3.5 py-2.5 text-xs font-semibold text-stone-800 shadow-2xs transition cursor-pointer">
+                <span>📏</span>
+                <span>Tabel Ukuran Baju</span>
+            </a>
             <a href="{{ route('design') }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-[#e8e4dc] bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 shadow-2xs transition">
                 <span>Lihat di Website</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
@@ -43,6 +47,10 @@
             <a href="{{ route('admin.designs') }}" class="border-b-2 border-[#b55322] pb-3 text-xs font-bold text-[#b55322]">Semua Koleksi</a>
             <a href="{{ route('admin.designs', ['status' => 'aktif']) }}" class="border-b-2 {{ request('status') === 'aktif' ? 'border-[#b55322] text-[#b55322] font-bold' : 'border-transparent text-stone-500 font-semibold hover:text-stone-900' }} pb-3 text-xs transition">Aktif di Website ({{ $totalAktif }})</a>
             <a href="{{ route('admin.designs', ['status' => 'nonaktif']) }}" class="border-b-2 {{ request('status') === 'nonaktif' ? 'border-[#b55322] text-[#b55322] font-bold' : 'border-transparent text-stone-500 font-semibold hover:text-stone-900' }} pb-3 text-xs transition">Draf / Nonaktif ({{ $totalNonaktif }})</a>
+            <a href="{{ route('admin.designs.size_chart') }}" class="border-b-2 border-transparent text-stone-500 font-semibold hover:text-stone-900 pb-3 text-xs transition flex items-center gap-1.5">
+                <span>📏</span>
+                <span>Tabel Ukuran Baju</span>
+            </a>
         </nav>
         <p class="text-xs font-medium text-stone-400 pb-3">{{ $totalDesigns }} desain &middot; {{ $totalAktif }} aktif di website</p>
     </div>

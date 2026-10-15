@@ -136,9 +136,9 @@
                         <span id="sizes-summary-text" class="font-medium text-stone-700">
                             {{ count($initialUkuran) }} dari 5 ukuran aktif (tersedia)
                         </span>
-                        <span class="text-stone-400 italic">
-                            Ukuran nonaktif otomatis dicoret pada etalase &amp; checkout
-                        </span>
+                        <a href="{{ route('admin.designs.size_chart', $design->exists ? ['design_id' => $design->id] : []) }}" target="_blank" class="text-[11px] font-bold text-[#b55322] hover:underline flex items-center gap-1">
+                            <span>📏 Buka Pembuat Tabel Ukuran Baju &nearr;</span>
+                        </a>
                     </div>
 
                     @error('ukuran')
