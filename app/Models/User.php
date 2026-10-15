@@ -76,8 +76,10 @@ class User extends Authenticatable
             }
 
             if ($this->role) {
-                $role = Role::where('name', $this->role)->first();
-                return $role?->hasPermission($permissionName) ?? false;
+                if (!property_exists($this, 'cachedStaticRole')) {
+                    $this->cachedStaticRole = Role::where('name', $this->role)->first();
+                }
+                return $this->cachedStaticRole?->hasPermission($permissionName) ?? false;
             }
         } catch (\Throwable $e) {
             return $this->role === 'super_admin';

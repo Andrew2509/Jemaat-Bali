@@ -76,11 +76,27 @@ class AdminController extends Controller
             'pageName' => 'page',
         ]);
 
-        $rpMenunggu = Order::where('status_pembayaran', 'menunggu_verifikasi')->sum('total')
-            + Donation::where('status', 'menunggu_verifikasi')->sum('nominal');
-        $rpBuktiUlang = Order::where('status_pembayaran', 'bukti_ulang')->sum('total')
-            + Donation::where('status', 'bukti_ulang')->sum('nominal');
-        $rpBelumBayar = Order::where('status_pembayaran', 'belum_bayar')->sum('total');
+        $stats = \Illuminate\Support\Facades\Cache::remember('admin_verification_totals', 10, function () {
+            $orderSums = Order::selectRaw('status_pembayaran, sum(total) as sum_total')
+                ->whereIn('status_pembayaran', ['menunggu_verifikasi', 'bukti_ulang', 'belum_bayar'])
+                ->groupBy('status_pembayaran')
+                ->pluck('sum_total', 'status_pembayaran');
+
+            $donationSums = Donation::selectRaw('status, sum(nominal) as sum_nominal')
+                ->whereIn('status', ['menunggu_verifikasi', 'bukti_ulang'])
+                ->groupBy('status')
+                ->pluck('sum_nominal', 'status');
+
+            return [
+                'rpMenunggu' => (int) ($orderSums['menunggu_verifikasi'] ?? 0) + (int) ($donationSums['menunggu_verifikasi'] ?? 0),
+                'rpBuktiUlang' => (int) ($orderSums['bukti_ulang'] ?? 0) + (int) ($donationSums['bukti_ulang'] ?? 0),
+                'rpBelumBayar' => (int) ($orderSums['belum_bayar'] ?? 0),
+            ];
+        });
+
+        $rpMenunggu = $stats['rpMenunggu'];
+        $rpBuktiUlang = $stats['rpBuktiUlang'];
+        $rpBelumBayar = $stats['rpBelumBayar'];
 
         $selectedId = $request->input('selected_id');
         $selectedTipe = $request->input('selected_tipe');

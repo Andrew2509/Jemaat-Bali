@@ -35,12 +35,18 @@ class Role extends Model
         return $this->hasMany(User::class, 'role_id');
     }
 
+    protected ?array $permissionNamesCache = null;
+
     public function hasPermission(string $permissionName): bool
     {
         if ($this->relationLoaded('permissions')) {
             return $this->permissions->contains('name', $permissionName);
         }
 
-        return $this->permissions()->where('name', $permissionName)->exists();
+        if ($this->permissionNamesCache === null) {
+            $this->permissionNamesCache = $this->permissions()->pluck('name')->all();
+        }
+
+        return in_array($permissionName, $this->permissionNamesCache, true);
     }
 }

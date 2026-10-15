@@ -30,18 +30,42 @@
             </div>
 
             @php
-                $rolesCount = 0;
-                $permsCount = 0;
-                $dbNeedsSetup = false;
-                try {
-                    $rolesCount = \App\Models\Role::count();
-                    $permsCount = \App\Models\Permission::count();
-                    if ($rolesCount === 0 && Auth::user()->isSuperAdmin()) {
-                        $dbNeedsSetup = true;
+                $sidebarStats = \Illuminate\Support\Facades\Cache::remember('admin_sidebar_metrics', 15, function () {
+                    try {
+                        $ws = \App\Models\WhatsappSetting::first();
+                        return [
+                            'pendingCount' => \App\Models\Donation::where('status', 'menunggu_verifikasi')->count(),
+                            'designsCount' => \App\Models\Design::where('aktif', 1)->count(),
+                            'expensesCount' => \App\Models\Expense::count(),
+                            'usersCount' => \App\Models\User::count(),
+                            'rolesCount' => \App\Models\Role::count(),
+                            'permsCount' => \App\Models\Permission::count(),
+                            'wsConnected' => ($ws && strtolower((string) $ws->device_status) === 'connect'),
+                            'wsConfigured' => ($ws && !empty(trim((string) $ws->api_token))),
+                        ];
+                    } catch (\Throwable $e) {
+                        return [
+                            'pendingCount' => 0,
+                            'designsCount' => 0,
+                            'expensesCount' => 0,
+                            'usersCount' => 0,
+                            'rolesCount' => 0,
+                            'permsCount' => 0,
+                            'wsConnected' => false,
+                            'wsConfigured' => false,
+                        ];
                     }
-                } catch (\Throwable $e) {
-                    $dbNeedsSetup = true;
-                }
+                });
+
+                $rolesCount = $sidebarStats['rolesCount'];
+                $permsCount = $sidebarStats['permsCount'];
+                $pendingCount = $sidebarStats['pendingCount'];
+                $designsCount = $sidebarStats['designsCount'];
+                $expensesCount = $sidebarStats['expensesCount'];
+                $usersCount = $sidebarStats['usersCount'];
+                $wsConnected = $sidebarStats['wsConnected'];
+                $wsConfigured = $sidebarStats['wsConfigured'];
+                $dbNeedsSetup = ($rolesCount === 0 && Auth::user()->isSuperAdmin());
             @endphp
 
             @if ($dbNeedsSetup && Auth::user()->isSuperAdmin())
@@ -75,7 +99,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                         </svg>
                         <span class="truncate">Verifikasi Pembayaran</span>
-                        @php $pendingCount = App\Models\Donation::where('status', 'menunggu_verifikasi')->count(); @endphp
                         @if ($pendingCount)
                             <span class="ml-auto text-xs font-semibold shrink-0 {{ request()->routeIs('admin.verification*') ? 'text-[#b55322]' : 'text-stone-400' }}">{{ $pendingCount }}</span>
                         @endif
@@ -98,7 +121,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
                         </svg>
                         <span class="truncate">Koleksi Kaos</span>
-                        @php $designsCount = App\Models\Design::where('aktif', 1)->count(); @endphp
                         <span class="ml-auto text-xs font-semibold shrink-0 {{ request()->routeIs('admin.designs*') ? 'text-[#b55322]' : 'text-stone-400' }}">{{ $designsCount }}</span>
                     </a>
                 @endif
@@ -127,7 +149,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6H2.25m0 0v8.25m0 0h.75a.75.75 0 0 1 .75.75v.75m0-9.75h18a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25H3.75m18-9a2.25 2.25 0 0 0-2.25-2.25H3.75" />
                         </svg>
                         <span class="truncate">Dana Pengeluaran</span>
-                        @php $expensesCount = App\Models\Expense::count(); @endphp
                         <span class="ml-auto text-xs font-semibold shrink-0 {{ request()->routeIs('admin.expenses*') ? 'text-[#b55322]' : 'text-stone-400' }}">{{ $expensesCount }}</span>
                     </a>
                 @endif
@@ -147,10 +168,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.974-.94 4.025 4.025 0 0 0 .524-1.782C3.125 16.71 2.25 14.475 2.25 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
                         </svg>
                         <span>Provider WA</span>
-                        @php $wsSetting = \App\Models\WhatsappSetting::first(); @endphp
-                        @if ($wsSetting && $wsSetting->isConnected())
+                        @if ($wsConnected)
                             <span class="ml-auto inline-block h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" title="Fonnte Terhubung"></span>
-                        @elseif($wsSetting && $wsSetting->isConfigured())
+                        @elseif($wsConfigured)
                             <span class="ml-auto inline-block h-2 w-2 rounded-full bg-amber-500 ring-2 ring-amber-100" title="Menunggu Koneksi"></span>
                         @endif
                     </a>
@@ -168,7 +188,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                             </svg>
                             <span>Pengguna</span>
-                            @php $usersCount = App\Models\User::count(); @endphp
                             <span class="ml-auto text-xs font-semibold shrink-0 {{ request()->routeIs('admin.users*') ? 'text-[#b55322]' : 'text-stone-400' }}">{{ $usersCount }}</span>
                         </a>
                     @endif

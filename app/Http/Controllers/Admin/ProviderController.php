@@ -22,8 +22,8 @@ class ProviderController extends Controller
         $setting = $service->getSetting();
         $shippingSetting = $rajaOngkir->getSetting();
 
-        // Auto refresh jika ada parameter refresh atau jika sudah lebih dari 1 menit sejak cek terakhir
-        if ($request->has('refresh') || ($setting->isConfigured() && (!$setting->last_checked_at || $setting->last_checked_at->diffInMinutes(now()) >= 1))) {
+        // Auto refresh hanya jika ada parameter refresh atau jika belum pernah dicek sama sekali
+        if ($request->has('refresh') || ($setting->isConfigured() && !$setting->last_checked_at)) {
             $service->checkDevice();
             $setting->refresh();
         }

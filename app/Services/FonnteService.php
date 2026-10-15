@@ -50,7 +50,7 @@ class FonnteService
         }
 
         try {
-            $response = Http::timeout(10)
+            $response = Http::timeout(3)
                 ->withHeaders([
                     'Authorization' => $activeToken,
                 ])

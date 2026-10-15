@@ -15,39 +15,55 @@ class OrderController extends Controller
 {
     public function dashboard()
     {
-        $donasiTerverifikasi = Donation::where('status', 'terverifikasi')->sum('nominal')
-            + Order::where('status_pembayaran', 'terverifikasi')->sum('donasi');
-        $omzetKaos = Order::where('status_pembayaran', 'terverifikasi')->sum('subtotal_kaos');
-        $biayaProduksi = Expense::where('kategori', 'Produksi kaos')->sum('jumlah');
+        $orderStats = Order::selectRaw('
+            status_pembayaran,
+            COUNT(*) as aggregate_count,
+            SUM(total) as sum_total,
+            SUM(donasi) as sum_donasi,
+            SUM(subtotal_kaos) as sum_subtotal_kaos
+        ')->groupBy('status_pembayaran')->get()->keyBy('status_pembayaran');
+
+        $donationStats = Donation::selectRaw('
+            status,
+            COUNT(*) as aggregate_count,
+            SUM(nominal) as sum_nominal
+        ')->groupBy('status')->get()->keyBy('status');
+
+        $donasiTerverifikasi = (int) ($donationStats->get('terverifikasi')?->sum_nominal ?? 0)
+            + (int) ($orderStats->get('terverifikasi')?->sum_donasi ?? 0);
+        $omzetKaos = (int) ($orderStats->get('terverifikasi')?->sum_subtotal_kaos ?? 0);
+        $biayaProduksi = (int) Expense::where('kategori', 'Produksi kaos')->sum('jumlah');
         $danaBersihKaos = $omzetKaos - $biayaProduksi;
-        $pengeluaran = Expense::sum('jumlah');
+        $pengeluaran = (int) Expense::sum('jumlah');
         $saldo = $donasiTerverifikasi + $danaBersihKaos - $pengeluaran;
 
         // Pembangunan: Donasi terverifikasi + dana bersih kaos
         $totalPembangunan = $donasiTerverifikasi + $danaBersihKaos;
-        $pengeluaranPembangunan = Expense::whereNotIn('kategori', ['Produksi kaos', 'Pengiriman'])->sum('jumlah');
+        $pengeluaranPembangunan = (int) Expense::whereNotIn('kategori', ['Produksi kaos', 'Pengiriman'])->sum('jumlah');
         $saldoPembangunan = $totalPembangunan - $pengeluaranPembangunan;
 
-        $perluVerifikasiCount = Order::where('status_pembayaran', 'menunggu_verifikasi')->count()
-            + Donation::where('status', 'menunggu_verifikasi')->count();
-        $buktiUlangCount = Order::where('status_pembayaran', 'bukti_ulang')->count()
-            + Donation::where('status', 'bukti_ulang')->count();
-        $belumBayarCount = Order::where('status_pembayaran', 'belum_bayar')->count();
+        $perluVerifikasiCount = (int) ($orderStats->get('menunggu_verifikasi')?->aggregate_count ?? 0)
+            + (int) ($donationStats->get('menunggu_verifikasi')?->aggregate_count ?? 0);
+        $buktiUlangCount = (int) ($orderStats->get('bukti_ulang')?->aggregate_count ?? 0)
+            + (int) ($donationStats->get('bukti_ulang')?->aggregate_count ?? 0);
+        $belumBayarCount = (int) ($orderStats->get('belum_bayar')?->aggregate_count ?? 0);
         $pesananBelumDikirimCount = Order::whereIn('status_pengiriman', ['siap_kirim', 'produksi', 'belum_diproduksi'])->where('status_pembayaran', 'terverifikasi')->count() ?: Order::where('status_pengiriman', 'siap_kirim')->count();
 
         // Nominal perlu verifikasi
-        $rpPerluVerifikasi = Order::where('status_pembayaran', 'menunggu_verifikasi')->sum('total')
-            + Donation::where('status', 'menunggu_verifikasi')->sum('nominal');
+        $rpPerluVerifikasi = (int) ($orderStats->get('menunggu_verifikasi')?->sum_total ?? 0)
+            + (int) ($donationStats->get('menunggu_verifikasi')?->sum_nominal ?? 0);
 
-        $donasiTertunda = Donation::where('status', 'menunggu_verifikasi')->sum('nominal');
+        $donasiTertunda = (int) ($donationStats->get('menunggu_verifikasi')?->sum_nominal ?? 0);
 
         // Daftar pembayaran prioritas gabungan
         $prioritasOrders = Order::with('design')
             ->whereIn('status_pembayaran', ['menunggu_verifikasi', 'bukti_ulang'])
             ->latest('updated_at')
+            ->take(15)
             ->get();
         $donasiPrioritas = Donation::whereIn('status', ['menunggu_verifikasi', 'bukti_ulang'])
             ->latest('updated_at')
+            ->take(15)
             ->get();
 
         $daftarPrioritas = collect();
@@ -340,13 +356,18 @@ class OrderController extends Controller
             })
             ->values();
 
+        $shippingCounts = Order::where('status_pembayaran', 'terverifikasi')
+            ->selectRaw('status_pengiriman, count(*) as total')
+            ->groupBy('status_pengiriman')
+            ->pluck('total', 'status_pengiriman');
+
         return view('admin.orders', [
             'pesanan' => $pesanan,
             'selectedOrder' => $selectedOrder,
             'rekapKaos' => $rekapKaos,
-            'semuaPesanan' => Order::where('status_pembayaran', 'terverifikasi')->count(),
-            'siapKirim' => Order::where('status_pembayaran', 'terverifikasi')->where('status_pengiriman', 'siap_kirim')->count(),
-            'dalamProduksi' => Order::where('status_pembayaran', 'terverifikasi')->where('status_pengiriman', 'produksi')->count(),
+            'semuaPesanan' => (int) $shippingCounts->sum(),
+            'siapKirim' => (int) ($shippingCounts['siap_kirim'] ?? 0),
+            'dalamProduksi' => (int) ($shippingCounts['produksi'] ?? 0),
             'menungguPembayaran' => Order::whereIn('status_pembayaran', ['belum_bayar', 'menunggu_verifikasi', 'bukti_ulang'])->count(),
         ]);
     }
