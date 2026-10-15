@@ -526,6 +526,7 @@ class AdminController extends Controller
         }
 
         $biayaProduksi = $expenses->where('kategori', 'Produksi kaos')->sum('jumlah');
+        $biayaPengiriman = $expenses->where('kategori', 'Pengiriman')->sum('jumlah');
         $danaBersihKaos = max(0, $omzetKaos - $biayaProduksi);
         $belanjaPembangunan = $expenses->sum('jumlah');
         $danaPembangunan = $totalDonasi + $omzetKaos;
@@ -618,7 +619,7 @@ class AdminController extends Controller
 
         return view('admin.reports', compact(
             'donasis', 'orders', 'expenses', 'totalDonasi', 'omzetKaos', 'ongkir',
-            'biayaProduksi', 'danaBersihKaos', 'penerimaan', 'pengeluaran', 'saldo',
+            'biayaProduksi', 'biayaPengiriman', 'danaBersihKaos', 'penerimaan', 'pengeluaran', 'saldo',
             'danaPembangunanPerBulan', 'months', 'from', 'to', 'jenis',
             'belanjaPembangunan', 'danaPembangunan', 'saldoPembangunan',
             'donasiSajaTerverifikasi', 'donasiDariKaosTerverifikasi'

@@ -248,29 +248,61 @@
     </div>
 
     <!-- Metrics Row: Dana Pembangunan -->
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Card 1: Dana Pembangunan (Total) -->
-        <div class="rounded-2xl bg-[#444d41] p-5 text-white flex flex-col justify-between shadow-2xs">
+        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-semibold text-white/70">Dana Pembangunan</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-4.5 w-4.5 text-white/70">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                </svg>
+                <p class="text-xs font-medium text-stone-500">Dana Pembangunan</p>
+                <span class="grid h-7 w-7 place-items-center rounded-lg bg-amber-50 text-amber-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A2.25 2.25 0 0 0 17.25 8H6.75A2.25 2.25 0 0 0 4.5 10.333V21" />
+                    </svg>
+                </span>
             </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-white leading-none">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-white/60">Total donasi + omzet kaos terverifikasi</p>
+            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-stone-400">Donasi + omzet kaos terverifikasi</p>
         </div>
 
         <!-- Card 2: Saldo Pembangunan -->
+        <div class="rounded-2xl bg-[#444d41] p-5 text-white flex flex-col justify-between shadow-2xs">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-semibold text-white/70">Saldo pembangunan saat ini</p>
+                <span class="grid h-7 w-7 place-items-center rounded-lg bg-white/10 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6H2.25m0 0v8.25m0 0h.75a.75.75 0 0 1 .75.75v.75m0-9.75h18a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25H3.75m18-9a2.25 2.25 0 0 0-2.25-2.25H3.75" />
+                    </svg>
+                </span>
+            </div>
+            <p class="mt-3 font-serif text-[26px] font-bold text-white leading-none">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-white/60">Dana terkumpul dikurangi belanja</p>
+        </div>
+
+        <!-- Card 3: Biaya Kaos & Ongkir -->
         <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-stone-500">Saldo Pembangunan</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="#444d41" class="h-4.5 w-4.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
-                </svg>
+                <p class="text-xs font-medium text-stone-500">Biaya kaos & ongkir</p>
+                <span class="grid h-7 w-7 place-items-center rounded-lg bg-stone-100 text-stone-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l1.5 2.25a3 3 0 0 0 4.5 0l1.5-2.25 5.25 2.25-1.5 4.5h-2.25V20.25a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V11.25H4.5L3 6.75 8.25 4.5z" />
+                    </svg>
+                </span>
             </div>
-            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
-            <p class="mt-2 text-xs text-stone-400">Dana pembangunan dikurangi semua pengeluaran</p>
+            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($biayaProduksi + $biayaPengiriman, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-stone-400">Produksi Rp{{ number_format($biayaProduksi, 0, ',', '.') }} + Ongkir Rp{{ number_format($biayaPengiriman, 0, ',', '.') }}</p>
+        </div>
+
+        <!-- Card 4: Total Semua Pengeluaran -->
+        <div class="rounded-2xl border border-[#e8e4dc] bg-white p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-medium text-stone-500">Total semua pengeluaran</p>
+                <span class="grid h-7 w-7 place-items-center rounded-lg bg-rose-50 text-rose-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </span>
+            </div>
+            <p class="mt-3 font-serif text-[26px] font-bold text-stone-900 leading-none">Rp{{ number_format($pengeluaran, 0, ',', '.') }}</p>
+            <p class="mt-2 text-xs text-stone-400">{{ $expenses->count() }} catatan pengeluaran</p>
         </div>
     </div>
 
