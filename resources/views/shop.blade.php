@@ -381,7 +381,7 @@
             {{-- ========================================================================= --}}
             {{-- KOLOM KANAN: SIDEBAR RINGKASAN (Persis Screenshot 1 & 2) --}}
             {{-- ========================================================================= --}}
-            <aside class="lg:col-span-4">
+            <aside class="lg:col-span-4 order-first lg:order-none">
                 <div class="card p-6 bg-white border border-stone-200 rounded-2xl sticky top-24">
                     <h2 class="font-serif text-lg font-bold text-stone-900">Ringkasan</h2>
 

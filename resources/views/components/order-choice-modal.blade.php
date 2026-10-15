@@ -100,7 +100,7 @@
         </div>
 
         {{-- Keterangan Alur --}}
-        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+        <div class="mt-4 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-stone-500">
             <span>Kaos + Donasi langsung ke form Shop + Donasi</span>
             <button type="button" onclick="document.getElementById('order-modal-close').click()" class="text-stone-400 hover:text-stone-700 underline text-xs cursor-pointer">
                 Batal

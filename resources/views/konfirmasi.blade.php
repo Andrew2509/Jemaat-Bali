@@ -78,20 +78,18 @@
                 @if ($isKaos)
                     <div class="mt-6 border-t border-line pt-6 text-left">
                         <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-muted">Langkah selanjutnya</p>
-                        <div class="mt-4 flex items-center">
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-ink">Pesanan diproduksi</p>
-                                <span class="mt-2 block h-2.5 w-2.5 rounded-full bg-primary"></span>
+                        <div class="mt-4">
+                            <div class="flex items-start">
+                                <p class="flex-1 text-center text-sm font-semibold text-ink">Pesanan diproduksi</p>
+                                <p class="flex-1 text-center text-sm font-semibold text-ink">Dikirim</p>
+                                <p class="flex-1 text-center text-sm font-semibold text-stone-500">Diterima</p>
                             </div>
-                            <span class="h-px flex-1 bg-primary"></span>
-                            <div class="flex-1 text-center">
-                                <p class="text-sm font-semibold text-ink">Dikirim</p>
-                                <span class="mt-2 block h-2.5 w-2.5 rounded-full bg-primary"></span>
-                            </div>
-                            <span class="h-px flex-1 bg-stone-300"></span>
-                            <div class="flex-1 text-right">
-                                <p class="text-sm font-semibold text-stone-500">Diterima</p>
-                                <span class="mt-2 block h-2.5 w-2.5 rounded-full bg-stone-300"></span>
+                            <div class="mt-3 flex items-center">
+                                <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
+                                <span class="h-px flex-1 bg-primary"></span>
+                                <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
+                                <span class="h-px flex-1 bg-stone-300"></span>
+                                <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-stone-300"></span>
                             </div>
                         </div>
                         <p class="mt-4 text-xs leading-relaxed text-muted">

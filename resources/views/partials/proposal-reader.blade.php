@@ -4,8 +4,8 @@
             <div class="mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-6">
 
                 {{-- Bar kontrol atas: kiri prev + pil Hal, kanan zoom + next --}}
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2.5">
+                <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <div class="flex items-center gap-2.5 shrink-0">
                         <button type="button" id="btn-prev-page" title="Halaman sebelumnya" aria-label="Halaman sebelumnya"
                             class="grid h-10 w-10 place-items-center rounded-full border border-stone-200 bg-white text-stone-900 shadow-sm transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-30 sm:h-11 sm:w-11">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-5 w-5">
@@ -17,7 +17,7 @@
                         </span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 sm:gap-2.5">
+                    <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                         <button type="button" id="btn-spread" title="Tampilan 2 halaman"
                             class="grid h-10 w-10 place-items-center rounded-full border border-stone-200 bg-white text-stone-900 shadow-sm transition hover:scale-105 sm:h-11 sm:w-11 md:hidden">
                             <svg id="icon-spread-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
@@ -29,7 +29,7 @@
                         </button>
                         <button type="button" id="btn-zoom-out" title="Perkecil"
                             class="grid h-10 w-10 place-items-center rounded-full bg-white text-xl leading-none text-stone-900 shadow transition hover:scale-105 sm:h-11 sm:w-11">−</button>
-                        <span id="zoom-label" class="rounded-full border border-stone-200 bg-white px-4 py-2 font-mono text-sm font-semibold text-stone-900 shadow-sm">100%</span>
+                        <span id="zoom-label" class="hidden rounded-full border border-stone-200 bg-white px-4 py-2 font-mono text-sm font-semibold text-stone-900 shadow-sm sm:inline-block">100%</span>
                         <button type="button" id="btn-zoom-in" title="Perbesar"
                             class="grid h-10 w-10 place-items-center rounded-full bg-white text-xl leading-none text-stone-900 shadow transition hover:scale-105 sm:h-11 sm:w-11">+</button>
                         <button type="button" id="btn-next-page" title="Halaman berikutnya" aria-label="Halaman berikutnya"

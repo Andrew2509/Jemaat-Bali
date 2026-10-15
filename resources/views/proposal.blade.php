@@ -49,7 +49,7 @@
                 </div>
 
                 {{-- Canva Frame Container --}}
-                <div id="canva-wrapper" class="relative w-full aspect-[16/9] min-h-[460px] sm:min-h-[580px] md:min-h-[680px] lg:min-h-[760px] overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
+                <div id="canva-wrapper" class="relative w-full aspect-[16/9] min-h-[320px] sm:min-h-[580px] md:min-h-[680px] lg:min-h-[760px] overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
                     <iframe id="canva-frame"
                         src="{{ $canvaEmbedUrl }}"
                         title="{{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}"

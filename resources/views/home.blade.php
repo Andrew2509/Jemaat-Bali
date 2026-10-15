@@ -32,7 +32,7 @@
     <div class="relative z-10 w-full bg-canvas">
 
     {{-- ================= FLOATING SEARCH / QUICK-ACTION BAR ================= --}}
-    <div id="quick-action-bar" class="relative z-20 -translate-y-1/2 px-4 sm:px-6">
+    <div id="quick-action-bar" class="relative z-20 px-4 sm:px-6 lg:-translate-y-1/2">
         <div class="mx-auto max-w-6xl rounded-3xl lg:rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.12)] border border-stone-200/80">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-center lg:gap-0 lg:divide-x lg:divide-stone-100">
                 {{-- 1. Lokasi --}}
@@ -104,7 +104,7 @@
 
     {{-- ================= 4 FEATURE PILLARS ================= --}}
     <section class="mx-auto max-w-6xl px-4 pt-2 sm:pt-4 pb-8 sm:px-6">
-        <div class="grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {{-- 1 --}}
             <div class="flex items-start gap-3.5">
                 <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-stone-100 text-stone-800">
@@ -187,7 +187,7 @@
                         {{-- Tampilan Canva Presentasi Langsung: Menampilkan Sampul Depan & Slide Interaktif --}}
                         <div class="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200 bg-stone-950 shadow-2xl">
                             {{-- Iframe Canva Player --}}
-                            <div class="relative w-full aspect-[16/9] min-h-[300px] sm:min-h-[420px] md:min-h-[460px] bg-stone-950">
+                            <div class="relative w-full aspect-[16/9] sm:min-h-[420px] md:min-h-[460px] bg-stone-950">
                                 <iframe id="home-canva-frame"
                                     src="{{ $canvaEmbedUrl }}"
                                     title="{{ $programInfo->judul_proposal ?? 'Proposal Pembangunan' }}"
@@ -350,7 +350,7 @@
         <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/35 pointer-events-none z-10"></div>
 
         {{-- Header Bar Section --}}
-        <div class="relative z-20 flex items-center justify-between pt-6 sm:pt-8 pb-4 sm:pb-6">
+        <div class="relative z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-6 sm:pt-8 pb-4 sm:pb-6">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-amber-400"></span>
                 <span class="text-xs font-bold uppercase tracking-[0.2em] text-white/90">Dokumentasi Progres Lapangan</span>
@@ -669,7 +669,7 @@
             {{-- Header Pengantar --}}
             <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end sm:mb-10">
                 <div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-900/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-stone-800">
                             ✦ Official Merch & Fundraiser
                         </span>
@@ -706,7 +706,7 @@
                     {{-- 1. BAGIAN KIRI: SOLID OLIVE GREEN DENGAN TYPOGRAPHY & BADGE --}}
                     <div class="relative z-10 md:col-span-6 bg-[#4c5443] p-5 sm:p-7 lg:p-8 flex flex-col justify-between overflow-hidden">
                         {{-- Watermark Outlined Vertikal di Sisi Kiri (Sesuai Gambar "REGEN JACKET") --}}
-                        <div class="pointer-events-none absolute left-3 top-8 bottom-8 select-none flex items-center justify-center opacity-30">
+                        <div class="pointer-events-none absolute left-3 top-8 bottom-8 select-none hidden items-center justify-center opacity-30 md:flex">
                             <span class="font-display text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-[0.2em] whitespace-nowrap"
                                 style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.4); color: transparent; writing-mode: vertical-rl; transform: rotate(180deg);">
                                 KAOS JEMAAT
@@ -826,7 +826,7 @@
                     </div>
 
                     {{-- 3. HERO GARMENT DISPLAY (DI TENGAH-TENGAH PERBATASAN WARNA, UKURAN BESAR & SEIMBANG) --}}
-                    <div class="pointer-events-none absolute inset-0 z-15 flex items-center justify-center">
+                    <div class="pointer-events-none relative z-15 flex items-center justify-center py-6 md:absolute md:inset-0 md:py-0">
                         <div id="hero-static-stage" class="pointer-events-none flex items-center justify-center md:translate-x-6 lg:translate-x-8">
                             {{-- Gambar Kaos Hero Transparan Dinamis (Diperbesar Sesuai Permintaan) --}}
                             <div class="relative w-72 sm:w-84 md:w-[26rem] lg:w-[29rem] transition-transform duration-300 flex items-center justify-center">
