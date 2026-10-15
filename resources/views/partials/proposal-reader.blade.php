@@ -207,7 +207,7 @@
             .book-turn-next, .book-turn-prev { animation: none; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.pdfjsLib) {

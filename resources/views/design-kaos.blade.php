@@ -69,7 +69,7 @@
                         @if ($selected->video360Url())
                             {{-- 360° VIDEO PLAYING KHUSUS UNTUK DESAIN YANG MEMILIKI VIDEO 360 --}}
                             <div id="viewer-360" class="relative aspect-square w-full cursor-grab select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm active:cursor-grabbing">
-                                <video id="viewer-360-video" src="{{ $selected->video360Url() }}" playsinline webkit-playsinline muted loop autoplay
+                                <video id="viewer-360-video" src="{{ $selected->video360Url() }}" playsinline webkit-playsinline muted loop autoplay preload="metadata"
                                     class="pointer-events-none absolute inset-0 h-full w-full object-contain p-6 will-change-transform"></video>
                                 <span class="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">
                                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -90,7 +90,7 @@
                         @else
                             {{-- DESAIN TANPA VIDEO 360: GAMBAR PAKAIAN STATIS ELEGAN & BERSIH --}}
                             <div class="relative aspect-square w-full select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm flex items-center justify-center p-8">
-                                <img src="{{ $selected->gambarUrl() }}" alt="{{ $selected->nama }}" draggable="false"
+                                <img src="{{ $selected->gambarUrl() }}" alt="{{ $selected->nama }}" draggable="false" decoding="async"
                                     class="max-h-full max-w-full object-contain drop-shadow-md transition duration-300 hover:scale-105">
                             </div>
                         @endif
@@ -158,7 +158,7 @@
                     @foreach ($terkait as $d)
                         <a href="{{ route('design', ['desain' => $d->id]) }}" class="card group flex flex-col overflow-hidden !p-0 transition hover:-translate-y-0.5 hover:shadow-md">
                             <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
-                                <img src="{{ $d->gambarUrl() }}" alt="{{ $d->nama }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                <img src="{{ $d->gambarUrl() }}" alt="{{ $d->nama }}" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
                             </div>
                             <div class="flex flex-1 flex-col p-4">
                                 <div class="flex items-start justify-between gap-2">

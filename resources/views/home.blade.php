@@ -15,7 +15,7 @@
                 </iframe>
             </div>
         @else
-            <video id="hero-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ $heroPosterUrl }}"
+            <video id="hero-bg-video" autoplay muted loop playsinline preload="metadata" poster="{{ $heroPosterUrl }}"
                 class="h-full w-full object-cover object-center">
                 <source src="{{ $heroVideoUrl }}" type="video/mp4">
                 @if ($heroVideoType === 'default')
@@ -266,33 +266,52 @@
 
     @if ($adaFile && !($isCanva && $canvaEmbedUrl))
         @push('scripts')
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+            <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     const coverUrl = @json($url ?? '');
                     const coverCanvas = document.getElementById('proposal-cover-canvas');
                     const coverFallback = document.getElementById('proposal-cover-fallback');
                     const coverPages = document.getElementById('proposal-cover-pages');
-                    if (!coverUrl || !coverCanvas || !window.pdfjsLib) return;
-                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                    window.pdfjsLib.getDocument(coverUrl).promise.then(function (pdf) {
-                        if (coverPages) coverPages.textContent = pdf.numPages + ' halaman • klik sampul untuk membaca';
-                        return pdf.getPage(1);
-                    }).then(function (page) {
-                        const base = page.getViewport({ scale: 1.0 });
-                        const viewport = page.getViewport({ scale: 620 / base.width });
-                        const scale = window.devicePixelRatio || 1;
-                        coverCanvas.width = Math.floor(viewport.width * scale);
-                        coverCanvas.height = Math.floor(viewport.height * scale);
-                        return page.render({
-                            canvasContext: coverCanvas.getContext('2d'),
-                            transform: scale !== 1 ? [scale, 0, 0, scale, 0, 0] : null,
-                            viewport: viewport
-                        }).promise;
-                    }).then(function () {
-                        coverCanvas.classList.remove('hidden');
-                        coverFallback?.classList.add('hidden');
-                    }).catch(function () { /* tetap tampilkan sampul statis */ });
+                    if (!coverUrl || !coverCanvas) return;
+
+                    let loaded = false;
+                    function loadCover() {
+                        if (loaded || !window.pdfjsLib) return;
+                        loaded = true;
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                        window.pdfjsLib.getDocument(coverUrl).promise.then(function (pdf) {
+                            if (coverPages) coverPages.textContent = pdf.numPages + ' halaman • klik sampul untuk membaca';
+                            return pdf.getPage(1);
+                        }).then(function (page) {
+                            const base = page.getViewport({ scale: 1.0 });
+                            const viewport = page.getViewport({ scale: 620 / base.width });
+                            const scale = window.devicePixelRatio || 1;
+                            coverCanvas.width = Math.floor(viewport.width * scale);
+                            coverCanvas.height = Math.floor(viewport.height * scale);
+                            return page.render({
+                                canvasContext: coverCanvas.getContext('2d'),
+                                transform: scale !== 1 ? [scale, 0, 0, scale, 0, 0] : null,
+                                viewport: viewport
+                            }).promise;
+                        }).then(function () {
+                            coverCanvas.classList.remove('hidden');
+                            coverFallback?.classList.add('hidden');
+                        }).catch(function () { /* tetap tampilkan sampul statis */ });
+                    }
+
+                    if ('IntersectionObserver' in window) {
+                        const obs = new IntersectionObserver((entries) => {
+                            if (entries[0].isIntersecting) {
+                                obs.disconnect();
+                                loadCover();
+                            }
+                        }, { rootMargin: '300px' });
+                        const section = document.getElementById('proposal-highlight') || coverCanvas;
+                        obs.observe(section);
+                    } else {
+                        setTimeout(loadCover, 1500);
+                    }
                 });
             </script>
         @endpush
@@ -315,7 +334,7 @@
                 </div>
             @elseif ($p->tipe === 'video' && $p->mediaUrl())
                 <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out overflow-hidden {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}">
-                    <video src="{{ $p->mediaUrl() }}" autoplay muted loop playsinline class="h-full w-full object-cover"></video>
+                    <video src="{{ $p->mediaUrl() }}" {{ $i === 0 ? 'autoplay' : '' }} muted loop playsinline preload="{{ $i === 0 ? 'metadata' : 'none' }}" class="h-full w-full object-cover"></video>
                 </div>
             @else
                 <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
@@ -797,7 +816,7 @@
                                         data-sizes="{{ json_encode($design->pilihanUkuran()) }}"
                                         title="{{ $design->nama }} — Rp {{ number_format($design->harga, 0, ',', '.') }}">
                                         <div class="relative h-14 w-full sm:h-16 flex items-center justify-center p-1">
-                                            <img src="{{ asset($cleanImg) }}" alt="{{ $design->nama }}"
+                                            <img src="{{ asset($cleanImg) }}" alt="{{ $design->nama }}" loading="lazy" decoding="async" width="80" height="80"
                                                 class="h-full w-full object-contain drop-shadow-xs transition group-hover:scale-105">
                                         </div>
                                     </button>
@@ -819,6 +838,8 @@
                                 <img id="hero-shirt-img"
                                     src="{{ asset($defaultCleanImg) }}"
                                     alt="{{ $defaultDesign->nama ?? 'Kaos Pembangunan' }}"
+                                    width="460" height="460"
+                                    decoding="async"
                                     class="w-full h-auto max-h-[400px] sm:max-h-[440px] lg:max-h-[470px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.4)] transition-all duration-300">
                             </div>
                         </div>

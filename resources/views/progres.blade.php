@@ -31,7 +31,7 @@
                     <article class="card overflow-hidden !p-0">
                         <div class="relative aspect-[4/3] w-full bg-stone-100">
                             @if ($foto->mediaUrl())
-                                <img src="{{ $foto->mediaUrl() }}" alt="{{ $foto->teks_alt ?: $foto->judul }}" class="h-full w-full object-cover" loading="lazy">
+                                <img src="{{ $foto->mediaUrl() }}" alt="{{ $foto->teks_alt ?: $foto->judul }}" class="h-full w-full object-cover" loading="lazy" decoding="async">
                             @else
                                 <div class="grid h-full w-full place-items-center text-sm text-muted">Tidak ada gambar</div>
                             @endif
@@ -66,7 +66,7 @@
                                      data-file="{{ $video->mediaUrl() }}"
                                      data-platform="{{ $video->videoPlatform() }}">
                                     @if ($video->thumbnailUrl())
-                                        <img src="{{ $video->thumbnailUrl() }}" alt="{{ $video->judul }}" class="absolute inset-0 h-full w-full object-cover">
+                                        <img src="{{ $video->thumbnailUrl() }}" alt="{{ $video->judul }}" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async">
                                         <div class="absolute inset-0 bg-stone-950/30 backdrop-blur-[0.5px]"></div>
                                     @elseif ($video->mediaUrl())
                                         <video src="{{ $video->mediaUrl() }}#t=0.1" preload="metadata" class="absolute inset-0 h-full w-full object-cover pointer-events-none"></video>
