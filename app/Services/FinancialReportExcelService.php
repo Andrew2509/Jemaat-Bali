@@ -75,8 +75,8 @@ class FinancialReportExcelService
         $biayaProduksi = $expenses->where('kategori', 'Produksi kaos')->sum('jumlah');
         $biayaPengiriman = $expenses->where('kategori', 'Pengiriman')->sum('jumlah');
         $danaBersihKaos = max(0, $omzetKaos - $biayaProduksi);
-        $belanjaPembangunan = $expenses->reject(fn($e) => in_array($e->kategori, ['Produksi kaos', 'Pengiriman']))->sum('jumlah');
-        $danaPembangunan = $totalDonasi + $danaBersihKaos;
+        $belanjaPembangunan = $expenses->sum('jumlah');
+        $danaPembangunan = $totalDonasi + $omzetKaos;
         $saldoPembangunan = $danaPembangunan - $belanjaPembangunan;
 
         $totalPenerimaan = $totalDonasi + $omzetKaos + $donasiDariKaos + $ongkir;

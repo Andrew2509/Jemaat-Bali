@@ -527,8 +527,8 @@ class AdminController extends Controller
 
         $biayaProduksi = $expenses->where('kategori', 'Produksi kaos')->sum('jumlah');
         $danaBersihKaos = max(0, $omzetKaos - $biayaProduksi);
-        $belanjaPembangunan = $expenses->reject(fn($e) => in_array($e->kategori, ['Produksi kaos', 'Pengiriman']))->sum('jumlah');
-        $danaPembangunan = $totalDonasi + $danaBersihKaos;
+        $belanjaPembangunan = $expenses->sum('jumlah');
+        $danaPembangunan = $totalDonasi + $omzetKaos;
         $saldoPembangunan = $danaPembangunan - $belanjaPembangunan;
         
         $penerimaan = $totalDonasi + $omzetKaos + $ongkir;
