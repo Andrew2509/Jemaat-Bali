@@ -925,6 +925,10 @@ class AdminController extends Controller
                 Storage::disk('public')->delete($info->logo_path);
             }
             $data['logo_path'] = null;
+
+            try {
+                @unlink(public_path('favicon.png'));
+            } catch (\Throwable $e) {}
         }
 
         // Simpan file logo baru jika diunggah
@@ -934,6 +938,17 @@ class AdminController extends Controller
             }
             $logoPath = $request->file('logo_file')->store('logo', 'public');
             $data['logo_path'] = $logoPath;
+
+            // Salin ke public/favicon.ico dan public/favicon.png agar request langsung ke /favicon.ico otomatis pakai logo baru
+            try {
+                $fullLogoPath = Storage::disk('public')->path($logoPath);
+                if (file_exists($fullLogoPath)) {
+                    @copy($fullLogoPath, public_path('favicon.ico'));
+                    @copy($fullLogoPath, public_path('favicon.png'));
+                }
+            } catch (\Throwable $e) {
+                // Abaikan jika permission public/ tidak mengizinkan write
+            }
         }
 
         unset($data['logo_file'], $data['hapus_logo']);

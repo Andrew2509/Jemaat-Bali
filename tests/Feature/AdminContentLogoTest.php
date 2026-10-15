@@ -29,6 +29,7 @@ class AdminContentLogoTest extends TestCase
         $response->assertSee('Logo program');
         $response->assertSee('Slogan / Subjudul');
         $response->assertSee('BANGUN BERSAMA');
+        $response->assertSee('favicon.svg');
     }
 
     public function test_admin_can_update_tagline(): void
@@ -83,9 +84,14 @@ class AdminContentLogoTest extends TestCase
         $this->assertNotNull($info->logo_path);
         $this->assertTrue(Storage::disk('public')->exists($info->logo_path));
 
-        // Check sidebar renders logo image
+        // Check sidebar renders logo image and browser tab favicon is set to logo url
         $adminPage = $this->actingAs($admin)->get(route('admin.content'));
         $adminPage->assertSee($info->logo_url);
+        $adminPage->assertSee('id="app-favicon"', false);
+
+        $homePage = $this->get(route('home'));
+        $homePage->assertSee($info->logo_url);
+        $homePage->assertSee('id="app-favicon"', false);
 
         // Now test delete logo
         $responseDelete = $this->actingAs($admin)->post(route('admin.content.info'), [

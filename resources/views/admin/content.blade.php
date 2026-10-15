@@ -959,11 +959,26 @@
                 });
             }
 
-            // Logo file instant image preview
+            // Logo file instant image preview & instant browser tab icon update
             var logoInput = document.getElementById('logo_file');
             var logoImg = document.getElementById('logo-preview-img');
             var logoBadge = document.getElementById('logo-preview-badge');
             var logoLabel = document.getElementById('logo_file_label');
+
+            function updateTabFavicon(url) {
+                var icons = document.querySelectorAll("link[rel*='icon']");
+                if (icons.length > 0) {
+                    icons.forEach(function (link) {
+                        link.href = url;
+                    });
+                } else {
+                    var newLink = document.createElement('link');
+                    newLink.id = 'app-favicon';
+                    newLink.rel = 'icon';
+                    newLink.href = url;
+                    document.head.appendChild(newLink);
+                }
+            }
 
             if (logoInput) {
                 logoInput.addEventListener('change', function () {
@@ -981,8 +996,26 @@
                             if (logoLabel) {
                                 logoLabel.textContent = file.name;
                             }
+                            // Ganti icon tab browser secara otomatis saat file dipilih!
+                            updateTabFavicon(e.target.result);
                         };
                         reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            var hapusLogoCheckbox = document.querySelector("input[name='hapus_logo']");
+            if (hapusLogoCheckbox) {
+                hapusLogoCheckbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        var defaultSvg = "{{ asset('favicon.svg') }}";
+                        updateTabFavicon(defaultSvg);
+                        if (logoImg) logoImg.classList.add('hidden');
+                        if (logoBadge) logoBadge.classList.remove('hidden');
+                    } else if (logoImg && logoImg.src) {
+                        updateTabFavicon(logoImg.src);
+                        logoImg.classList.remove('hidden');
+                        if (logoBadge) logoBadge.classList.add('hidden');
                     }
                 });
             }
