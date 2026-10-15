@@ -91,7 +91,7 @@
 
                 <!-- Pilihan Ukuran Tersedia (Stok Pakaian) -->
                 <div class="rounded-xl border border-[#e8e4dc] bg-[#fbf9f6] p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div>
                             <label class="block text-xs font-bold text-stone-800">
                                 Pilihan Ukuran Tersedia <span class="text-stone-400 font-normal">&mdash; Stok Pakaian</span>
@@ -110,28 +110,37 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-5 gap-2 sm:gap-2.5 pt-1.5">
+                    <div class="flex items-center gap-2 flex-wrap" style="display: flex; gap: 8px; flex-wrap: wrap;">
                         @foreach ($allSizes as $s)
                             @php
                                 $isChecked = in_array($s, $initialUkuran);
                             @endphp
-                            <label class="size-toggle-card group relative flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all cursor-pointer {{ $isChecked ? 'border-[#b55322] bg-white shadow-2xs' : 'border-stone-200 bg-stone-100/70 opacity-60 hover:opacity-100' }}" title="Klik untuk {{ $isChecked ? 'menonaktifkan (stok habis)' : 'mengaktifkan (stok tersedia)' }}">
-                                <input type="checkbox" name="ukuran[]" value="{{ $s }}" class="sr-only size-checkbox" {{ $isChecked ? 'checked' : '' }} data-size="{{ $s }}">
+                            <label class="size-toggle-card group relative inline-flex items-center justify-center gap-1.5 min-w-[62px] h-10 px-3 rounded-xl border-2 transition cursor-pointer select-none {{ $isChecked ? 'border-[#b55322] bg-white text-stone-900 shadow-2xs' : 'border-stone-200 bg-stone-100 text-stone-400 opacity-60 border-dashed' }}"
+                                data-size="{{ $s }}"
+                                style="display: inline-flex; align-items: center; justify-content: center; min-width: 62px; height: 40px; padding: 0 12px; border-radius: 12px; cursor: pointer; user-select: none; {{ $isChecked ? 'border-color: #b55322; background-color: #ffffff;' : 'border-color: #e7e5e4; background-color: #f5f5f4; opacity: 0.6;' }}"
+                                title="{{ $s }} — {{ $isChecked ? 'Tersedia (Klik untuk ubah ke Habis)' : 'Habis (Klik untuk ubah ke Tersedia)' }}">
+                                <input type="checkbox" name="ukuran[]" value="{{ $s }}" class="sr-only size-checkbox" {{ $isChecked ? 'checked' : '' }} data-size="{{ $s }}" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
                                 
-                                <span class="size-label font-serif text-sm font-bold {{ $isChecked ? 'text-[#b55322]' : 'text-stone-400 line-through' }}">
+                                <span class="size-label text-sm font-black {{ $isChecked ? 'text-stone-900' : 'text-stone-400 line-through' }}" style="{{ $isChecked ? 'color: #1c1917;' : 'color: #a8a29e; text-decoration: line-through;' }}">
                                     {{ $s }}
                                 </span>
                                 
-                                <span class="size-status mt-1 text-[9px] font-bold uppercase tracking-wider {{ $isChecked ? 'text-emerald-700' : 'text-stone-400' }}">
-                                    {{ $isChecked ? 'Tersedia' : 'Habis' }}
-                                </span>
-
-                                <span class="size-badge-check absolute top-1 right-1 grid h-3.5 w-3.5 place-items-center rounded-full text-[8px] font-bold text-white {{ $isChecked ? 'bg-[#b55322]' : 'bg-stone-300' }}">
-                                    {{ $isChecked ? '✓' : '✕' }}
+                                <span class="size-indicator text-[10px] font-bold {{ $isChecked ? 'text-emerald-600' : 'text-stone-400' }}" style="{{ $isChecked ? 'color: #059669;' : 'color: #a8a29e;' }}">
+                                    {{ $isChecked ? '●' : '✕' }}
                                 </span>
                             </label>
                         @endforeach
                     </div>
+
+                    <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-500 pt-2 border-t border-stone-200/60">
+                        <span id="sizes-summary-text" class="font-medium text-stone-700">
+                            {{ count($initialUkuran) }} dari 5 ukuran aktif (tersedia)
+                        </span>
+                        <span class="text-stone-400 italic">
+                            Ukuran nonaktif otomatis dicoret pada etalase &amp; checkout
+                        </span>
+                    </div>
+
                     @error('ukuran')
                         <p class="mt-2 text-xs text-rose-500">{{ $message }}</p>
                     @enderror
@@ -336,13 +345,14 @@
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Pilihan Ukuran:</span>
                                 <span class="text-[10px] text-stone-400 italic">Klik untuk aktif / nonaktif</span>
                             </div>
-                            <div id="preview-sizes-container" class="flex items-center gap-1.5 text-xs flex-wrap">
+                            <div id="preview-sizes-container" class="flex items-center gap-1.5 text-xs flex-wrap" style="display: flex; gap: 6px; flex-wrap: wrap;">
                                 @foreach ($allSizes as $size)
                                     @php
                                         $isAvail = in_array($size, $initialUkuran);
                                     @endphp
                                     <button type="button"
-                                        class="preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer {{ $isAvail ? 'border-[#e8e4dc] bg-[#fbf9f6] text-stone-700 hover:border-[#b55322]' : 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50' }}"
+                                        class="preview-size-btn grid h-8 w-8 place-items-center rounded-lg border text-xs font-bold transition cursor-pointer {{ $isAvail ? 'border-stone-300 bg-white text-stone-800 hover:border-[#b55322]' : 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50' }}"
+                                        style="display: inline-grid; width: 32px; height: 32px; place-items: center; border-radius: 8px; cursor: pointer; {{ $isAvail ? 'background: #ffffff; color: #1c1917; border-color: #d6d3d1;' : 'background: #f5f5f4; color: #d6d3d1; border-color: #e7e5e4; text-decoration: line-through; opacity: 0.5;' }}"
                                         data-size="{{ $size }}"
                                         title="{{ $size }} — {{ $isAvail ? 'Tersedia (Klik untuk ubah ke Habis)' : 'Habis (Klik untuk ubah ke Tersedia)' }}">
                                         {{ $size }}
@@ -615,53 +625,65 @@
             const btnResetSizes = document.getElementById('btn-reset-sizes');
             const chkUkuran = document.getElementById('chk-ukuran');
 
+            const sizesSummaryText = document.getElementById('sizes-summary-text');
+
+            function updateSizesSummary() {
+                let count = 0;
+                sizeCheckboxes.forEach(cb => { if (cb.checked) count++; });
+                if (sizesSummaryText) {
+                    sizesSummaryText.textContent = count + ' dari 5 ukuran aktif (tersedia)';
+                }
+                if (chkUkuran) setChecklist(chkUkuran, count > 0);
+            }
+
             function updateSizeCard(checkbox) {
                 const card = checkbox.closest('.size-toggle-card');
                 const label = card ? card.querySelector('.size-label') : null;
-                const status = card ? card.querySelector('.size-status') : null;
-                const checkBadge = card ? card.querySelector('.size-badge-check') : null;
+                const indicator = card ? card.querySelector('.size-indicator') : null;
                 const size = checkbox.value;
                 const isChecked = checkbox.checked;
 
                 if (isChecked) {
                     if (card) {
-                        card.classList.add('border-[#b55322]', 'bg-white', 'shadow-2xs');
-                        card.classList.remove('border-stone-200', 'bg-stone-100/70', 'opacity-60');
-                        card.title = 'Klik untuk menonaktifkan (stok habis)';
+                        card.classList.add('border-[#b55322]', 'bg-white', 'text-stone-900', 'shadow-2xs');
+                        card.classList.remove('border-stone-200', 'bg-stone-100', 'text-stone-400', 'opacity-60', 'border-dashed');
+                        card.title = size + ' — Tersedia (Klik untuk ubah ke Habis)';
+                        card.style.borderColor = '#b55322';
+                        card.style.backgroundColor = '#ffffff';
+                        card.style.opacity = '1';
                     }
                     if (label) {
-                        label.classList.add('text-[#b55322]');
+                        label.classList.add('text-stone-900');
                         label.classList.remove('text-stone-400', 'line-through');
+                        label.style.color = '#1c1917';
+                        label.style.textDecoration = 'none';
                     }
-                    if (status) {
-                        status.textContent = 'Tersedia';
-                        status.classList.add('text-emerald-700');
-                        status.classList.remove('text-stone-400');
-                    }
-                    if (checkBadge) {
-                        checkBadge.textContent = '✓';
-                        checkBadge.classList.add('bg-[#b55322]');
-                        checkBadge.classList.remove('bg-stone-300');
+                    if (indicator) {
+                        indicator.textContent = '●';
+                        indicator.classList.add('text-emerald-600');
+                        indicator.classList.remove('text-stone-400');
+                        indicator.style.color = '#059669';
                     }
                 } else {
                     if (card) {
-                        card.classList.remove('border-[#b55322]', 'bg-white', 'shadow-2xs');
-                        card.classList.add('border-stone-200', 'bg-stone-100/70', 'opacity-60');
-                        card.title = 'Klik untuk mengaktifkan (stok tersedia)';
+                        card.classList.remove('border-[#b55322]', 'bg-white', 'text-stone-900', 'shadow-2xs');
+                        card.classList.add('border-stone-200', 'bg-stone-100', 'text-stone-400', 'opacity-60', 'border-dashed');
+                        card.title = size + ' — Habis (Klik untuk ubah ke Tersedia)';
+                        card.style.borderColor = '#e7e5e4';
+                        card.style.backgroundColor = '#f5f5f4';
+                        card.style.opacity = '0.6';
                     }
                     if (label) {
-                        label.classList.remove('text-[#b55322]');
+                        label.classList.remove('text-stone-900');
                         label.classList.add('text-stone-400', 'line-through');
+                        label.style.color = '#a8a29e';
+                        label.style.textDecoration = 'line-through';
                     }
-                    if (status) {
-                        status.textContent = 'Habis';
-                        status.classList.remove('text-emerald-700');
-                        status.classList.add('text-stone-400');
-                    }
-                    if (checkBadge) {
-                        checkBadge.textContent = '✕';
-                        checkBadge.classList.remove('bg-[#b55322]');
-                        checkBadge.classList.add('bg-stone-300');
+                    if (indicator) {
+                        indicator.textContent = '✕';
+                        indicator.classList.remove('text-emerald-600');
+                        indicator.classList.add('text-stone-400');
+                        indicator.style.color = '#a8a29e';
                     }
                 }
 
@@ -669,19 +691,26 @@
                 previewSizeBtns.forEach(btn => {
                     if (btn.dataset.size === size) {
                         if (isChecked) {
-                            btn.className = 'preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer border-[#e8e4dc] bg-[#fbf9f6] text-stone-700 hover:border-[#b55322]';
+                            btn.className = 'preview-size-btn grid h-8 w-8 place-items-center rounded-lg border text-xs font-bold transition cursor-pointer border-stone-300 bg-white text-stone-800 hover:border-[#b55322]';
                             btn.title = size + ' — Tersedia (Klik untuk ubah ke Habis)';
+                            btn.style.borderColor = '#d6d3d1';
+                            btn.style.backgroundColor = '#ffffff';
+                            btn.style.color = '#1c1917';
+                            btn.style.textDecoration = 'none';
+                            btn.style.opacity = '1';
                         } else {
-                            btn.className = 'preview-size-btn grid h-7 w-7 place-items-center rounded-lg border text-[11px] font-bold transition cursor-pointer border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50';
+                            btn.className = 'preview-size-btn grid h-8 w-8 place-items-center rounded-lg border text-xs font-bold transition cursor-pointer border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50';
                             btn.title = size + ' — Habis (Klik untuk ubah ke Tersedia)';
+                            btn.style.borderColor = '#e7e5e4';
+                            btn.style.backgroundColor = '#f5f5f4';
+                            btn.style.color = '#d6d3d1';
+                            btn.style.textDecoration = 'line-through';
+                            btn.style.opacity = '0.5';
                         }
                     }
                 });
 
-                // Update checklist: at least 1 size is selected
-                let anyChecked = false;
-                sizeCheckboxes.forEach(cb => { if (cb.checked) anyChecked = true; });
-                if (chkUkuran) setChecklist(chkUkuran, anyChecked);
+                updateSizesSummary();
             }
 
             sizeCheckboxes.forEach(cb => {
