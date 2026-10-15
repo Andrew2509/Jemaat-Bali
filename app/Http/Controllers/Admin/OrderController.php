@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Progress;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -385,5 +386,29 @@ class OrderController extends Controller
         $order->save();
 
         return redirect()->route('admin.orders', ['selected_id' => $order->id])->with('success', 'Status pengiriman berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus data pesanan kaos dan berkas bukti terkait
+     */
+    public function destroy(Request $request, Order $order)
+    {
+        $label = $order->nomor_pesanan ?: ('#' . $order->id);
+        $nama = $order->nama;
+
+        if ($order->bukti_path && Storage::disk('public')->exists($order->bukti_path)) {
+            Storage::disk('public')->delete($order->bukti_path);
+        }
+
+        $order->delete();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Pesanan {$label} ({$nama}) berhasil dihapus.",
+            ]);
+        }
+
+        return redirect()->route('admin.orders')->with('success', "Pesanan {$label} ({$nama}) berhasil dihapus.");
     }
 }

@@ -264,6 +264,39 @@ class AdminController extends Controller
         }
     }
 
+    /**
+     * Hapus data transaksi verifikasi (baik pesanan kaos maupun donasi)
+     */
+    public function verificationDestroy(Request $request, int $id, string $tipe)
+    {
+        if ($tipe === 'order' || $tipe === 'pesanan') {
+            $item = Order::findOrFail($id);
+            $label = $item->nomor_pesanan ?: ('#' . $item->id);
+            $jenisLabel = 'Pesanan';
+        } else {
+            $item = Donation::findOrFail($id);
+            $label = $item->kode ?: ('#' . $item->id);
+            $jenisLabel = 'Donasi';
+        }
+
+        $nama = $item->nama;
+
+        if ($item->bukti_path && Storage::disk('public')->exists($item->bukti_path)) {
+            Storage::disk('public')->delete($item->bukti_path);
+        }
+
+        $item->delete();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Data {$jenisLabel} {$label} ({$nama}) berhasil dihapus.",
+            ]);
+        }
+
+        return redirect()->route('admin.verification')->with('success', "Data {$jenisLabel} {$label} ({$nama}) berhasil dihapus.");
+    }
+
     public function donations(Request $request)
     {
         $query = Donation::query()->where('status', 'terverifikasi');

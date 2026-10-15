@@ -61,6 +61,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::middleware('permission:verification.manage')->group(function () {
         Route::post('/verifikasi/{id}/{tipe}/aksi', [AdminController::class, 'verificationAction'])->name('verification.action');
         Route::post('/verifikasi/{id}/{tipe}/kirim-wa', [AdminController::class, 'resendVerificationWa'])->name('verification.resend_wa');
+        Route::post('/verifikasi/{id}/{tipe}/hapus', [AdminController::class, 'verificationDestroy'])->name('verification.destroy');
+        Route::delete('/verifikasi/{id}/{tipe}', [AdminController::class, 'verificationDestroy'])->name('verification.delete');
     });
 
     // 3. Pesanan Kaos
@@ -70,6 +72,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     });
     Route::middleware('permission:orders.manage')->group(function () {
         Route::post('/orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
+        Route::post('/orders/{order}/hapus', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.delete');
     });
 
     // 4. Koleksi Kaos
