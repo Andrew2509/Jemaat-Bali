@@ -437,34 +437,13 @@
                 <div class="divide-y divide-stone-100 text-xs">
                     <div class="grid grid-cols-12 gap-3 items-center px-4 py-3.5">
                         <div class="col-span-8">
-                            <p class="font-bold text-stone-900">Donasi Saja</p>
-                            <p class="text-stone-400 mt-0.5">{{ $donasiSajaTerverifikasi->count() }} donasi terverifikasi</p>
+                            <p class="font-bold text-stone-900">Dana Pembangunan</p>
+                            <p class="text-stone-400 mt-0.5">Donasi saja + donasi dari kaos + omzet kaos</p>
                         </div>
                         <div class="col-span-4 text-right font-semibold text-stone-900">
-                            Rp{{ number_format($donasiSajaTerverifikasi->sum('nominal'), 0, ',', '.') }}
+                            Rp{{ number_format($danaPembangunan, 0, ',', '.') }}
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-12 gap-3 items-center px-4 py-3.5">
-                        <div class="col-span-8">
-                            <p class="font-bold text-stone-900">Donasi dari kaos</p>
-                            <p class="text-stone-400 mt-0.5">{{ $donasiDariKaosTerverifikasi->count() }} donasi terverifikasi</p>
-                        </div>
-                        <div class="col-span-4 text-right font-semibold text-stone-900">
-                            Rp{{ number_format($donasiDariKaosTerverifikasi->sum('nominal'), 0, ',', '.') }}
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-12 gap-3 items-center px-4 py-3.5">
-                        <div class="col-span-8">
-                            <p class="font-bold text-stone-900">Omzet kaos</p>
-                            <p class="text-stone-400 mt-0.5">{{ $orders->sum('jumlah') }} kaos terverifikasi</p>
-                        </div>
-                        <div class="col-span-4 text-right font-semibold text-stone-900">
-                            Rp{{ number_format($omzetKaos, 0, ',', '.') }}
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="mt-3 flex items-center justify-between border-t border-stone-200 px-4 pt-3.5 text-xs">
