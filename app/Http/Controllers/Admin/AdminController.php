@@ -529,7 +529,7 @@ class AdminController extends Controller
         $biayaPengiriman = $expenses->where('kategori', 'Pengiriman')->sum('jumlah');
         $danaBersihKaos = max(0, $omzetKaos - $biayaProduksi);
         $belanjaPembangunan = $expenses->sum('jumlah');
-        $danaPembangunan = $totalDonasi + $omzetKaos;
+        $danaPembangunan = $totalDonasi + $omzetKaos + $orders->sum('donasi');
         $saldoPembangunan = $danaPembangunan - $belanjaPembangunan;
         
         $penerimaan = $totalDonasi + $omzetKaos + $ongkir;
