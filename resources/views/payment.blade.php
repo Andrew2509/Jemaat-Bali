@@ -80,19 +80,28 @@
                         </p>
                     </div>
 
-                    <div class="mt-5 grid aspect-square w-full max-w-[280px] mx-auto place-items-center rounded-2xl border-2 border-dashed border-line bg-canvas p-6">
-                        <div class="text-center">
-                            <svg class="mx-auto h-10 w-10 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                            </svg>
-                            <p class="mt-3 text-sm font-semibold text-ink">QRIS merchant belum tersedia</p>
-                            <p class="mt-1 text-xs text-muted">Bukan kode pembayaran</p>
+                    @if(!empty($programInfo->qris_image_url))
+                        <div class="mt-5 mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
+                            <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="w-full rounded-xl object-contain">
                         </div>
-                    </div>
+                        <p class="mt-4 text-xs leading-relaxed text-muted">
+                            Pindai QRIS di atas dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.
+                        </p>
+                    @else
+                        <div class="mt-5 grid aspect-square w-full max-w-[280px] mx-auto place-items-center rounded-2xl border-2 border-dashed border-line bg-canvas p-6">
+                            <div class="text-center">
+                                <svg class="mx-auto h-10 w-10 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008H12V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                </svg>
+                                <p class="mt-3 text-sm font-semibold text-ink">QRIS merchant belum tersedia</p>
+                                <p class="mt-1 text-xs text-muted">Bukan kode pembayaran</p>
+                            </div>
+                        </div>
 
-                    <p class="mt-4 text-xs leading-relaxed text-muted">
-                        QRIS asli akan ditampilkan setelah tersedia dari admin. Jangan melakukan pembayaran sebelum dikonfirmasi.
-                    </p>
+                        <p class="mt-4 text-xs leading-relaxed text-muted">
+                            QRIS asli akan ditampilkan setelah tersedia dari admin. Jangan melakukan pembayaran sebelum dikonfirmasi.
+                        </p>
+                    @endif
 
                     <h3 class="mt-8 font-serif text-base font-bold">Cara pembayaran manual</h3>
                     <ol class="mt-4 space-y-4">

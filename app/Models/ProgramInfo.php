@@ -19,6 +19,7 @@ class ProgramInfo extends Model
         'proposal_tipe',
         'proposal_canva_url',
         'proposal_canva_url_en',
+        'qris_image',
         'size_chart',
         'hero_video_type',
         'hero_video_path',
@@ -163,6 +164,17 @@ class ProgramInfo extends Model
     public function hasCanvaVersionEn(): bool
     {
         return !empty($this->canva_embed_url_en);
+    }
+
+    /**
+     * URL gambar QRIS merchant untuk halaman pembayaran
+     */
+    public function getQrisImageUrlAttribute(): ?string
+    {
+        if (!empty($this->qris_image)) {
+            return asset('storage/' . $this->qris_image);
+        }
+        return null;
     }
 
     /**
