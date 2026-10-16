@@ -20,6 +20,7 @@ class ProgramInfo extends Model
         'proposal_canva_url',
         'proposal_canva_url_en',
         'qris_image',
+        'qris_code',
         'size_chart',
         'hero_video_type',
         'hero_video_path',
@@ -175,6 +176,14 @@ class ProgramInfo extends Model
             return asset('storage/' . $this->qris_image);
         }
         return null;
+    }
+
+    /**
+     * Cek apakah tersedia payload QRIS untuk digenerate menjadi gambar QR
+     */
+    public function hasQrisCode(): bool
+    {
+        return !empty(trim((string) $this->qris_code));
     }
 
     /**

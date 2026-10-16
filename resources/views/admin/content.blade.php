@@ -827,39 +827,23 @@
                     </div>
                 </div>
 
-                <!-- QRIS Merchant -->
+                <!-- Kode QRIS -->
                 <div>
-                    <label class="block text-xs font-semibold text-stone-700 mb-1.5">Gambar QRIS merchant</label>
-                    <div class="flex items-center gap-3">
-                        <div class="relative shrink-0">
-                            @if(!empty($programInfo->qris_image_url))
-                                <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant" class="h-16 w-16 rounded-xl object-cover border border-[#e8e4dc] bg-white">
+                    <label for="qris_code" class="block text-xs font-semibold text-stone-700 mb-1">Kode QRIS merchant (payload)</label>
+                    <textarea id="qris_code" name="qris_code" rows="3" placeholder="00020101021126..." class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-stone-900 focus:border-[#b55322] focus:outline-none break-all">{{ old('qris_code', $programInfo->qris_code ?? '') }}</textarea>
+                    <div class="mt-2 flex items-start gap-3">
+                        <div class="shrink-0">
+                            @if(!empty($programInfo->qris_code))
+                                <img data-qris-code="{{ $programInfo->qris_code }}" alt="Pratinjau QRIS" class="h-20 w-20 rounded-lg border border-[#e8e4dc] bg-white object-contain p-1">
                             @else
-                                <div class="grid h-16 w-16 place-items-center rounded-xl border border-dashed border-stone-300 bg-stone-50 text-stone-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h4.5v4.5h-4.5V4.5Zm0 10.5h4.5v4.5h-4.5V15Zm10.5-10.5h4.5v4.5h-4.5V4.5Zm0 10.5h2.25M15 15h2.25v2.25H15V15Zm4.5 0h.75M15 19.5h1.5M19.5 19.5h.75" />
-                                    </svg>
-                                </div>
+                                <div class="grid h-20 w-20 place-items-center rounded-lg border border-dashed border-stone-300 bg-stone-50 px-1 text-center text-[10px] leading-tight text-stone-400">Belum ada</div>
                             @endif
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <label for="qris_image_file" class="inline-flex items-center gap-1.5 rounded-lg border border-[#e8e4dc] bg-stone-50 px-3 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-100 hover:border-stone-400 cursor-pointer transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-3.5 h-3.5 text-stone-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                                </svg>
-                                <span>Pilih QRIS...</span>
-                            </label>
-                            <input type="file" id="qris_image_file" name="qris_image_file" accept="image/png,image/jpeg,image/webp" class="hidden">
-                            @if(!empty($programInfo->qris_image))
-                                <label class="inline-flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 cursor-pointer ml-1">
-                                    <input type="checkbox" name="hapus_qris" value="1" class="rounded border-stone-300 text-rose-600 focus:ring-rose-500">
-                                    <span>Hapus QRIS</span>
-                                </label>
-                            @endif
-                            <span class="text-[11px] text-stone-400">PNG, JPG maks. 2MB</span>
+                        <div class="text-[11px] leading-relaxed text-stone-500">
+                            <p>Tempel payload QRIS (string EMVCo) dari bank/e-wallet. Sistem otomatis mengubahnya menjadi gambar QR di halaman pembayaran.</p>
+                            <p class="mt-1 text-stone-400">Jangan mengubah karakter di dalamnya. Spasi hanya boleh ada di dalam nama merchant.</p>
                         </div>
                     </div>
-                    <p class="mt-1.5 text-[11px] text-stone-400">Tampilkan gambar QRIS di halaman pembayaran.</p>
                 </div>
 
                 <!-- Nama Program & Slogan / Subjudul -->

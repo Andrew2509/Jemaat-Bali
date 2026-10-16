@@ -947,8 +947,7 @@ class AdminController extends Controller
             'tagline' => ['nullable', 'string', 'max:120'],
             'logo_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
             'hapus_logo' => ['nullable', 'boolean'],
-            'qris_image_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
-            'hapus_qris' => ['nullable', 'boolean'],
+            'qris_code' => ['nullable', 'string', 'max:1000'],
             'deskripsi' => ['required', 'string', 'max:500'],
             'whatsapp' => ['required', 'string', 'max:30'],
             'email' => ['required', 'email', 'max:150'],
@@ -957,8 +956,6 @@ class AdminController extends Controller
             'nama_program.required' => 'Nama program wajib diisi.',
             'logo_file.image' => 'Berkas logo harus berupa gambar (PNG, JPG, WEBP, atau SVG).',
             'logo_file.max' => 'Ukuran berkas logo maksimal 2 MB.',
-            'qris_image_file.image' => 'Berkas QRIS harus berupa gambar (PNG, JPG, atau WEBP).',
-            'qris_image_file.max' => 'Ukuran berkas QRIS maksimal 2 MB.',
         ]);
 
         $info = ProgramInfo::first();
@@ -1002,23 +999,15 @@ class AdminController extends Controller
             }
         }
 
-        // Hapus QRIS lama jika diminta
-        if ($request->boolean('hapus_qris')) {
-            if ($info && $info->qris_image) {
-                Storage::disk('public')->delete($info->qris_image);
+        // Normalisasi kode QRIS: buang baris baru/tab yang tidak sengaja tersalin (spasi di dalam nama merchant dipertahankan)
+        if (array_key_exists('qris_code', $data)) {
+            $data['qris_code'] = trim(str_replace(["\r", "\n", "\t"], '', (string) $data['qris_code']));
+            if ($data['qris_code'] === '') {
+                $data['qris_code'] = null;
             }
-            $data['qris_image'] = null;
         }
 
-        // Simpan file QRIS baru jika diunggah
-        if ($request->hasFile('qris_image_file')) {
-            if ($info && $info->qris_image) {
-                Storage::disk('public')->delete($info->qris_image);
-            }
-            $data['qris_image'] = $request->file('qris_image_file')->store('qris', 'public');
-        }
-
-        unset($data['logo_file'], $data['hapus_logo'], $data['qris_image_file'], $data['hapus_qris']);
+        unset($data['logo_file'], $data['hapus_logo']);
 
         if ($info) {
             $info->update($data);

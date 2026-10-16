@@ -80,7 +80,18 @@
                         </p>
                     </div>
 
-                    @if(!empty($programInfo->qris_image_url))
+                    @if(!empty($programInfo->qris_code))
+                        <div class="mt-5 mx-auto w-full max-w-[280px]" data-qris-wrapper>
+                            <div class="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
+                                <div class="grid h-full w-full place-items-center rounded-xl bg-canvas px-4 text-center text-xs font-medium text-muted" data-qris-placeholder>Memuat QRIS&hellip;</div>
+                                <img data-qris-code="{{ $programInfo->qris_code }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="hidden absolute inset-0 m-auto h-full w-full rounded-2xl object-contain p-3">
+                            </div>
+                            <p class="mt-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted">QRIS &middot; Scan to Pay</p>
+                        </div>
+                        <p class="mt-4 text-xs leading-relaxed text-muted">
+                            Pindai QRIS di atas dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.
+                        </p>
+                    @elseif(!empty($programInfo->qris_image_url))
                         <div class="mt-5 mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
                             <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="w-full rounded-xl object-contain">
                         </div>
