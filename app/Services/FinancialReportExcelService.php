@@ -229,7 +229,11 @@ class FinancialReportExcelService
         $sheet->getStyle('E12')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         $rowDana = [
-            ['Dana Pembangunan', $metrics['danaPembangunan'], 'Donasi saja + donasi dari kaos + omzet kaos terverifikasi'],
+            ['Donasi Terverifikasi', $metrics['totalDonasi'], 'Penerimaan murni dari para donatur untuk pembangunan'],
+            ['Omzet Penjualan Kaos Fundraiser', $metrics['omzetKaos'], 'Total penjualan kaos program pembangunan'],
+            ['Biaya Produksi Kaos (HPP Kaos)', -$metrics['biayaProduksi'], 'Biaya kain, sablon, konveksi kaos fundraiser'],
+            ['Dana Bersih Kaos untuk Pembangunan', $metrics['danaBersihKaos'], 'Omzet kaos dikurangi biaya produksi kaos'],
+            ['SUBTOTAL DANA PEMBANGUNAN TERKUMPUL', $metrics['danaPembangunan'], 'Total Donasi + Dana Bersih Kaos'],
             ['Belanja Pembangunan (Fisik, Material, Upah)', -$metrics['belanjaPembangunan'], 'Pengeluaran semen, pasir, besi, upah tukang, dll.'],
             ['SALDO AKHIR DANA PEMBANGUNAN', $metrics['saldoPembangunan'], 'Dana bersih yang tersisa untuk kelanjutan pembangunan fisik'],
         ];
@@ -284,7 +288,8 @@ class FinancialReportExcelService
         $r++;
 
         $rowKas = [
-            ['Penerimaan: Dana Pembangunan', $metrics['totalDonasi'] + $metrics['omzetKaos'], 'Donasi saja + donasi dari kaos + omzet kaos terverifikasi'],
+            ['Penerimaan: Donasi Jemaat', $metrics['totalDonasi'], 'Pemasukan donasi terverifikasi'],
+            ['Penerimaan: Penjualan Kaos & Donasi Kaos', $metrics['omzetKaos'] + $metrics['donasiDariKaos'], 'Total penerimaan dari transaksi kaos'],
             ['Penerimaan: Ongkos Kirim Kaos (Prabayar)', $metrics['ongkir'], 'Ongkir dari pemesan kaos untuk diteruskan ke ekspedisi'],
             ['TOTAL PENERIMAAN KAS (A)', $metrics['totalPenerimaan'], 'Total seluruh uang masuk ke rekening'],
             ['Pengeluaran: Belanja Pembangunan', -$metrics['belanjaPembangunan'], 'Material semen, pasir, bata, besi, upah tukang, dll.'],

@@ -440,15 +440,10 @@
                             <p class="font-bold text-stone-900">Dana Pembangunan</p>
                             <p class="text-stone-400 mt-0.5">Donasi saja + donasi dari kaos + omzet kaos</p>
                         </div>
-                        <div class="col-span-4 text-right font-semibold text-stone-900">
+                        <div class="col-span-4 text-right font-bold text-[#b55322] text-sm">
                             Rp{{ number_format($danaPembangunan, 0, ',', '.') }}
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-3 flex items-center justify-between border-t border-stone-200 px-4 pt-3.5 text-xs">
-                    <span class="font-bold text-stone-700">Total dana pembangunan</span>
-                    <span class="font-bold text-[#b55322] text-sm">Rp{{ number_format($danaPembangunan, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
