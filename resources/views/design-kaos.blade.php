@@ -117,17 +117,6 @@
                         </div>
                     </div>
 
-                    {{-- Warna --}}
-                    <div class="mt-6">
-                        <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-ink">Warna</p>
-                        <div class="mt-3 flex items-center gap-3">
-                            <button type="button" data-warna="Terracotta" aria-label="Terracotta" class="color-swatch h-9 w-9 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-white transition" style="background:#b4531f"></button>
-                            <button type="button" data-warna="Hitam" aria-label="Hitam" class="color-swatch h-9 w-9 rounded-full ring-offset-2 ring-offset-white transition hover:ring-2 hover:ring-stone-400" style="background:#1c1917"></button>
-                            <button type="button" data-warna="Putih" aria-label="Putih" class="color-swatch h-9 w-9 rounded-full border border-line ring-offset-2 ring-offset-white transition hover:ring-2 hover:ring-stone-400" style="background:#f5f5f4"></button>
-                            <button type="button" data-warna="Navy" aria-label="Navy" class="color-swatch h-9 w-9 rounded-full ring-offset-2 ring-offset-white transition hover:ring-2 hover:ring-stone-400" style="background:#1e293b"></button>
-                        </div>
-                    </div>
-
                     {{-- Aksi --}}
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                         <button type="button" id="fav" class="btn flex flex-1 items-center justify-center gap-2 border-2 border-primary py-3 text-xs font-bold uppercase tracking-[0.12em] text-primary hover:bg-primary/5">
@@ -321,15 +310,6 @@
                     }
                 });
             }
-
-            document.querySelectorAll('.color-swatch').forEach(function (sw) {
-                sw.addEventListener('click', function () {
-                    document.querySelectorAll('.color-swatch').forEach(function (s) {
-                        s.classList.remove('ring-2', 'ring-primary', 'ring-stone-400');
-                    });
-                    sw.classList.add('ring-2', 'ring-primary');
-                });
-            });
 
             var favBtn = document.getElementById('fav');
             var favLabel = document.getElementById('fav-label');
