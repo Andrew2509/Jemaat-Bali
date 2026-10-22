@@ -157,21 +157,40 @@
             @if ($terkait->isEmpty())
                 <p class="mt-6 text-center text-sm text-muted">Belum ada desain lain di koleksi ini.</p>
             @else
-                <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($terkait as $d)
-                        <a href="{{ route('design', ['desain' => $d->id]) }}" class="card group flex flex-col overflow-hidden !p-0 transition hover:-translate-y-0.5 hover:shadow-md">
-                            <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+                        @php $dUkuranTersedia = count($d->pilihanUkuran()); @endphp
+                        <a href="{{ route('design', ['desain' => $d->id]) }}" class="group flex flex-col rounded-3xl border border-line bg-white p-2.5 shadow-xs transition hover:-translate-y-1 hover:shadow-lg">
+                            <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-stone-200">
                                 <img src="{{ $d->gambarUrl() }}" alt="{{ $d->nama }}" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                @if ($d->video_360)
+                                    <span class="absolute left-3 top-3 rounded-full bg-stone-900/85 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">360&deg;</span>
+                                @endif
+                                <button type="button" data-fav-card="{{ $d->id }}" aria-label="Simpan favorit"
+                                    class="fav-card absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-stone-900/40 text-white backdrop-blur-xs transition hover:bg-stone-900/60 cursor-pointer">
+                                    <svg class="h-4 w-4 fill-none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="flex flex-1 flex-col p-4">
-                                <div class="flex items-start justify-between gap-2">
-                                    <span class="font-display text-sm font-bold uppercase leading-snug">{{ $d->nama }}</span>
-                                    <span class="shrink-0 font-display text-sm font-bold">Rp {{ number_format($d->harga, 0, ',', '.') }}</span>
-                                </div>
-                                <span class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                            <div class="flex flex-1 flex-col px-2 pb-1 pt-3.5">
+                                <h3 class="line-clamp-3 text-[15px] font-bold leading-snug text-ink">{{ $d->nama }}</h3>
+                                <p class="mt-2.5 text-xl font-extrabold tracking-tight text-ink">Rp {{ number_format($d->harga, 0, ',', '.') }}</p>
+                                <div class="mt-2 flex items-center gap-1.5 text-xs">
                                     <span class="tracking-tight text-primary">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                                    {{ $d->orders_count }} pesanan
-                                </span>
+                                    <span class="font-bold text-ink">5.0</span>
+                                    <span class="h-3 w-px bg-line"></span>
+                                    <span class="text-muted">{{ number_format($d->orders_count) }} pesanan</span>
+                                </div>
+                                <div class="mt-auto flex items-center justify-between gap-2 pt-4">
+                                    <span class="text-[11px] font-semibold text-muted">{{ $dUkuranTersedia }} Ukuran Tersedia</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3.5 py-2 text-xs font-bold text-ink transition group-hover:bg-stone-900 group-hover:text-white">
+                                        Lihat Detail
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.659L11.22 5.53a.75.75 0 1 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.19-3.19H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
                         </a>
                     @endforeach
@@ -332,6 +351,28 @@
                 });
                 syncFav();
             }
+
+            // Favorit (hati) pada card "Anda Mungkin Suka"
+            function readFavIds() {
+                try { return JSON.parse(localStorage.getItem('jb-favorit') || '[]'); } catch (err) { return []; }
+            }
+            document.querySelectorAll('[data-fav-card]').forEach(function (btn) {
+                var cardId = Number(btn.dataset.favCard);
+                var cardSvg = btn.querySelector('svg');
+                function syncCardFav() {
+                    if (cardSvg) cardSvg.classList.toggle('fill-current', readFavIds().indexOf(cardId) !== -1);
+                }
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var ids = readFavIds();
+                    var i = ids.indexOf(cardId);
+                    if (i === -1) ids.push(cardId); else ids.splice(i, 1);
+                    localStorage.setItem('jb-favorit', JSON.stringify(ids));
+                    syncCardFav();
+                });
+                syncCardFav();
+            });
         })();
     </script>
 @endpush
