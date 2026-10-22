@@ -697,37 +697,25 @@
             </div>
 
             {{-- ================= FASHION SHOWCASE CARD (PERSIS SEPERTI GAMBAR REFERENSI) ================= --}}
-            <div class="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border border-stone-800/20 bg-stone-900 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)]">
-                {{-- Garis Frame Putih Tipis Inset (Sesuai Referensi Gambar) --}}
-                <div class="pointer-events-none absolute inset-3 sm:inset-5 z-20 rounded-2xl sm:rounded-3xl border border-white/25"></div>
+            <div class="relative mx-auto max-w-5xl overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] border border-stone-900/10 bg-[#e7e6e0] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)]">
 
-                {{-- Kontainer Split: Kiri Olive Green, Kanan Greyish Fog Atmosphere --}}
-                <div class="relative grid grid-cols-1 md:grid-cols-12 min-h-[500px] sm:min-h-[540px] lg:min-h-[580px]">
-                    {{-- 1. BAGIAN KIRI: SOLID OLIVE GREEN DENGAN TYPOGRAPHY & BADGE --}}
-                    <div class="relative z-10 md:col-span-6 bg-[#4c5443] p-5 sm:p-7 lg:p-8 flex flex-col justify-between overflow-hidden">
-                        {{-- Watermark Outlined Vertikal di Sisi Kiri (Sesuai Gambar "REGEN JACKET") --}}
-                        <div class="pointer-events-none absolute left-3 top-8 bottom-8 select-none hidden items-center justify-center opacity-30 md:flex">
-                            <span class="font-display text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-[0.2em] whitespace-nowrap"
-                                style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.4); color: transparent; writing-mode: vertical-rl; transform: rotate(180deg);">
-                                KAOS JEMAAT
-                            </span>
+                {{-- Kontainer Split: Kiri Olive, Tengah Fog, Kanan Strip Thumbnail --}}
+                <div class="relative grid grid-cols-1 md:grid-cols-12 min-h-[480px] sm:min-h-[520px] lg:min-h-[560px]">
+                    {{-- 1. PANEL KIRI: OLIVE GREEN --}}
+                    <div class="relative z-10 flex flex-col bg-[#4c5443] p-5 sm:p-7 md:col-span-4 lg:p-8">
+                        {{-- Label Seri + Garis --}}
+                        <div class="relative z-10 flex items-center gap-3 pr-28 md:pr-0">
+                            <span class="whitespace-nowrap font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider text-white/70">Edisi 2026 | Official Fundraiser</span>
+                            <span class="h-px flex-1 bg-white/30"></span>
                         </div>
 
-                        {{-- Konten Teks Kiri Atas: Hanya Label Seri & Judul Utama --}}
-                        <div class="relative z-10 pl-8 sm:pl-10 max-w-xs sm:max-w-sm">
-                            {{-- Label Seri (Sesuai "Iva™ | Trendy") --}}
-                            <p class="font-mono text-[11px] sm:text-xs font-semibold tracking-wider text-white/75">
-                                Edisi 2026 | Official Fundraiser
-                            </p>
-
-                            {{-- Judul Utama --}}
-                            <h3 id="showcase-title" class="mt-1 font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-white leading-tight">
-                                {{ preg_replace('/["\'“”]/', '', $defaultDesign->nama ?? 'Kaos Pembangunan') }}
-                            </h3>
-                        </div>
+                        {{-- Judul Utama --}}
+                        <h3 id="showcase-title" class="relative z-10 mt-3 font-display text-2xl sm:text-[26px] font-black leading-[1.15] text-white">
+                            {{ preg_replace('/["\'“”]/', '', $defaultDesign->nama ?? 'Kaos Pembangunan') }}
+                        </h3>
 
                         {{-- Konten Teks Kiri Bawah: Tabel Ukuran Tepat di Atas Teks Isi / Deskripsi --}}
-                        <div class="relative z-10 pl-8 sm:pl-10 mt-4 max-w-xs sm:max-w-sm">
+                        <div class="relative z-10 mt-4">
                             {{-- Tabel Panduan Ukuran (Size Chart): Pria & Wanita --}}
                             @php
                                 $homeCharts = $defaultDesign
@@ -738,10 +726,10 @@
                                 $homeGenderOptions = ['pria' => ['label' => 'Pria', 'icon' => '♂'], 'wanita' => ['label' => 'Wanita', 'icon' => '♀']];
                             @endphp
                             <div class="mb-2 sm:mb-2.5" id="home-size-chart">
-                                <div class="flex items-center gap-1.5 mb-1.5">
+                                <div class="mb-2.5 flex items-center gap-2">
                                     @foreach ($homeGenderOptions as $gKey => $gOpt)
                                         <button type="button" data-home-size-tab="{{ $gKey }}"
-                                            class="rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition {{ $gKey === 'pria' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20' }}">
+                                            class="cursor-pointer rounded-full border px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider transition {{ $gKey === 'pria' ? 'border-white/80 text-white' : 'border-transparent bg-white/15 text-white/70 hover:bg-white/25' }}">
                                             {{ $gOpt['icon'] }} {{ $gOpt['label'] }}
                                         </button>
                                     @endforeach
@@ -798,11 +786,12 @@
                                     function activate(g) {
                                         tabs.forEach(function (t) {
                                             var on = t.dataset.homeSizeTab === g;
-                                            t.classList.toggle('bg-white', on);
-                                            t.classList.toggle('text-stone-900', on);
-                                            t.classList.toggle('bg-white/10', !on);
+                                            t.classList.toggle('border-white/80', on);
+                                            t.classList.toggle('text-white', on);
+                                            t.classList.toggle('border-transparent', !on);
+                                            t.classList.toggle('bg-white/15', !on);
                                             t.classList.toggle('text-white/70', !on);
-                                            t.classList.toggle('hover:bg-white/20', !on);
+                                            t.classList.toggle('hover:bg-white/25', !on);
                                         });
                                         panels.forEach(function (p) {
                                             p.classList.toggle('hidden', p.dataset.homeSizePanel !== g);
@@ -816,143 +805,132 @@
                             </script>
 
                             {{-- Keterangan Bahan / Teks Isi Deskripsi --}}
-                            <p id="showcase-desc" class="text-[11px] sm:text-xs text-white/80 leading-relaxed">
+                            <p id="showcase-desc" class="mt-3.5 text-[11px] sm:text-xs text-white/75 leading-relaxed">
                                 {{ $defaultDesign->deskripsi ?? 'Bahan 100% Combed Cotton adem, sablon premium tahan cuci.' }}
                             </p>
                         </div>
+
+                        {{-- Aksen Tulisan Tangan --}}
+                        <span class="relative z-10 mt-auto block w-fit -rotate-6 self-end pt-6 pr-1 text-right font-display text-sm font-semibold italic leading-tight text-white/50">
+                            Small Kindness<br>Big Impact
+                        </span>
                     </div>
 
-                    {{-- 2. BAGIAN KANAN: SOFT FOG / ATMOSPHERIC BACKDROP DENGAN GALLERY THUMBNAIL --}}
-                    <div class="relative md:col-span-6 p-5 sm:p-7 lg:p-8 flex flex-col justify-between items-end overflow-hidden"
-                        style="background: radial-gradient(circle at 75% 25%, #f6f5f1 0%, #e6e5df 50%, #cbcec5 100%);">
-                        {{-- Logo Brand di Pojok Kanan Atas (Sesuai "LOOMIE FASHION") --}}
-                        <div class="relative z-20">
-                            <div class="border-y-2 border-stone-800 px-4 py-1 text-center">
-                                <span class="block font-display text-xs sm:text-sm font-black tracking-[0.25em] text-stone-900 leading-tight uppercase">{{ $programInfo->nama_program ?? 'JEMAAT BALI' }}</span>
-                                <span class="block font-mono text-[8px] sm:text-[9px] font-bold tracking-[0.3em] text-stone-600">OFFICIAL FUNDRAISER</span>
-                            </div>
-                        </div>
-
-                        {{-- Galeri Thumbnail Kapsul Vertikal (Sesuai Bentuk Kapsul Melengkung di Gambar) --}}
-                        <div class="relative z-20 my-auto py-3">
-                            <div class="flex flex-col gap-2 sm:gap-2.5 rounded-[2.2rem] sm:rounded-[2.5rem] bg-stone-400/25 p-2 sm:p-2.5 border border-white/60 shadow-lg backdrop-blur-md w-24 sm:w-28 md:w-32">
-                                @foreach ($designs as $idx => $design)
-                                    @php
-                                        $cleanImg = file_exists(public_path('designs/clean-' . basename($design->gambar)))
-                                            ? 'designs/clean-' . basename($design->gambar)
-                                            : $design->gambar;
-                                        $isActive = $defaultDesign && ($design->id === $defaultDesign->id);
-                                    @endphp
-                                    @if (!file_exists(public_path($cleanImg)))
-                                        {{-- Desain tanpa berkas gambar valid dilewati agar tidak menampilkan gambar rusak --}}
-                                        @continue
-                                    @endif
-                                    <button type="button"
-                                        class="design-thumb group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-1.5 shadow-xs transition-all duration-200 hover:scale-105 cursor-pointer {{ $isActive ? 'active ring-2 ring-stone-900 border-stone-900 scale-105' : 'border border-stone-200/60 opacity-80 hover:opacity-100' }}"
-                                        data-id="{{ $design->id }}"
-                                        data-nama="{{ preg_replace('/["\'“”]/', '', $design->nama) }}"
-                                        data-harga="{{ $design->harga }}"
-                                        data-deskripsi="{{ $design->deskripsi }}"
-                                        data-img="{{ asset($cleanImg) }}"
-                                        data-sizes="{{ json_encode($design->pilihanUkuran()) }}"
-                                        title="{{ $design->nama }} — Rp {{ number_format($design->harga, 0, ',', '.') }}">
-                                        <div class="relative h-14 w-full sm:h-16 flex items-center justify-center p-1">
-                                            <img src="{{ asset($cleanImg) }}" alt="{{ $design->nama }}" loading="lazy" decoding="async" width="80" height="80"
-                                                class="h-full w-full object-contain drop-shadow-xs transition group-hover:scale-105">
-                                        </div>
-                                    </button>
-                                @endforeach
-                            </div>
+                    {{-- 2. TENGAH: BACKDROP FOG DENGAN HERO GARMENT --}}
+                    <div class="relative flex items-center justify-center overflow-hidden px-4 py-8 sm:py-10 md:col-span-6"
+                        style="background: radial-gradient(circle at 70% 30%, #f7f6f2 0%, #e9e8e2 55%, #d5d7ce 100%);">
+                        {{-- Gambar Kaos Hero --}}
+                        <div class="relative w-60 sm:w-72 md:w-[21rem] lg:w-[24rem]">
+                            @php
+                                $defaultCleanImg = file_exists(public_path('designs/clean-' . basename($defaultDesign->gambar ?? '')))
+                                    ? 'designs/clean-' . basename($defaultDesign->gambar)
+                                    : ($defaultDesign->gambar ?? 'designs/kaos-bangun-bersama.svg');
+                            @endphp
+                            <img id="hero-shirt-img"
+                                src="{{ asset($defaultCleanImg) }}"
+                                alt="{{ $defaultDesign->nama ?? 'Kaos Pembangunan' }}"
+                                width="460" height="460"
+                                decoding="async"
+                                class="h-auto max-h-[320px] w-full object-contain drop-shadow-[0_22px_30px_rgba(0,0,0,0.3)] transition-all duration-300 sm:max-h-[380px] lg:max-h-[430px]">
                         </div>
                     </div>
 
-                    {{-- 3. HERO GARMENT DISPLAY (DI TENGAH-TENGAH PERBATASAN WARNA, UKURAN BESAR & SEIMBANG) --}}
-                    <div class="pointer-events-none relative z-15 flex items-center justify-center py-6 md:absolute md:inset-0 md:py-0">
-                        <div id="hero-static-stage" class="pointer-events-none flex items-center justify-center md:translate-x-6 lg:translate-x-8">
-                            {{-- Gambar Kaos Hero Transparan Dinamis (Diperbesar Sesuai Permintaan) --}}
-                            <div class="relative w-72 sm:w-84 md:w-[26rem] lg:w-[29rem] transition-transform duration-300 flex items-center justify-center">
+                    {{-- 3. KANAN: STRIP THUMBNAIL VERTIKAL --}}
+                    <div class="relative flex items-center justify-center border-t border-stone-900/10 bg-[#dcdbd4] px-4 py-5 md:col-span-2 md:border-l md:border-t-0 md:px-3 md:py-6 md:pt-16">
+                        <div class="flex w-full flex-row gap-2 overflow-x-auto rounded-3xl border border-white bg-white/70 p-2 shadow-sm backdrop-blur-xs md:max-h-[400px] md:w-auto md:flex-col md:gap-2.5 md:overflow-x-visible md:overflow-y-auto">
+                            @foreach ($designs as $idx => $design)
                                 @php
-                                    $defaultCleanImg = file_exists(public_path('designs/clean-' . basename($defaultDesign->gambar ?? '')))
-                                        ? 'designs/clean-' . basename($defaultDesign->gambar)
-                                        : ($defaultDesign->gambar ?? 'designs/kaos-bangun-bersama.svg');
+                                    $cleanImg = file_exists(public_path('designs/clean-' . basename($design->gambar)))
+                                        ? 'designs/clean-' . basename($design->gambar)
+                                        : $design->gambar;
+                                    $isActive = $defaultDesign && ($design->id === $defaultDesign->id);
                                 @endphp
-                                <img id="hero-shirt-img"
-                                    src="{{ asset($defaultCleanImg) }}"
-                                    alt="{{ $defaultDesign->nama ?? 'Kaos Pembangunan' }}"
-                                    width="460" height="460"
-                                    decoding="async"
-                                    class="w-full h-auto max-h-[400px] sm:max-h-[440px] lg:max-h-[470px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.4)] transition-all duration-300">
-                            </div>
+                                @if (!file_exists(public_path($cleanImg)))
+                                    {{-- Desain tanpa berkas gambar valid dilewati agar tidak menampilkan gambar rusak --}}
+                                    @continue
+                                @endif
+                                <button type="button"
+                                    class="design-thumb group relative flex shrink-0 min-w-16 flex-col items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-1.5 shadow-xs transition-all duration-200 hover:scale-105 cursor-pointer {{ $isActive ? 'active ring-2 ring-stone-900 border-stone-900 scale-105' : 'border border-stone-200/60 opacity-80 hover:opacity-100' }}"
+                                    data-id="{{ $design->id }}"
+                                    data-nama="{{ preg_replace('/["\'“”]/', '', $design->nama) }}"
+                                    data-harga="{{ $design->harga }}"
+                                    data-deskripsi="{{ $design->deskripsi }}"
+                                    data-img="{{ asset($cleanImg) }}"
+                                    data-sizes="{{ json_encode($design->pilihanUkuran()) }}"
+                                    title="{{ $design->nama }} — Rp {{ number_format($design->harga, 0, ',', '.') }}">
+                                    <div class="relative flex h-14 w-full shrink-0 items-center justify-center p-1 sm:h-16">
+                                        <img src="{{ asset($cleanImg) }}" alt="{{ $design->nama }}" loading="lazy" decoding="async" width="80" height="80"
+                                            class="h-full w-full object-contain drop-shadow-xs transition group-hover:scale-105">
+                                    </div>
+                                </button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
 
+                {{-- Brand Notch Pojok Kanan Atas --}}
+                <div class="absolute right-0 top-0 z-30 flex items-center gap-2.5 rounded-bl-2xl border-b border-l border-stone-900/10 bg-white px-4 py-2.5 shadow-sm">
+                    <span class="text-[10px] font-black uppercase tracking-[0.18em] text-stone-900 sm:text-[11px]">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 shrink-0 text-stone-900" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM8.5 14.5c.8 1.2 2 1.9 3.5 1.9s2.7-.7 3.5-1.9" />
+                    </svg>
+                </div>
+
                 {{-- ================= LIVE INTERACTIVE ORDERING BAR ================= --}}
-                <div class="border-t border-stone-800/30 bg-white/95 p-4 sm:p-6 backdrop-blur-md">
-                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        {{-- Kiri: Detail Desain & Harga yang Aktif --}}
-                        <div class="flex items-center gap-3.5">
-                            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-stone-900 text-white font-bold text-xs shadow-sm">
-                                <span id="bar-design-id">#{{ $defaultDesign->id ?? 1 }}</span>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-stone-400">Desain Terpilih</span>
-                                <h4 id="bar-design-name" class="font-display text-sm sm:text-base font-extrabold text-stone-900 leading-tight">
-                                    {{ $defaultDesign->nama ?? 'Kaos Bangun Bersama' }}
-                                </h4>
-                                <p id="bar-design-sub" class="text-xs font-semibold text-stone-500">
-                                    Rp {{ number_format($defaultDesign->harga ?? 150000, 0, ',', '.') }} • 100% Cotton 24s/30s
-                                </p>
-                            </div>
+                <div class="m-2 flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-xs sm:m-3 sm:p-5 md:flex-row md:items-center md:justify-between md:gap-5">
+                    {{-- Kiri: Detail Desain & Harga yang Aktif --}}
+                    <div class="flex items-center gap-3.5">
+                        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#414b36] text-xs font-black text-white shadow-sm">
+                            <span id="bar-design-id">#{{ $defaultDesign->id ?? 1 }}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-stone-400">Desain Terpilih</span>
+                            <h4 id="bar-design-name" class="font-display text-sm sm:text-base font-extrabold text-stone-900 leading-tight">
+                                {{ $defaultDesign->nama ?? 'Kaos Bangun Bersama' }}
+                            </h4>
+                            <p id="bar-design-sub" class="text-xs font-semibold text-stone-500">
+                                Rp {{ number_format($defaultDesign->harga ?? 150000, 0, ',', '.') }} • 100% Cotton 24s/30s
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Tengah: Pemilih Ukuran --}}
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="mr-1.5 text-[10px] font-extrabold uppercase tracking-widest text-stone-400">Size</span>
+                        @php
+                            $defaultSizes = $defaultDesign ? $defaultDesign->pilihanUkuran() : ['S', 'M', 'L', 'XL', 'XXL'];
+                            $initialActiveSize = in_array('L', $defaultSizes) ? 'L' : ($defaultSizes[0] ?? 'L');
+                        @endphp
+                        @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $sz)
+                            @php
+                                $isAvail = in_array($sz, $defaultSizes);
+                                $isSel = $sz === $initialActiveSize;
+                            @endphp
+                            <button type="button" data-size="{{ $sz }}"
+                                {{ $isAvail ? '' : 'disabled' }}
+                                title="{{ $sz }} — {{ $isAvail ? 'Tersedia' : 'Habis' }}"
+                                class="size-choice-btn grid h-9 w-9 place-items-center rounded-full border text-xs font-black transition {{ !$isAvail ? 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50 cursor-not-allowed' : ($isSel ? 'border-[#4c5443] bg-[#4c5443] text-white shadow-xs cursor-pointer' : 'border-stone-300 bg-white text-stone-700 hover:border-[#4c5443] cursor-pointer') }}">
+                                {{ $sz }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    {{-- Kanan: Total & Tombol Order Now --}}
+                    <div class="flex items-center justify-between gap-4 border-t border-stone-200 pt-3 md:justify-end md:border-t-0 md:pt-0">
+                        <div class="text-left md:text-right">
+                            <span class="block text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Total Donasi</span>
+                            <span id="display-total-price" class="font-display text-lg sm:text-xl font-black text-stone-900">
+                                Rp {{ number_format($defaultDesign->harga ?? 150000, 0, ',', '.') }}
+                            </span>
                         </div>
 
-                        {{-- Tengah: Pemilih Ukuran & Jumlah --}}
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="flex items-center gap-1">
-                                <span class="text-xs font-bold uppercase tracking-wider text-stone-600 mr-1">Size:</span>
-                                @php
-                                    $defaultSizes = $defaultDesign ? $defaultDesign->pilihanUkuran() : ['S', 'M', 'L', 'XL', 'XXL'];
-                                    $initialActiveSize = in_array('L', $defaultSizes) ? 'L' : ($defaultSizes[0] ?? 'L');
-                                @endphp
-                                @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $sz)
-                                    @php
-                                        $isAvail = in_array($sz, $defaultSizes);
-                                        $isSel = $sz === $initialActiveSize;
-                                    @endphp
-                                    <button type="button" data-size="{{ $sz }}"
-                                        {{ $isAvail ? '' : 'disabled' }}
-                                        title="{{ $sz }} — {{ $isAvail ? 'Tersedia' : 'Habis' }}"
-                                        class="size-choice-btn grid h-9 w-9 place-items-center rounded-xl border text-xs font-black transition {{ !$isAvail ? 'border-stone-200 bg-stone-100 text-stone-300 line-through opacity-50 cursor-not-allowed' : ($isSel ? 'border-stone-900 bg-stone-900 text-white shadow-xs' : 'border-stone-300 bg-white text-stone-700 hover:border-stone-900') }}">
-                                        {{ $sz }}
-                                    </button>
-                                @endforeach
-                            </div>
-
-                            <div class="flex items-center rounded-xl border border-stone-300 bg-stone-50 px-2 py-1">
-                                <button type="button" id="btn-qty-minus" aria-label="Kurangi"
-                                    class="grid h-7 w-7 place-items-center rounded-lg text-sm font-black text-stone-600 transition hover:bg-stone-200 hover:text-stone-900">−</button>
-                                <span id="display-qty" class="font-mono text-xs font-black text-stone-900 px-2">1</span>
-                                <button type="button" id="btn-qty-plus" aria-label="Tambah"
-                                    class="grid h-7 w-7 place-items-center rounded-lg text-sm font-black text-stone-600 transition hover:bg-stone-200 hover:text-stone-900">+</button>
-                            </div>
-                        </div>
-
-                        {{-- Kanan: Total & Tombol Order Now --}}
-                        <div class="flex items-center justify-between gap-4 border-t border-stone-200 pt-3 md:border-t-0 md:pt-0">
-                            <div class="text-left md:text-right">
-                                <span class="block text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Total Donasi</span>
-                                <span id="display-total-price" class="font-display text-lg sm:text-xl font-black text-stone-900">
-                                    Rp {{ number_format($defaultDesign->harga ?? 150000, 0, ',', '.') }}
-                                </span>
-                            </div>
-
-                            <a id="btn-order-checkout"
-                                href="{{ $defaultDesign ? route('checkout.pemesanan', ['desain' => $defaultDesign->id, 'ukuran' => 'L', 'jumlah' => 1]) : route('checkout.pemesanan') }}"
-                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-md transition hover:bg-primary-dark hover:scale-[1.02] active:scale-95 sm:text-sm">
-                                <span>Order Now</span>
-                                <span>&rarr;</span>
-                            </a>
-                        </div>
+                        <a id="btn-order-checkout"
+                            href="{{ $defaultDesign ? route('checkout.pemesanan', ['desain' => $defaultDesign->id, 'ukuran' => 'L', 'jumlah' => 1]) : route('checkout.pemesanan') }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#414b36] px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-md transition hover:bg-[#37412f] hover:scale-[1.02] active:scale-95 sm:px-6 sm:text-sm">
+                            <span>Order Now</span>
+                            <span>&rarr;</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -970,9 +948,6 @@
                 const barDesignName = document.getElementById('bar-design-name');
                 const barDesignSub = document.getElementById('bar-design-sub');
                 const displayTotalPrice = document.getElementById('display-total-price');
-                const displayQty = document.getElementById('display-qty');
-                const btnQtyMinus = document.getElementById('btn-qty-minus');
-                const btnQtyPlus = document.getElementById('btn-qty-plus');
                 const btnOrderCheckout = document.getElementById('btn-order-checkout');
                 const sizeBtns = document.querySelectorAll('.size-choice-btn');
 
@@ -999,7 +974,6 @@
                     if (barDesignId) barDesignId.textContent = '#' + activeId;
                     if (barDesignName) barDesignName.textContent = activeName;
                     if (barDesignSub) barDesignSub.textContent = formatRupiah(activePrice) + ' • 100% Cotton 24s/30s';
-                    if (displayQty) displayQty.textContent = String(activeQty);
                     if (displayTotalPrice) displayTotalPrice.textContent = formatRupiah(activePrice * activeQty);
 
                     // Update link href ke form pemesanan
@@ -1013,13 +987,13 @@
                         const isAvail = activeSizes.includes(s);
                         btn.disabled = !isAvail;
                         if (!isAvail) {
-                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-200 bg-stone-100 text-xs font-black text-stone-300 line-through opacity-50 cursor-not-allowed transition';
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-full border border-stone-200 bg-stone-100 text-xs font-black text-stone-300 line-through opacity-50 cursor-not-allowed transition';
                             btn.title = s + ' — Habis';
                         } else if (s === activeSize) {
-                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-900 bg-stone-900 text-xs font-black text-white shadow-xs transition cursor-pointer';
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-full border border-[#4c5443] bg-[#4c5443] text-xs font-black text-white shadow-xs transition cursor-pointer';
                             btn.title = s + ' — Terpilih';
                         } else {
-                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-xl border border-stone-300 bg-white text-xs font-black text-stone-700 hover:border-stone-900 transition cursor-pointer';
+                            btn.className = 'size-choice-btn grid h-9 w-9 place-items-center rounded-full border border-stone-300 bg-white text-xs font-black text-stone-700 hover:border-[#4c5443] transition cursor-pointer';
                             btn.title = s + ' — Tersedia';
                         }
                     });
@@ -1072,21 +1046,6 @@
                         activeSize = this.dataset.size;
                         syncUI();
                     });
-                });
-
-                // Qty Stepper
-                btnQtyMinus?.addEventListener('click', function () {
-                    if (activeQty > 1) {
-                        activeQty--;
-                        syncUI();
-                    }
-                });
-
-                btnQtyPlus?.addEventListener('click', function () {
-                    if (activeQty < 99) {
-                        activeQty++;
-                        syncUI();
-                    }
                 });
 
                 // Klik Order: Munculkan modal pilihan "Beli Kaos Saja" atau "Kaos + Donasi"
