@@ -91,17 +91,6 @@
                                 @endforeach
                             </div>
                         </details>
-                        <details class="group border-t border-line">
-                            <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-xs font-bold uppercase tracking-[0.15em] [&::-webkit-details-marker]:hidden">
-                                Cara Perawatan
-                                <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                </svg>
-                            </summary>
-                            <div class="pb-5 text-sm leading-relaxed text-muted">
-                                Cuci dengan air dingin, jangan pakai pemutih. Setrika dari balik sablon dan hindari mesin pengering agar awet.
-                            </div>
-                        </details>
                     </div>
                 </div>
 
