@@ -158,10 +158,6 @@
                             </button>
                         @endforeach
                     </div>
-                    <button type="button" id="size-guide" class="mt-3 w-fit text-[11px] font-bold uppercase tracking-[0.15em] text-muted underline underline-offset-4 hover:text-ink">
-                        Panduan Ukuran
-                    </button>
-
                     <p class="mt-8 text-[11px] font-bold uppercase tracking-[0.25em] text-ink">Warna</p>
                     <div class="mt-3 flex items-center gap-3">
                         <button type="button" data-warna="Terracotta" aria-label="Terracotta" class="color-swatch h-9 w-9 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-white transition" style="background:#b4531f"></button>
