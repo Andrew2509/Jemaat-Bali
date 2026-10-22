@@ -30,24 +30,65 @@
                     <p class="mt-5 text-sm leading-relaxed text-muted">{{ $selected->deskripsi }}</p>
 
                     <div class="mt-8 border-y border-line">
+                        @php
+                            $detailCharts = $selected
+                                ? $selected->getSizeCharts()
+                                : ($programInfo
+                                    ? $programInfo->getSizeCharts()
+                                    : ['pria' => \App\Models\ProgramInfo::defaultSizeChartPria(), 'wanita' => \App\Models\ProgramInfo::defaultSizeChartWanita()]);
+                            $detailGenderOptions = ['pria' => ['label' => 'Pria', 'icon' => '♂'], 'wanita' => ['label' => 'Cewe', 'icon' => '♀']];
+                        @endphp
                         <details class="group">
                             <summary class="flex cursor-pointer list-none items-center justify-between py-4 text-xs font-bold uppercase tracking-[0.15em] [&::-webkit-details-marker]:hidden">
-                                Bahan &amp; Ukuran
+                                Panduan Ukuran Baju
                                 <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                                 </svg>
                             </summary>
-                            <div class="pb-5 text-sm leading-relaxed text-muted">
-                                <p>Kaos katun combed 30s — adem, jahitan rapi, sablon fleksibel yang tidak mudah retak.</p>
-                                <table class="mt-3 w-full max-w-xs text-xs">
-                                    <tbody class="divide-y divide-line">
-                                        <tr><td class="py-1.5 font-semibold text-ink">S</td><td class="py-1.5">Lingkar dada 48 cm</td></tr>
-                                        <tr><td class="py-1.5 font-semibold text-ink">M</td><td class="py-1.5">Lingkar dada 50 cm</td></tr>
-                                        <tr><td class="py-1.5 font-semibold text-ink">L</td><td class="py-1.5">Lingkar dada 52 cm</td></tr>
-                                        <tr><td class="py-1.5 font-semibold text-ink">XL</td><td class="py-1.5">Lingkar dada 54 cm</td></tr>
-                                        <tr><td class="py-1.5 font-semibold text-ink">XXL</td><td class="py-1.5">Lingkar dada 56 cm</td></tr>
-                                    </tbody>
-                                </table>
+                            <div class="pb-5" id="detail-size-chart">
+                                <div class="mb-3 flex items-center gap-1.5">
+                                    @foreach ($detailGenderOptions as $gKey => $gOpt)
+                                        <button type="button" data-detail-size-tab="{{ $gKey }}"
+                                            class="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition {{ $gKey === 'pria' ? 'bg-stone-900 text-white shadow-2xs' : 'bg-stone-100 text-stone-600 hover:bg-stone-200' }}">
+                                            {{ $gOpt['icon'] }} {{ $gOpt['label'] }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                                @foreach ($detailCharts as $gKey => $chart)
+                                    @php
+                                        $dCols = $chart['columns'] ?? ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
+                                        $dRows = $chart['rows'] ?? [];
+                                        $dTitle = $chart['title'] ?? 'Panduan Ukuran Kaos (cm)';
+                                        $dNote = $chart['note'] ?? 'Toleransi ukuran ±1 cm';
+                                    @endphp
+                                    <div data-detail-size-panel="{{ $gKey }}" class="{{ $gKey === 'pria' ? '' : 'hidden' }}">
+                                        <p class="text-xs font-semibold text-ink">{{ $dTitle }}</p>
+                                        @if ($dNote)
+                                            <p class="mt-0.5 text-[11px] text-muted">{{ $dNote }}</p>
+                                        @endif
+                                        <div class="mt-3 overflow-x-auto rounded-xl border border-line">
+                                            <table class="w-full text-center text-xs border-collapse">
+                                                <thead>
+                                                    <tr class="border-b border-line bg-stone-50 font-bold uppercase tracking-wider text-stone-700">
+                                                        @foreach ($dCols as $cIdx => $col)
+                                                            <th class="py-1.5 px-2.5 {{ $cIdx === 0 ? 'text-left font-bold text-ink' : '' }}">{{ $col }}</th>
+                                                        @endforeach
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-line">
+                                                    @foreach ($dRows as $row)
+                                                        <tr>
+                                                            @foreach ($dCols as $cIdx => $col)
+                                                                @php $dVal = $row[$cIdx] ?? ''; @endphp
+                                                                <td class="py-1.5 px-2.5 {{ $cIdx === 0 ? 'text-left font-semibold text-ink' : 'text-muted' }}">{{ $dVal }}</td>
+                                                            @endforeach
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </details>
                         <details class="group border-t border-line">
@@ -194,6 +235,30 @@
 @push('scripts')
     <script>
         (function () {
+            var csRoot = document.getElementById('detail-size-chart');
+            if (csRoot) {
+                var csTabs = csRoot.querySelectorAll('[data-detail-size-tab]');
+                var csPanels = csRoot.querySelectorAll('[data-detail-size-panel]');
+                var activateSize = function (g) {
+                    csTabs.forEach(function (t) {
+                        var on = t.dataset.detailSizeTab === g;
+                        t.classList.toggle('bg-stone-900', on);
+                        t.classList.toggle('text-white', on);
+                        t.classList.toggle('shadow-2xs', on);
+                        t.classList.toggle('bg-stone-100', !on);
+                        t.classList.toggle('text-stone-600', !on);
+                        t.classList.toggle('hover:bg-stone-200', !on);
+                    });
+                    csPanels.forEach(function (p) {
+                        p.classList.toggle('hidden', p.dataset.detailSizePanel !== g);
+                    });
+                };
+                csTabs.forEach(function (t) {
+                    t.addEventListener('click', function () { activateSize(t.dataset.detailSizeTab); });
+                });
+                activateSize('pria');
+            }
+
             var viewer = document.getElementById('viewer-360');
             var video = document.getElementById('viewer-360-video');
             var counter = document.getElementById('viewer-360-counter');
