@@ -26,9 +26,9 @@ class AdminController extends Controller
     public function verification(Request $request)
     {
         $ordersQ = Order::with('design')
-            ->whereIn('status_pembayaran', ['menunggu_verifikasi', 'bukti_ulang', 'terverifikasi', 'ditolak'])
+            ->whereIn('status_pembayaran', ['menunggu_verifikasi', 'bukti_ulang', 'terverifikasi', 'ditolak', 'belum_bayar'])
             ->latest('updated_at');
-        $donationsQ = Donation::whereIn('status', ['menunggu_verifikasi', 'bukti_ulang', 'terverifikasi', 'ditolak'])
+        $donationsQ = Donation::whereIn('status', ['menunggu_verifikasi', 'bukti_ulang', 'terverifikasi', 'ditolak', 'belum_bayar'])
             ->latest('updated_at');
 
         if ($request->filled('q')) {
@@ -83,14 +83,14 @@ class AdminController extends Controller
                 ->pluck('sum_total', 'status_pembayaran');
 
             $donationSums = Donation::selectRaw('status, sum(nominal) as sum_nominal')
-                ->whereIn('status', ['menunggu_verifikasi', 'bukti_ulang'])
+                ->whereIn('status', ['menunggu_verifikasi', 'bukti_ulang', 'belum_bayar'])
                 ->groupBy('status')
                 ->pluck('sum_nominal', 'status');
 
             return [
                 'rpMenunggu' => (int) ($orderSums['menunggu_verifikasi'] ?? 0) + (int) ($donationSums['menunggu_verifikasi'] ?? 0),
                 'rpBuktiUlang' => (int) ($orderSums['bukti_ulang'] ?? 0) + (int) ($donationSums['bukti_ulang'] ?? 0),
-                'rpBelumBayar' => (int) ($orderSums['belum_bayar'] ?? 0),
+                'rpBelumBayar' => (int) ($orderSums['belum_bayar'] ?? 0) + (int) ($donationSums['belum_bayar'] ?? 0),
             ];
         });
 
@@ -139,7 +139,7 @@ class AdminController extends Controller
             'statMenunggu' => Order::where('status_pembayaran', 'menunggu_verifikasi')->count() + Donation::where('status', 'menunggu_verifikasi')->count(),
             'statBuktiUlang' => Order::where('status_pembayaran', 'bukti_ulang')->count() + Donation::where('status', 'bukti_ulang')->count(),
             'statTerverifikasi' => Order::where('status_pembayaran', 'terverifikasi')->count() + Donation::where('status', 'terverifikasi')->count(),
-            'statBelumBayar' => Order::where('status_pembayaran', 'belum_bayar')->count(),
+            'statBelumBayar' => Order::where('status_pembayaran', 'belum_bayar')->count() + Donation::where('status', 'belum_bayar')->count(),
             'rpMenunggu' => $rpMenunggu,
             'rpBuktiUlang' => $rpBuktiUlang,
             'rpBelumBayar' => $rpBelumBayar,
