@@ -9,7 +9,7 @@
     @endpush
 
     {{-- ================= HERO VIDEO DIAM (FIXED / TIDAK IKUT SCROLL) ================= --}}
-    <div id="hero-video-wrapper" class="fixed top-[60px] left-0 right-0 z-0 h-[380px] sm:h-[460px] lg:h-[540px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
+    <div id="hero-video-wrapper" class="fixed top-[60px] left-0 right-0 z-0 h-[440px] sm:h-[520px] lg:h-[600px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
         @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
             <div class="relative h-full w-full bg-stone-900">
                 <iframe src="{{ $heroVideoEmbedUrl }}"
@@ -1102,6 +1102,18 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Geser video hero ke bawah navbar secara dinamis
+            // (tinggi navbar bisa berbeda di tiap device)
+            const siteHeader = document.querySelector('header.sticky');
+            const heroVideoWrapper = document.getElementById('hero-video-wrapper');
+            if (siteHeader && heroVideoWrapper) {
+                const syncVideoTop = function () {
+                    heroVideoWrapper.style.top = siteHeader.offsetHeight + 'px';
+                };
+                syncVideoTop();
+                window.addEventListener('resize', syncVideoTop);
+            }
+
             // Video hero: pastikan autoplay jalan (muted + playsinline sudah di tag video)
             const bgVideo = document.getElementById('hero-bg-video');
             if (bgVideo) {
