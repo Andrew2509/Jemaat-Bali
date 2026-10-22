@@ -8,8 +8,14 @@
         <link rel="preload" as="image" href="{{ $heroPosterUrl }}" fetchpriority="high">
     @endpush
 
-    {{-- ================= HERO VIDEO DIAM (FIXED / TIDAK IKUT SCROLL) ================= --}}
-    <div id="hero-video-wrapper" class="fixed top-[60px] left-0 right-0 z-0 h-[340px] sm:h-[420px] lg:h-[480px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
+    {{-- ================= HERO VIDEO (di BAWAH navbar, tinggi mengikuti rasio video) ================= --}}
+    {{-- Video memakai position absolute di dalam section overflow-hidden, sehingga:
+         - tidak pernah tertutup navbar (section berada di flow, tepat di bawah header)
+         - tidak pernah tertutup konten di bawahnya (section ter-clip, konten mulai setelahnya)
+         - object-contain di mobile => seluruh frame video terlihat, tidak kepotong --}}
+    <section id="hero-section"
+        class="relative w-full aspect-[854/480] max-h-[340px] sm:max-h-[420px] lg:max-h-[480px] overflow-hidden bg-stone-900 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}"
+        aria-hidden="true">
         @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
             <div class="relative h-full w-full bg-stone-900">
                 <iframe src="{{ $heroVideoEmbedUrl }}"
@@ -20,19 +26,16 @@
             </div>
         @else
             <video id="hero-bg-video" autoplay muted loop playsinline preload="metadata" poster="{{ $heroPosterUrl }}"
-                class="h-full w-full object-cover object-center">
+                class="absolute inset-0 h-full w-full object-contain lg:object-cover">
                 <source src="{{ $heroVideoUrl }}" type="video/mp4">
                 @if ($heroVideoType === 'default')
                     <source src="{{ asset('videos/hero-bg.webm') }}" type="video/webm">
                 @endif
             </video>
         @endif
-    </div>
+    </section>
 
-    {{-- Spacer transparan seukuran hero --}}
-    <div id="hero-spacer" class="relative w-full h-[340px] sm:h-[420px] lg:h-[480px] pointer-events-none" aria-hidden="true"></div>
-
-    {{-- Semua konten di bawah hero menutupi video saat di-scroll --}}
+    {{-- Konten di bawah hero (mulai tepat setelah section hero, tidak menutupi video) --}}
     <div class="relative z-10 w-full bg-canvas">
 
     {{-- ================= FLOATING SEARCH / QUICK-ACTION BAR ================= --}}
@@ -1102,21 +1105,6 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Geser video hero ke bawah navbar & samakan tinggi dengan area hero,
-            // supaya tidak ada bagian video yang ketutup konten / kepotong.
-            const siteHeader = document.querySelector('header.sticky');
-            const heroVideoWrapper = document.getElementById('hero-video-wrapper');
-            const heroSpacer = document.getElementById('hero-spacer');
-            if (siteHeader && heroVideoWrapper && heroSpacer) {
-                const syncVideoBox = function () {
-                    heroVideoWrapper.style.top = siteHeader.offsetHeight + 'px';
-                    heroVideoWrapper.style.height = heroSpacer.offsetHeight + 'px';
-                };
-                syncVideoBox();
-                window.addEventListener('resize', syncVideoBox);
-                window.addEventListener('orientationchange', syncVideoBox);
-            }
-
             // Video hero: pastikan autoplay jalan (muted + playsinline sudah di tag video)
             const bgVideo = document.getElementById('hero-bg-video');
             if (bgVideo) {
@@ -1124,21 +1112,20 @@
                 if (p && p.catch) p.catch(function () { /* autoplay ditahan browser, abaikan */ });
             }
 
-            // Sembunyikan video ketika user scroll melewati area hero
-            // agar video fixed TIDAK PERNAH muncul di bagian bawah halaman / footer
-            if (heroSpacer && heroVideoWrapper && 'IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            heroVideoWrapper.style.visibility = 'visible';
-                            heroVideoWrapper.style.opacity = '1';
-                        } else {
-                            heroVideoWrapper.style.visibility = 'hidden';
-                            heroVideoWrapper.style.opacity = '0';
-                        }
-                    });
-                }, { threshold: 0 });
-                observer.observe(heroSpacer);
+            // Samakan rasio section hero dengan rasio video asli,
+            // supaya tinggi area hero pas dengan video (tidak ada frame yang terpotong).
+            const heroSection = document.getElementById('hero-section');
+            if (heroSection && bgVideo) {
+                const syncHeroRatio = function () {
+                    if (!bgVideo.videoWidth || !bgVideo.videoHeight) return;
+                    heroSection.style.aspectRatio = bgVideo.videoWidth + ' / ' + bgVideo.videoHeight;
+                };
+                if (bgVideo.readyState >= 1) {
+                    syncHeroRatio();
+                } else {
+                    bgVideo.addEventListener('loadedmetadata', syncHeroRatio);
+                }
+                window.addEventListener('resize', syncHeroRatio);
             }
         });
     </script>

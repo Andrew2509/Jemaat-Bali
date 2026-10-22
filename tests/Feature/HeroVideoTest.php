@@ -40,6 +40,26 @@ class HeroVideoTest extends TestCase
         $response->assertSee('videos/hero-bg.mp4');
     }
 
+    public function test_hero_video_di_dalam_section_yang_tidak_bisa_tertutup_navbar_maupun_konten_bawah()
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertStatus(200);
+
+        // Hero memakai section in-flow (bukan fixed) dengan overflow-hidden,
+        // sehingga tidak bisa tertutup navbar maupun konten di bawahnya.
+        $response->assertSee('id="hero-section"', false);
+        $response->assertSee('aspect-[854/480]', false);
+        $response->assertSee('overflow-hidden', false);
+
+        // Video mengikuti ukuran aslinya (object-contain) di mobile
+        $response->assertSee('object-contain lg:object-cover', false);
+
+        // Tidak ada lagi wrapper video fixed / spacer lama
+        $response->assertDontSee('hero-video-wrapper', false);
+        $response->assertDontSee('hero-spacer', false);
+    }
+
     public function test_admin_content_page_renders_hero_video_management()
     {
         $admin = User::where('email', 'admin@jemaatbali.or.id')->first();
