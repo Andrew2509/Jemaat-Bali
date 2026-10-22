@@ -30,12 +30,13 @@
 
 @pushOnce('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.product-360-viewer-container').forEach(function (el) {
-            if (el.dataset.initialized) return;
-            el.dataset.initialized = 'true';
+    (function () {
+        function initViewers() {
+            if (typeof window.Product360Viewer !== 'function') return;
+            document.querySelectorAll('.product-360-viewer-container').forEach(function (el) {
+                if (el.dataset.initialized) return;
+                el.dataset.initialized = 'true';
 
-            if (typeof window.Product360Viewer === 'function') {
                 new window.Product360Viewer(el, {
                     productName: el.dataset.productName || 'Produk Kaos',
                     imagePath: el.dataset.imagePath || '',
@@ -47,8 +48,14 @@
                     showHint: el.dataset.showHint !== 'false',
                     showControls: el.dataset.showControls !== 'false',
                 });
-            }
-        });
-    });
+            });
+        }
+
+        if (typeof window.Product360Viewer === 'function') {
+            initViewers();
+        } else {
+            document.addEventListener('product-360-ready', initViewers, { once: true });
+        }
+    })();
 </script>
 @endPushOnce
