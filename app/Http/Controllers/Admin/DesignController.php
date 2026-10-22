@@ -60,10 +60,11 @@ class DesignController extends Controller
             $design = Design::find($request->query('design_id'));
         }
 
-        $sizeChart = $design ? $design->getSizeChart() : $programInfo->getSizeChart();
+        $gender = $request->query('gender') === 'wanita' ? 'wanita' : 'pria';
+        $sizeChart = $design ? $design->getSizeChartFor($gender) : $programInfo->getSizeChartFor($gender);
         $designs = Design::latest('id')->get();
 
-        return view('admin.designs.size-chart', compact('sizeChart', 'programInfo', 'design', 'designs'));
+        return view('admin.designs.size-chart', compact('sizeChart', 'programInfo', 'design', 'designs', 'gender'));
     }
 
     /**
@@ -78,7 +79,10 @@ class DesignController extends Controller
             'columns.*' => ['required', 'string', 'max:100'],
             'rows' => ['required', 'array', 'min:1'],
             'rows.*' => ['required', 'array'],
+            'gender' => ['nullable', 'in:pria,wanita'],
         ]);
+
+        $gender = $request->input('gender') === 'wanita' ? 'wanita' : 'pria';
 
         $columns = array_values(array_map('trim', $request->input('columns', [])));
         $numCols = count($columns);
@@ -104,18 +108,31 @@ class DesignController extends Controller
 
         if ($request->filled('design_id')) {
             $design = Design::findOrFail($request->input('design_id'));
+            $redirectParams = ['design_id' => $design->id];
+            if ($gender === 'wanita') {
+                $redirectParams['gender'] = 'wanita';
+            }
+
             if ($request->boolean('reset_to_global')) {
                 $design->size_chart = null;
                 $design->save();
-                return redirect()->route('admin.designs.size_chart', ['design_id' => $design->id])
+                return redirect()->route('admin.designs.size_chart', $redirectParams)
                     ->with('success', "Tabel ukuran kaos \"{$design->nama}\" direset mengikuti tabel standar koleksi.");
             }
 
-            $design->size_chart = $chartData;
+            $existing = is_array($design->size_chart) ? $design->size_chart : [];
+            // Migrasi data lama (satu tabel di root) menjadi versi Pria
+            if (isset($existing['columns']) || isset($existing['rows'])) {
+                $existing = ['pria' => $existing];
+            }
+            $existing[$gender] = $chartData;
+
+            $design->size_chart = $existing;
             $design->save();
 
-            return redirect()->route('admin.designs.size_chart', ['design_id' => $design->id])
-                ->with('success', "Tabel ukuran kaos khusus \"{$design->nama}\" berhasil diperbarui!");
+            $genderLabel = $gender === 'wanita' ? 'Cewe' : 'Pria';
+            return redirect()->route('admin.designs.size_chart', $redirectParams)
+                ->with('success', "Tabel ukuran kaos {$genderLabel} khusus \"{$design->nama}\" berhasil diperbarui!");
         }
 
         $programInfo = ProgramInfo::first();
@@ -129,11 +146,21 @@ class DesignController extends Controller
             ]);
         }
 
-        $programInfo->size_chart = $chartData;
+        $existing = is_array($programInfo->size_chart) ? $programInfo->size_chart : [];
+        // Migrasi data lama (satu tabel di root) menjadi versi Pria
+        if (isset($existing['columns']) || isset($existing['rows'])) {
+            $existing = ['pria' => $existing];
+        }
+        $existing[$gender] = $chartData;
+
+        $programInfo->size_chart = $existing;
         $programInfo->save();
 
-        return redirect()->route('admin.designs.size_chart')
-            ->with('success', 'Tabel ukuran standar Koleksi Kaos Pembangunan berhasil diperbarui dan diterapkan ke website!');
+        $redirectParams = $gender === 'wanita' ? ['gender' => 'wanita'] : [];
+        $genderLabel = $gender === 'wanita' ? 'Cewe' : 'Pria';
+
+        return redirect()->route('admin.designs.size_chart', $redirectParams)
+            ->with('success', "Tabel ukuran standar Koleksi Kaos {$genderLabel} berhasil diperbarui dan diterapkan ke website!");
     }
 
     /**

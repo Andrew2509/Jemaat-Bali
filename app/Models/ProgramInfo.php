@@ -36,12 +36,12 @@ class ProgramInfo extends Model
     }
 
     /**
-     * Format default tabel panduan ukuran kaos
+     * Format default tabel panduan ukuran kaos Pria
      */
-    public static function defaultSizeChart(): array
+    public static function defaultSizeChartPria(): array
     {
         return [
-            'title' => 'Panduan Ukuran Kaos (cm)',
+            'title' => 'Panduan Ukuran Kaos Pria (cm)',
             'note' => 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
             'columns' => ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'],
             'rows' => [
@@ -55,20 +55,103 @@ class ProgramInfo extends Model
     }
 
     /**
-     * Ambil data tabel panduan ukuran yang valid
+     * Format default tabel panduan ukuran kaos Wanita (Cewe)
+     */
+    public static function defaultSizeChartWanita(): array
+    {
+        return [
+            'title' => 'Panduan Ukuran Kaos Wanita (cm)',
+            'note' => 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
+            'columns' => ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'],
+            'rows' => [
+                ['S', '44', '60', '18'],
+                ['M', '47', '63', '19'],
+                ['L', '50', '66', '20'],
+                ['XL', '53', '68', '21'],
+                ['XXL', '56', '70', '22'],
+            ],
+        ];
+    }
+
+    /**
+     * Alias lama: tabel default dianggap versi Pria.
+     */
+    public static function defaultSizeChart(): array
+    {
+        return static::defaultSizeChartPria();
+    }
+
+    /**
+     * Ambil data tabel panduan ukuran untuk gender tertentu.
+     * Struktur baru: ['pria' => [...], 'wanita' => [...]].
+     * Data lama (satu tabel di root) diperlakukan sebagai Pria.
+     */
+    public function getSizeChartFor(string $gender = 'pria'): array
+    {
+        $gender = $gender === 'wanita' ? 'wanita' : 'pria';
+        $default = $gender === 'wanita'
+            ? static::defaultSizeChartWanita()
+            : static::defaultSizeChartPria();
+
+        $raw = $this->size_chart;
+
+        if (! is_array($raw)) {
+            return $default;
+        }
+
+        if (isset($raw['pria']) || isset($raw['wanita'])) {
+            return static::normalizeSizeChart($raw[$gender] ?? null, $default);
+        }
+
+        if ($gender === 'pria') {
+            return static::normalizeSizeChart($raw, $default);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Ambil data tabel panduan ukuran Pria (kompatibilitas lama).
      */
     public function getSizeChart(): array
     {
-        if (!empty($this->size_chart) && is_array($this->size_chart) && !empty($this->size_chart['columns']) && !empty($this->size_chart['rows'])) {
-            return [
-                'title' => $this->size_chart['title'] ?? 'Panduan Ukuran Kaos (cm)',
-                'note' => $this->size_chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
-                'columns' => (array) $this->size_chart['columns'],
-                'rows' => (array) $this->size_chart['rows'],
-            ];
+        return $this->getSizeChartFor('pria');
+    }
+
+    /**
+     * Ambil data tabel panduan ukuran Wanita (Cewe).
+     */
+    public function getSizeChartWanita(): array
+    {
+        return $this->getSizeChartFor('wanita');
+    }
+
+    /**
+     * Ambil kedua tabel panduan ukuran.
+     */
+    public function getSizeCharts(): array
+    {
+        return [
+            'pria' => $this->getSizeChartFor('pria'),
+            'wanita' => $this->getSizeChartFor('wanita'),
+        ];
+    }
+
+    /**
+     * Normalisasi satu tabel ukuran agar selalu memiliki title, note, columns, rows.
+     */
+    protected static function normalizeSizeChart($raw, array $default): array
+    {
+        if (! is_array($raw) || empty($raw['columns']) || empty($raw['rows'])) {
+            return $default;
         }
 
-        return static::defaultSizeChart();
+        return [
+            'title' => $raw['title'] ?? $default['title'],
+            'note' => $raw['note'] ?? $default['note'],
+            'columns' => (array) $raw['columns'],
+            'rows' => (array) $raw['rows'],
+        ];
     }
 
     protected static function booted(): void

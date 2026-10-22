@@ -41,21 +41,69 @@ class Design extends Model
     }
 
     /**
-     * Ambil data tabel panduan ukuran untuk desain ini atau fallback ke default program info
+     * Ambil data tabel panduan ukuran untuk gender tertentu.
+     * Bila desain tidak punya tabel khusus, fallback ke tabel standar koleksi.
      */
-    public function getSizeChart(): array
+    public function getSizeChartFor(string $gender = 'pria'): array
     {
-        if (!empty($this->size_chart) && is_array($this->size_chart) && !empty($this->size_chart['columns']) && !empty($this->size_chart['rows'])) {
-            return [
-                'title' => $this->size_chart['title'] ?? 'Panduan Ukuran Kaos (cm)',
-                'note' => $this->size_chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed',
-                'columns' => (array) $this->size_chart['columns'],
-                'rows' => (array) $this->size_chart['rows'],
-            ];
+        $gender = $gender === 'wanita' ? 'wanita' : 'pria';
+        $default = $gender === 'wanita'
+            ? ProgramInfo::defaultSizeChartWanita()
+            : ProgramInfo::defaultSizeChartPria();
+
+        $raw = $this->size_chart;
+
+        if (is_array($raw)) {
+            if (isset($raw['pria']) || isset($raw['wanita'])) {
+                $chart = $raw[$gender] ?? null;
+                if (! empty($chart['columns']) && ! empty($chart['rows'])) {
+                    return [
+                        'title' => $chart['title'] ?? $default['title'],
+                        'note' => $chart['note'] ?? $default['note'],
+                        'columns' => (array) $chart['columns'],
+                        'rows' => (array) $chart['rows'],
+                    ];
+                }
+            } elseif ($gender === 'pria' && ! empty($raw['columns']) && ! empty($raw['rows'])) {
+                // Data lama: satu tabel di root dianggap Pria
+                return [
+                    'title' => $raw['title'] ?? $default['title'],
+                    'note' => $raw['note'] ?? $default['note'],
+                    'columns' => (array) $raw['columns'],
+                    'rows' => (array) $raw['rows'],
+                ];
+            }
         }
 
         $programInfo = ProgramInfo::first();
-        return $programInfo ? $programInfo->getSizeChart() : ProgramInfo::defaultSizeChart();
+        return $programInfo ? $programInfo->getSizeChartFor($gender) : $default;
+    }
+
+    /**
+     * Tabel panduan ukuran Pria (kompatibilitas lama).
+     */
+    public function getSizeChart(): array
+    {
+        return $this->getSizeChartFor('pria');
+    }
+
+    /**
+     * Tabel panduan ukuran Wanita (Cewe).
+     */
+    public function getSizeChartWanita(): array
+    {
+        return $this->getSizeChartFor('wanita');
+    }
+
+    /**
+     * Kedua tabel panduan ukuran.
+     */
+    public function getSizeCharts(): array
+    {
+        return [
+            'pria' => $this->getSizeChartFor('pria'),
+            'wanita' => $this->getSizeChartFor('wanita'),
+        ];
     }
 
     public const ALL_UKURAN = ['S', 'M', 'L', 'XL', 'XXL'];

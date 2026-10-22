@@ -1,15 +1,21 @@
 @php
-    $chart = $chartData ?? ($selected ?? null ? $selected->getSizeChart() : ($programInfo ? $programInfo->getSizeChart() : \App\Models\ProgramInfo::defaultSizeChart()));
-    $cols = $chart['columns'] ?? ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
-    $rows = $chart['rows'] ?? [
-        ['S', '47', '67', '20'],
-        ['M', '50', '70', '21'],
-        ['L', '53', '73', '22'],
-        ['XL', '56', '75', '23'],
-        ['XXL', '59', '77', '24'],
+    $source = $selected ?? null;
+    if ($chartData ?? null) {
+        $chartPria = $chartData;
+        $chartWanita = $chartData;
+    } else {
+        $chartPria = $source
+            ? $source->getSizeChart()
+            : ($programInfo ? $programInfo->getSizeChart() : \App\Models\ProgramInfo::defaultSizeChartPria());
+        $chartWanita = $source
+            ? $source->getSizeChartWanita()
+            : ($programInfo ? $programInfo->getSizeChartWanita() : \App\Models\ProgramInfo::defaultSizeChartWanita());
+    }
+
+    $charts = [
+        'pria' => ['label' => 'Pria', 'icon' => '♂', 'chart' => $chartPria],
+        'wanita' => ['label' => 'Cewe', 'icon' => '♀', 'chart' => $chartWanita],
     ];
-    $title = $chart['title'] ?? 'Panduan Ukuran Kaos (cm)';
-    $note = $chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed';
 @endphp
 
 <!-- Modal Panduan Ukuran Kaos -->
@@ -24,11 +30,9 @@
             <div>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-[#b55322] block">PANDUAN UKURAN PAKAIAN</span>
                 <h3 id="size-chart-modal-title" class="text-base sm:text-lg font-bold text-stone-900 font-sans tracking-tight">
-                    {{ $title }}
+                    Panduan Ukuran Kaos (cm)
                 </h3>
-                @if ($note)
-                    <p class="text-xs text-stone-500 mt-0.5">{{ $note }}</p>
-                @endif
+                <p id="size-chart-modal-note" class="text-xs text-stone-500 mt-0.5"></p>
             </div>
             <button type="button" id="size-chart-modal-close" class="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition cursor-pointer" aria-label="Tutup">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -37,29 +41,57 @@
             </button>
         </div>
 
+        <!-- Tab Selector Pria / Cewe -->
+        <div class="mt-4 flex items-center gap-1.5 rounded-xl bg-stone-100 p-1 border border-stone-200 shrink-0" role="tablist">
+            @foreach ($charts as $key => $item)
+                <button type="button" data-size-gender-tab="{{ $key }}" role="tab"
+                    class="flex-1 rounded-lg py-2 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer {{ $key === 'pria' ? 'bg-stone-900 text-white shadow-2xs' : 'text-stone-600 hover:text-stone-900' }}">
+                    <span>{{ $item['icon'] }}</span>
+                    <span>{{ $item['label'] }}</span>
+                </button>
+            @endforeach
+        </div>
+
         <!-- Table Body -->
         <div class="overflow-y-auto py-4 space-y-4 flex-1">
-            <div class="overflow-x-auto rounded-xl border border-stone-200 bg-[#fbf9f6]">
-                <table class="w-full text-center text-xs border-collapse">
-                    <thead>
-                        <tr class="border-b border-stone-200 bg-stone-100/80 font-bold uppercase tracking-wider text-stone-700">
-                            @foreach ($cols as $cIdx => $col)
-                                <th class="py-2.5 px-3 {{ $cIdx === 0 ? 'text-left pl-3.5 font-bold text-stone-900' : '' }}">{{ $col }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-stone-200/70 font-mono">
-                        @foreach ($rows as $row)
-                            <tr class="hover:bg-white/80 transition">
-                                @foreach ($cols as $cIdx => $col)
-                                    @php $val = $row[$cIdx] ?? ''; @endphp
-                                    <td class="py-2.5 px-3 {{ $cIdx === 0 ? 'text-left pl-3.5 font-sans font-bold text-stone-900 bg-stone-50/60' : 'text-stone-700' }}">{{ $val }}</td>
+            @foreach ($charts as $key => $item)
+                @php
+                    $chart = $item['chart'];
+                    $cols = $chart['columns'] ?? ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
+                    $rows = $chart['rows'] ?? [
+                        ['S', '47', '67', '20'],
+                        ['M', '50', '70', '21'],
+                        ['L', '53', '73', '22'],
+                        ['XL', '56', '75', '23'],
+                        ['XXL', '59', '77', '24'],
+                    ];
+                    $title = $chart['title'] ?? 'Panduan Ukuran Kaos (cm)';
+                    $note = $chart['note'] ?? 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed';
+                @endphp
+                <div data-size-gender-panel="{{ $key }}" data-chart-title="{{ $title }}" data-chart-note="{{ $note }}" class="{{ $key === 'pria' ? '' : 'hidden' }}">
+                    <div class="overflow-x-auto rounded-xl border border-stone-200 bg-[#fbf9f6]">
+                        <table class="w-full text-center text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-stone-200 bg-stone-100/80 font-bold uppercase tracking-wider text-stone-700">
+                                    @foreach ($cols as $cIdx => $col)
+                                        <th class="py-2.5 px-3 {{ $cIdx === 0 ? 'text-left pl-3.5 font-bold text-stone-900' : '' }}">{{ $col }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-200/70 font-mono">
+                                @foreach ($rows as $row)
+                                    <tr class="hover:bg-white/80 transition">
+                                        @foreach ($cols as $cIdx => $col)
+                                            @php $val = $row[$cIdx] ?? ''; @endphp
+                                            <td class="py-2.5 px-3 {{ $cIdx === 0 ? 'text-left pl-3.5 font-sans font-bold text-stone-900 bg-stone-50/60' : 'text-stone-700' }}">{{ $val }}</td>
+                                        @endforeach
+                                    </tr>
                                 @endforeach
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endforeach
 
             <!-- Petunjuk Pengukuran -->
             <div class="rounded-xl bg-stone-50 p-3.5 border border-stone-200/80 text-[11px] text-stone-600 space-y-1.5">
@@ -90,6 +122,36 @@
         const backdrop = document.getElementById('size-chart-modal-backdrop');
         const closeBtn = document.getElementById('size-chart-modal-close');
         const okBtn = document.getElementById('btn-size-chart-modal-ok');
+        const titleEl = document.getElementById('size-chart-modal-title');
+        const noteEl = document.getElementById('size-chart-modal-note');
+
+        const genderTabs = document.querySelectorAll('[data-size-gender-tab]');
+        const genderPanels = document.querySelectorAll('[data-size-gender-panel]');
+
+        function activateGender(gender) {
+            genderTabs.forEach(function (tab) {
+                const on = tab.dataset.sizeGenderTab === gender;
+                tab.classList.toggle('bg-stone-900', on);
+                tab.classList.toggle('text-white', on);
+                tab.classList.toggle('shadow-2xs', on);
+                tab.classList.toggle('text-stone-600', !on);
+                tab.classList.toggle('hover:text-stone-900', !on);
+            });
+
+            let activePanel = null;
+            genderPanels.forEach(function (panel) {
+                const on = panel.dataset.sizeGenderPanel === gender;
+                panel.classList.toggle('hidden', !on);
+                if (on) activePanel = panel;
+            });
+
+            if (activePanel && titleEl) {
+                titleEl.textContent = activePanel.dataset.chartTitle || 'Panduan Ukuran Kaos (cm)';
+            }
+            if (activePanel && noteEl) {
+                noteEl.textContent = activePanel.dataset.chartNote || '';
+            }
+        }
 
         window.SizeChartModal = {
             open: function () {
@@ -110,6 +172,12 @@
         if (closeBtn) closeBtn.addEventListener('click', window.SizeChartModal.close);
         if (okBtn) okBtn.addEventListener('click', window.SizeChartModal.close);
 
+        genderTabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                activateGender(tab.dataset.sizeGenderTab);
+            });
+        });
+
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
                 window.SizeChartModal.close();
@@ -120,8 +188,12 @@
         document.querySelectorAll('[data-open-size-chart], #size-guide').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
+                activateGender('pria');
                 window.SizeChartModal.open();
             });
         });
+
+        // Sinkronkan judul/catatan saat halaman dimuat
+        activateGender('pria');
     })();
 </script>

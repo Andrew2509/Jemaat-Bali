@@ -128,4 +128,55 @@ class SizeChartTest extends TestCase
         $checkoutPage->assertSee('id="size-chart-modal"', false);
         $checkoutPage->assertSee('Panduan Ukuran');
     }
+
+    public function test_admin_can_update_global_wanita_size_chart_separately(): void
+    {
+        $this->seed();
+        $admin = User::where('email', 'admin@jemaatbali.or.id')->first();
+
+        $wanitaColumns = ['Ukuran', 'Lebar Dada Wanita (cm)', 'Panjang Badan Wanita (cm)'];
+        $wanitaRows = [
+            ['S', '44', '60'],
+            ['M', '47', '63'],
+            ['L', '50', '66'],
+        ];
+
+        $response = $this->actingAs($admin)->post(route('admin.designs.size_chart.update'), [
+            'gender' => 'wanita',
+            'title' => 'Panduan Ukuran Kaos Cewe (cm)',
+            'note' => 'Toleransi ukuran ±1 cm · Potongan wanita',
+            'columns' => $wanitaColumns,
+            'rows' => $wanitaRows,
+        ]);
+
+        $response->assertRedirect(route('admin.designs.size_chart', ['gender' => 'wanita']));
+        $response->assertSessionHas('success');
+
+        $programInfo = ProgramInfo::first();
+        $this->assertNotEmpty($programInfo->getSizeChartWanita()['columns']);
+        $this->assertSame('Panduan Ukuran Kaos Cewe (cm)', $programInfo->getSizeChartWanita()['title']);
+        $this->assertSame($wanitaColumns, $programInfo->getSizeChartWanita()['columns']);
+        $this->assertSame($wanitaRows, $programInfo->getSizeChartWanita()['rows']);
+
+        // Tabel Pria tidak ikut berubah
+        $prioritasPria = ProgramInfo::defaultSizeChartPria();
+        $this->assertSame($prioritasPria['columns'], $programInfo->getSizeChart()['columns']);
+        $this->assertSame($prioritasPria['rows'], $programInfo->getSizeChart()['rows']);
+    }
+
+    public function test_home_and_modal_render_both_gender_tables(): void
+    {
+        $this->seed();
+
+        $homeResponse = $this->get('/');
+        $homeResponse->assertStatus(200);
+        $homeResponse->assertSee('Panduan Ukuran Kaos Pria (cm)');
+        $homeResponse->assertSee('Panduan Ukuran Kaos Wanita (cm)');
+        $homeResponse->assertSee('data-home-size-tab="wanita"', false);
+
+        $designPage = $this->get('/design-kaos');
+        $designPage->assertStatus(200);
+        $designPage->assertSee('data-size-gender-tab="wanita"', false);
+        $designPage->assertSee('Panduan Ukuran Kaos Wanita (cm)');
+    }
 }

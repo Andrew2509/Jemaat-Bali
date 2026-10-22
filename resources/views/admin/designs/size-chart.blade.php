@@ -5,6 +5,8 @@
 
 @section('content')
     @php
+        $gender = $gender ?? 'pria';
+        $genderLabel = $gender === 'wanita' ? 'Cewe' : 'Pria';
         $jsColumns = !empty($sizeChart['columns']) ? $sizeChart['columns'] : ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
         $jsRows = !empty($sizeChart['rows']) ? $sizeChart['rows'] : [
             ['S', '47', '67', '20'],
@@ -86,6 +88,7 @@
                     <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Target Tabel Ukuran:</span>
                     <h3 class="font-bold text-sm text-stone-900">
                         {{ $design ? "Khusus Desain: {$design->nama}" : 'Tabel Standar Seluruh Koleksi (Default Beranda & Katalog)' }}
+                        <span class="ml-1 inline-flex items-center rounded-full bg-[#faefe8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#b55322]">{{ $genderLabel }}</span>
                     </h3>
                 </div>
             </div>
@@ -102,9 +105,26 @@
                     @endforeach
                 </select>
                 @if ($design)
-                    <a href="{{ route('admin.designs.size_chart') }}" class="text-xs text-stone-400 hover:text-stone-700 underline ml-1">Ke Standar</a>
+                    <a href="{{ route('admin.designs.size_chart', ['gender' => $gender]) }}" class="text-xs text-stone-400 hover:text-stone-700 underline ml-1">Ke Standar</a>
                 @endif
             </form>
+        </div>
+
+        {{-- Pemilih Gender: Pria / Cewe --}}
+        <div class="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Jenis Ukuran:</span>
+            @foreach (['pria' => 'Pria', 'wanita' => 'Cewe'] as $gKey => $gLabel)
+                @php
+                    $gParams = ['gender' => $gKey];
+                    if ($design) { $gParams['design_id'] = $design->id; }
+                @endphp
+                <a href="{{ route('admin.designs.size_chart', $gParams) }}"
+                   class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition {{ $gender === $gKey ? 'bg-[#b55322] text-white shadow-2xs' : 'bg-stone-100 text-stone-600 hover:bg-stone-200' }}">
+                    <span>{{ $gKey === 'wanita' ? '♀' : '♂' }}</span>
+                    <span>{{ $gLabel }}</span>
+                </a>
+            @endforeach
+            <span class="text-[11px] text-stone-400">Tabel Pria &amp; Cewe disimpan terpisah.</span>
         </div>
     </div>
 
@@ -115,6 +135,7 @@
         <div class="lg:col-span-7 xl:col-span-7 space-y-6">
             <form id="form-size-chart" action="{{ route('admin.designs.size_chart.update') }}" method="POST" class="rounded-2xl border border-[#e8e4dc] bg-white p-5 sm:p-6 shadow-2xs space-y-5">
                 @csrf
+                <input type="hidden" name="gender" value="{{ $gender }}">
                 @if ($design)
                     <input type="hidden" name="design_id" value="{{ $design->id }}">
                 @endif
@@ -122,7 +143,7 @@
                 <!-- Form Header -->
                 <div class="flex items-center justify-between border-b border-stone-100 pb-4">
                     <div>
-                        <h2 class="font-serif text-lg font-bold text-stone-900">Pembuat Tabel Ukuran</h2>
+                        <h2 class="font-serif text-lg font-bold text-stone-900">Pembuat Tabel Ukuran — {{ $genderLabel }}</h2>
                         <p class="text-[11px] text-stone-400">Ketik pada kotak kolom atau baris untuk mengubah nilai seketika.</p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -290,6 +311,7 @@
             // Initial data from PHP
             let columns = @json($jsColumns);
             let rows = @json($jsRows);
+            const gender = @json($gender);
 
             const inputTitle = document.getElementById('chart-title');
             const inputNote = document.getElementById('chart-note');
@@ -494,14 +516,25 @@
             btnPresetVertical.addEventListener('click', function () {
                 if (!confirm('Terapkan preset standar kaos (Ukuran, Lebar Dada, Panjang Badan, Panjang Lengan)?')) return;
                 columns = ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
-                rows = [
-                    ['S', '47', '67', '20'],
-                    ['M', '50', '70', '21'],
-                    ['L', '53', '73', '22'],
-                    ['XL', '56', '75', '23'],
-                    ['XXL', '59', '77', '24']
-                ];
-                inputTitle.value = 'Panduan Ukuran Kaos (cm)';
+                if (gender === 'wanita') {
+                    rows = [
+                        ['S', '44', '60', '18'],
+                        ['M', '47', '63', '19'],
+                        ['L', '50', '66', '20'],
+                        ['XL', '53', '68', '21'],
+                        ['XXL', '56', '70', '22']
+                    ];
+                    inputTitle.value = 'Panduan Ukuran Kaos Wanita (cm)';
+                } else {
+                    rows = [
+                        ['S', '47', '67', '20'],
+                        ['M', '50', '70', '21'],
+                        ['L', '53', '73', '22'],
+                        ['XL', '56', '75', '23'],
+                        ['XXL', '59', '77', '24']
+                    ];
+                    inputTitle.value = 'Panduan Ukuran Kaos Pria (cm)';
+                }
                 inputNote.value = 'Toleransi ukuran ±1 cm · Bahan 100% Cotton Combed';
                 renderBuilder();
             });
