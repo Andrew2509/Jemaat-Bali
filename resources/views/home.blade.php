@@ -9,7 +9,7 @@
     @endpush
 
     {{-- ================= HERO VIDEO DIAM (FIXED / TIDAK IKUT SCROLL) ================= --}}
-    <div id="hero-video-wrapper" class="fixed top-[60px] left-0 right-0 z-0 h-[440px] sm:h-[520px] lg:h-[600px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
+    <div id="hero-video-wrapper" class="fixed top-[60px] left-0 right-0 z-0 h-[340px] sm:h-[420px] lg:h-[480px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
         @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
             <div class="relative h-full w-full bg-stone-900">
                 <iframe src="{{ $heroVideoEmbedUrl }}"
@@ -1102,16 +1102,19 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Geser video hero ke bawah navbar secara dinamis
-            // (tinggi navbar bisa berbeda di tiap device)
+            // Geser video hero ke bawah navbar & samakan tinggi dengan area hero,
+            // supaya tidak ada bagian video yang ketutup konten / kepotong.
             const siteHeader = document.querySelector('header.sticky');
             const heroVideoWrapper = document.getElementById('hero-video-wrapper');
-            if (siteHeader && heroVideoWrapper) {
-                const syncVideoTop = function () {
+            const heroSpacer = document.getElementById('hero-spacer');
+            if (siteHeader && heroVideoWrapper && heroSpacer) {
+                const syncVideoBox = function () {
                     heroVideoWrapper.style.top = siteHeader.offsetHeight + 'px';
+                    heroVideoWrapper.style.height = heroSpacer.offsetHeight + 'px';
                 };
-                syncVideoTop();
-                window.addEventListener('resize', syncVideoTop);
+                syncVideoBox();
+                window.addEventListener('resize', syncVideoBox);
+                window.addEventListener('orientationchange', syncVideoBox);
             }
 
             // Video hero: pastikan autoplay jalan (muted + playsinline sudah di tag video)
@@ -1123,17 +1126,15 @@
 
             // Sembunyikan video ketika user scroll melewati area hero
             // agar video fixed TIDAK PERNAH muncul di bagian bawah halaman / footer
-            const heroSpacer = document.getElementById('hero-spacer');
-            const heroVideo = document.getElementById('hero-video-wrapper');
-            if (heroSpacer && heroVideo && 'IntersectionObserver' in window) {
+            if (heroSpacer && heroVideoWrapper && 'IntersectionObserver' in window) {
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
-                            heroVideo.style.visibility = 'visible';
-                            heroVideo.style.opacity = '1';
+                            heroVideoWrapper.style.visibility = 'visible';
+                            heroVideoWrapper.style.opacity = '1';
                         } else {
-                            heroVideo.style.visibility = 'hidden';
-                            heroVideo.style.opacity = '0';
+                            heroVideoWrapper.style.visibility = 'hidden';
+                            heroVideoWrapper.style.opacity = '0';
                         }
                     });
                 }, { threshold: 0 });
