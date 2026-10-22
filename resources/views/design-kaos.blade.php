@@ -73,16 +73,6 @@
                         </div>
                     </div>
 
-                    {{-- Kontrol Putar 360° (khusus video) --}}
-                    @if ($selected->video360Url() && ! $selected->isVideo360Gif())
-                        <div id="gal-360-controls" class="mt-4 hidden flex-wrap items-center justify-center gap-2">
-                            <button type="button" data-putar="-10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar -10°">&minus;10&deg;</button>
-                            <button type="button" id="btn-jeda" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Jeda / putar otomatis">&#10074;&#10074;</button>
-                            <button type="button" data-putar="reset" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-xs font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Reset ke 0°">0&deg;</button>
-                            <button type="button" data-putar="10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar +10°">+10&deg;</button>
-                            <span class="ml-1 text-[11px] font-semibold text-muted">Geser kiri/kanan untuk putar 360&deg;</span>
-                        </div>
-                    @endif
                 </div>
 
                 {{-- ================= KANAN: INFO PRODUK ================= --}}
@@ -254,14 +244,12 @@
             var viewer = document.getElementById('viewer-360');
             var video = document.getElementById('viewer-360-video');
             var counter = document.getElementById('viewer-360-counter');
-            var jedaBtn = document.getElementById('btn-jeda');
 
             // ================= Galeri: Foto vs 360° =================
             var galThumbs = document.querySelectorAll('[data-gal]');
             var galPanelFoto = document.getElementById('gal-panel-foto');
             var galPanel360 = document.getElementById('gal-panel-360');
             var galCounter = document.getElementById('gal-counter');
-            var gal360Controls = document.getElementById('gal-360-controls');
             var galTotal = document.querySelectorAll('.gal-thumb').length;
 
             function showGal(mode) {
@@ -275,7 +263,6 @@
                 });
                 if (galPanelFoto) galPanelFoto.classList.toggle('hidden', is360);
                 if (galPanel360) galPanel360.classList.toggle('hidden', !is360);
-                if (gal360Controls) gal360Controls.classList.toggle('hidden', !is360);
                 if (galCounter) galCounter.textContent = (is360 ? 2 : 1) + '/' + galTotal;
                 if (video) {
                     if (is360) video.play().catch(function(){});
@@ -290,7 +277,6 @@
 
             // Kontrol 360° Video: Hanya berjalan bila pakaian memiliki berkas video 360°
             if (viewer && video) {
-                var otomatis = true;
                 var menyeret = false;
                 var awalX = 0;
                 var awalTime = 0;
@@ -301,16 +287,6 @@
                         if (counter) counter.textContent = deg + '°';
                     }
                 });
-
-                function setOtomatis(nilai) {
-                    otomatis = nilai;
-                    if (jedaBtn) {
-                        jedaBtn.innerHTML = nilai ? '&#10074;&#10074;' : '&#9654;';
-                        jedaBtn.title = nilai ? 'Jeda putar otomatis' : 'Lanjutkan putar otomatis';
-                    }
-                    if (nilai) video.play().catch(function(){});
-                    else video.pause();
-                }
 
                 viewer.addEventListener('pointerdown', function (e) {
                     menyeret = true;
@@ -335,32 +311,12 @@
 
                 viewer.addEventListener('pointerup', function () {
                     menyeret = false;
-                    if (otomatis) video.play().catch(function(){});
+                    video.play().catch(function(){});
                 });
                 viewer.addEventListener('pointercancel', function () {
                     menyeret = false;
-                    if (otomatis) video.play().catch(function(){});
+                    video.play().catch(function(){});
                 });
-
-                document.querySelectorAll('[data-putar]').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        var aksi = btn.getAttribute('data-putar');
-                        if (!video.duration) return;
-                        var dur = video.duration;
-                        if (aksi === 'reset') {
-                            video.currentTime = 0;
-                        } else {
-                            var newTime = (video.currentTime + (Number(aksi) / 360) * dur);
-                            while (newTime < 0) newTime += dur;
-                            while (newTime >= dur) newTime -= dur;
-                            video.currentTime = newTime;
-                        }
-                    });
-                });
-
-                if (jedaBtn) {
-                    jedaBtn.addEventListener('click', function () { setOtomatis(!otomatis); });
-                }
             }
 
             var sizeWrap = document.querySelector('.size-pill')?.parentElement;
