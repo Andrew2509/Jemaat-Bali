@@ -4,6 +4,10 @@
 @section('description', $programInfo->deskripsi ?? 'Situs penggalangan dana pembangunan Jemaat Bali: video, proposal, progres, desain kaos, dan donasi.')
 
 @section('content')
+    @push('preload')
+        <link rel="preload" as="image" href="{{ $heroPosterUrl }}" fetchpriority="high">
+    @endpush
+
     {{-- ================= HERO VIDEO DIAM (FIXED / TIDAK IKUT SCROLL) ================= --}}
     <div id="hero-video-wrapper" class="fixed top-0 left-0 right-0 z-0 h-[440px] sm:h-[520px] lg:h-[600px] w-full overflow-hidden transition-opacity duration-200 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}" aria-hidden="true">
         @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
@@ -338,7 +342,7 @@
                 </div>
             @else
                 <div class="progres-bg absolute inset-0 transition-opacity duration-700 ease-in-out {{ $i === 0 ? 'opacity-100' : 'opacity-0' }}"
-                    style="background-image: url('{{ asset('images/hero-poster.jpg') }}'); background-size: cover; background-position: center;">
+                    style="background-image: url('{{ asset('images/hero-poster.webp') }}'); background-size: cover; background-position: center;">
                 </div>
             @endif
         @empty
@@ -443,7 +447,7 @@
                                         <video src="{{ $p->mediaUrl() }}#t=0.1" preload="metadata" muted playsinline
                                             class="absolute inset-0 h-full w-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"></video>
                                     @else
-                                        <img src="{{ asset('images/hero-poster.jpg') }}" alt="{{ $p->judul }}"
+                                        <img src="{{ asset('images/hero-poster.webp') }}" alt="{{ $p->judul }}" width="1376" height="768"
                                             class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
                                     @endif
 

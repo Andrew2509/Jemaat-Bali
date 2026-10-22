@@ -156,14 +156,55 @@ class ProgramInfo extends Model
 
     protected static function booted(): void
     {
-        static::created(fn () => cache()->forget('program_info'));
-        static::updated(fn () => cache()->forget('program_info'));
-        static::deleted(fn () => cache()->forget('program_info'));
+        static::created(fn () => static::flushMemo());
+        static::updated(fn () => static::flushMemo());
+        static::deleted(fn () => static::flushMemo());
     }
+
+    /**
+     * Cache statis per-request untuk hasil ProgramInfo::first().
+     * Menghindari query berulang (cache database = 1 query per panggilan).
+     */
+    protected static ?Model $memoInstance = null;
+
+    protected static ?int $memoRequestId = null;
 
     public static function first(): ?Model
     {
-        return cache()->rememberForever('program_info', fn () => static::query()->first());
+        $requestId = static::currentRequestId();
+
+        if (static::$memoRequestId === $requestId && static::$memoInstance !== null) {
+            return static::$memoInstance;
+        }
+
+        $model = cache()->rememberForever('program_info', fn () => static::query()->first());
+
+        static::$memoInstance = $model;
+        static::$memoRequestId = $requestId;
+
+        return $model;
+    }
+
+    /**
+     * Bersihkan cache statis (dipanggil ketika data berubah).
+     */
+    public static function flushMemo(): void
+    {
+        cache()->forget('program_info');
+        static::$memoInstance = null;
+        static::$memoRequestId = null;
+    }
+
+    /**
+     * Identitas request saat ini, agar memo tidak bocor antar-request.
+     */
+    protected static function currentRequestId(): int
+    {
+        if (app()->bound('request')) {
+            return spl_object_id(app('request'));
+        }
+
+        return -1;
     }
 
     /**
@@ -406,7 +447,7 @@ class ProgramInfo extends Model
         if ($this->getHeroVideoType() === 'gdrive' && $driveId = $this->getHeroGoogleDriveId()) {
             return 'https://drive.google.com/thumbnail?id=' . $driveId . '&sz=w1200';
         }
-        return asset('images/hero-poster.jpg');
+        return asset('images/hero-poster.webp');
     }
 
     /**

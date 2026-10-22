@@ -32,7 +32,7 @@ class HeroVideoTest extends TestCase
         $this->assertEquals('default', $info->getHeroVideoType());
         $this->assertFalse($info->hasCustomHeroVideo());
         $this->assertStringContainsString('videos/hero-bg.mp4', $info->getActiveHeroVideoUrl());
-        $this->assertStringContainsString('images/hero-poster.jpg', $info->getHeroPosterUrl());
+        $this->assertStringContainsString('images/hero-poster.webp', $info->getHeroPosterUrl());
 
         $response = $this->get(route('home'));
         $response->assertStatus(200);

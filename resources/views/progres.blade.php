@@ -4,10 +4,20 @@
 @section('description', 'Dokumentasi lapangan dalam bentuk foto dan video. Diperbarui setiap ada perkembangan, agar setiap donatur dapat melihat langsung bagaimana pembangunan berjalan.')
 
 @section('content')
+    @push('preload')
+        <link rel="preload" as="image" type="image/webp" fetchpriority="high" sizes="100vw"
+            href="{{ asset('images/hero-poster.webp') }}"
+            imagesrcset="{{ asset('images/hero-poster-768.webp') }} 768w, {{ asset('images/hero-poster.webp') }} 1376w">
+    @endpush
+
     {{-- ================= HERO ================= --}}
     <section class="relative overflow-hidden bg-stone-900">
-        <img src="{{ asset('images/hero-poster.jpg') }}" alt="" aria-hidden="true"
-            class="absolute inset-0 h-full w-full object-cover opacity-40" fetchpriority="high">
+        <picture>
+            <source srcset="{{ asset('images/hero-poster-768.webp') }} 768w, {{ asset('images/hero-poster.webp') }} 1376w"
+                type="image/webp" sizes="100vw">
+            <img src="{{ asset('images/hero-poster.jpg') }}" alt="" aria-hidden="true" width="1376" height="768"
+                class="absolute inset-0 h-full w-full object-cover opacity-40" fetchpriority="high" decoding="async">
+        </picture>
         <div class="absolute inset-0 bg-gradient-to-br from-stone-950/85 via-stone-900/70 to-stone-950/90"></div>
 
         <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
