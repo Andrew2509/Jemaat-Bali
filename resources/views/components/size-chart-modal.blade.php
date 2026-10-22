@@ -14,7 +14,7 @@
 
     $charts = [
         'pria' => ['label' => 'Pria', 'icon' => '♂', 'chart' => $chartPria],
-        'wanita' => ['label' => 'Cewe', 'icon' => '♀', 'chart' => $chartWanita],
+        'wanita' => ['label' => 'Wanita', 'icon' => '♀', 'chart' => $chartWanita],
     ];
 @endphp
 
@@ -41,7 +41,7 @@
             </button>
         </div>
 
-        <!-- Tab Selector Pria / Cewe -->
+        <!-- Tab Selector Pria / Wanita -->
         <div class="mt-4 flex items-center gap-1.5 rounded-xl bg-stone-100 p-1 border border-stone-200 shrink-0" role="tablist">
             @foreach ($charts as $key => $item)
                 <button type="button" data-size-gender-tab="{{ $key }}" role="tab"

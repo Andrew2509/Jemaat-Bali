@@ -6,7 +6,7 @@
 @section('content')
     @php
         $gender = $gender ?? 'pria';
-        $genderLabel = $gender === 'wanita' ? 'Cewe' : 'Pria';
+        $genderLabel = $gender === 'wanita' ? 'Wanita' : 'Pria';
         $jsColumns = !empty($sizeChart['columns']) ? $sizeChart['columns'] : ['Ukuran', 'Lebar Dada (cm)', 'Panjang Badan (cm)', 'Panjang Lengan (cm)'];
         $jsRows = !empty($sizeChart['rows']) ? $sizeChart['rows'] : [
             ['S', '47', '67', '20'],
@@ -110,10 +110,10 @@
             </form>
         </div>
 
-        {{-- Pemilih Gender: Pria / Cewe --}}
+        {{-- Pemilih Gender: Pria / Wanita --}}
         <div class="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center gap-2">
             <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Jenis Ukuran:</span>
-            @foreach (['pria' => 'Pria', 'wanita' => 'Cewe'] as $gKey => $gLabel)
+            @foreach (['pria' => 'Pria', 'wanita' => 'Wanita'] as $gKey => $gLabel)
                 @php
                     $gParams = ['gender' => $gKey];
                     if ($design) { $gParams['design_id'] = $design->id; }
@@ -124,7 +124,7 @@
                     <span>{{ $gLabel }}</span>
                 </a>
             @endforeach
-            <span class="text-[11px] text-stone-400">Tabel Pria &amp; Cewe disimpan terpisah.</span>
+            <span class="text-[11px] text-stone-400">Tabel Pria &amp; Wanita disimpan terpisah.</span>
         </div>
     </div>
 

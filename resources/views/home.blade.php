@@ -728,14 +728,14 @@
 
                         {{-- Konten Teks Kiri Bawah: Tabel Ukuran Tepat di Atas Teks Isi / Deskripsi --}}
                         <div class="relative z-10 pl-8 sm:pl-10 mt-4 max-w-xs sm:max-w-sm">
-                            {{-- Tabel Panduan Ukuran (Size Chart): Pria & Cewe --}}
+                            {{-- Tabel Panduan Ukuran (Size Chart): Pria & Wanita --}}
                             @php
                                 $homeCharts = $defaultDesign
                                     ? $defaultDesign->getSizeCharts()
                                     : ($programInfo
                                         ? $programInfo->getSizeCharts()
                                         : ['pria' => \App\Models\ProgramInfo::defaultSizeChartPria(), 'wanita' => \App\Models\ProgramInfo::defaultSizeChartWanita()]);
-                                $homeGenderOptions = ['pria' => ['label' => 'Pria', 'icon' => '♂'], 'wanita' => ['label' => 'Cewe', 'icon' => '♀']];
+                                $homeGenderOptions = ['pria' => ['label' => 'Pria', 'icon' => '♂'], 'wanita' => ['label' => 'Wanita', 'icon' => '♀']];
                             @endphp
                             <div class="mb-2 sm:mb-2.5" id="home-size-chart">
                                 <div class="flex items-center gap-1.5 mb-1.5">
