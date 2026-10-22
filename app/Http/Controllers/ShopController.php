@@ -137,12 +137,6 @@ class ShopController extends Controller
             ]);
         }
 
-        try {
-            app(FonnteService::class)->sendOrderNotification($order);
-        } catch (\Throwable $e) {
-            Log::warning('Fonnte sendOrderNotification failed: ' . $e->getMessage());
-        }
-
         return redirect()->route('shop.pemesanan', $order);
     }
 

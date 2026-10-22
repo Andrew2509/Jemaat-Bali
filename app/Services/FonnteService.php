@@ -194,40 +194,6 @@ class FonnteService
     }
 
     /**
-     * Kirim notifikasi WhatsApp saat ada pesanan baru
-     */
-    public function sendOrderNotification(Order $order): ?array
-    {
-        if (!$this->setting->is_active || !$this->setting->auto_notify_order || empty($order->nomor)) {
-            return null;
-        }
-
-        $program = ProgramInfo::first();
-        $programName = $program->nama_program ?? 'Jemaat Bali';
-
-        $link = route('shop.waiting', $order->id);
-        if ($order->status_pembayaran === 'belum_bayar') {
-            $link = route('shop.payment', $order->id);
-        }
-
-        $template = $this->setting->template_order ?: WhatsappSetting::defaultOrderTemplate();
-
-        $variables = [
-            '{nama}' => $order->nama,
-            '{nomor_pesanan}' => $order->nomor_pesanan ?: ('ORD-' . $order->id),
-            '{jenis}' => $order->jenis === 'kaos_donasi' ? 'Kaos & Donasi' : 'Donasi',
-            '{total}' => number_format($order->totalTagihan(), 0, ',', '.'),
-            '{metode}' => $order->metode ? strtoupper($order->metode) : 'QRIS Manual',
-            '{link}' => $link,
-            '{nama_program}' => $programName,
-        ];
-
-        $message = str_replace(array_keys($variables), array_values($variables), $template);
-
-        return $this->sendMessage($order->nomor, $message);
-    }
-
-    /**
      * Kirim notifikasi WhatsApp saat pesanan masuk status Menunggu Konfirmasi (setelah upload bukti transfer)
      */
     public function sendWaitingNotification(Order $order): ?array

@@ -36,12 +36,13 @@ class Product360ViewerTest extends TestCase
         $response->assertSee('id="viewer-360"', false);
         $response->assertSee('id="viewer-360-video"', false);
         $response->assertSee('id="viewer-360-counter"', false);
-        $response->assertSee('data-putar', false);
-        $response->assertSee('360&deg; Video Playing', false);
+        $response->assertSee('id="gal-panel-360"', false);
+        $response->assertSee('id="gal-counter"', false);
 
-        // Kontrol putar tersedia
-        $response->assertSee('id="btn-jeda"', false);
-        $response->assertSee('id="size-guide"', false);
+        // Galeri foto/360° (kontrol putar dihapus, putaran via drag) & panduan ukuran
+        $response->assertSee('data-gal="foto"', false);
+        $response->assertSee('data-gal="360"', false);
+        $response->assertSee('data-open-size-chart', false);
     }
 
     public function test_every_design_has_working_360_viewer_page(): void

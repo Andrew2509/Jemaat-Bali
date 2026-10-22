@@ -64,7 +64,7 @@ class AdminLoginTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Aktivitas terbaru');
-        $response->assertSee('Real-time');
+        $response->assertSee('Hari ini');
         $response->assertViewHas('aktivitas', function ($aktivitas) {
             return $aktivitas instanceof \Illuminate\Support\Collection && $aktivitas->isNotEmpty();
         });

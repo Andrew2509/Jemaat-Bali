@@ -113,12 +113,6 @@ class CheckoutController extends Controller
             'status_pengiriman' => 'belum_diproduksi',
         ]);
 
-        try {
-            app(\App\Services\FonnteService::class)->sendOrderNotification($order);
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Fonnte sendOrderNotification failed: ' . $e->getMessage());
-        }
-
         return redirect()->route('checkout.bayar', $order);
     }
 

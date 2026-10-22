@@ -40,10 +40,8 @@ class ProviderController extends Controller
             'api_token' => ['nullable', 'string', 'max:255'],
             'country_code' => ['required', 'string', 'max:10'],
             'is_active' => ['nullable', 'boolean'],
-            'auto_notify_order' => ['nullable', 'boolean'],
             'auto_notify_waiting' => ['nullable', 'boolean'],
             'auto_notify_verified' => ['nullable', 'boolean'],
-            'template_order' => ['nullable', 'string', 'max:3000'],
             'template_waiting' => ['nullable', 'string', 'max:3000'],
             'template_verified' => ['nullable', 'string', 'max:3000'],
         ]);
@@ -51,7 +49,6 @@ class ProviderController extends Controller
         $setting = $service->getSetting();
 
         $data['is_active'] = $request->boolean('is_active');
-        $data['auto_notify_order'] = $request->boolean('auto_notify_order');
         $data['auto_notify_waiting'] = $request->boolean('auto_notify_waiting');
         $data['auto_notify_verified'] = $request->boolean('auto_notify_verified');
 

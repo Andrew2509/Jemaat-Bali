@@ -409,19 +409,11 @@
 
                     <div class="border-t border-stone-100 pt-4">
                         <span class="block text-xs font-bold text-stone-800 mb-3">Pemicu Pengiriman Otomatis (Auto Triggers):</span>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
-                                <input type="checkbox" name="auto_notify_order" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_order', $setting->auto_notify_order))>
-                                <div>
-                                    <span class="block text-xs font-bold text-stone-800">1. Pesanan Baru</span>
-                                    <span class="text-[11px] text-stone-500 leading-tight">Kirim saat pemesan submit form.</span>
-                                </div>
-                            </label>
-
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
                                 <input type="checkbox" name="auto_notify_waiting" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_waiting', $setting->auto_notify_waiting))>
                                 <div>
-                                    <span class="block text-xs font-bold text-stone-800">2. Menunggu Verifikasi</span>
+                                    <span class="block text-xs font-bold text-stone-800">1. Menunggu Konfirmasi</span>
                                     <span class="text-[11px] text-stone-500 leading-tight">Kirim saat bukti bayar diupload.</span>
                                 </div>
                             </label>
@@ -429,7 +421,7 @@
                             <label class="flex items-start gap-2.5 rounded-xl border border-[#e8e4dc] bg-stone-50/50 p-3 cursor-pointer hover:bg-stone-50 transition">
                                 <input type="checkbox" name="auto_notify_verified" value="1" class="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#b55322] focus:ring-[#b55322]" @checked(old('auto_notify_verified', $setting->auto_notify_verified))>
                                 <div>
-                                    <span class="block text-xs font-bold text-stone-800">3. Terverifikasi</span>
+                                    <span class="block text-xs font-bold text-stone-800">2. Terverifikasi</span>
                                     <span class="text-[11px] text-stone-500 leading-tight">Kirim saat admin setujui pembayaran.</span>
                                 </div>
                             </label>
@@ -473,29 +465,20 @@
                 </div>
 
                 <div class="mt-6 space-y-6">
-                    {{-- Template 1: Pesanan Baru --}}
-                    <div class="space-y-3 rounded-2xl border border-stone-200/80 bg-stone-50/40 p-4">
-                        <div class="flex items-center justify-between">
-                            <label for="template_order" class="text-xs font-bold text-stone-900">1. Pesanan Kaos Baru (Menunggu Pembayaran)</label>
-                            <span class="rounded bg-stone-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-700">Tahap 1</span>
-                        </div>
-                        <textarea id="template_order" form="provider-config-form" name="template_order" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_order', $setting->template_order ?: \App\Models\WhatsappSetting::defaultOrderTemplate()) }}</textarea>
-                    </div>
-
-                    {{-- Template 2: Menunggu Konfirmasi --}}
+                    {{-- Template 1: Menunggu Konfirmasi --}}
                     <div class="space-y-3 rounded-2xl border border-amber-200/70 bg-amber-50/30 p-4">
                         <div class="flex items-center justify-between">
-                            <label for="template_waiting" class="text-xs font-bold text-amber-950">2. Menunggu Konfirmasi (Upload Bukti)</label>
-                            <span class="rounded bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-900">Tahap 2</span>
+                            <label for="template_waiting" class="text-xs font-bold text-amber-950">1. Menunggu Konfirmasi (Upload Bukti)</label>
+                            <span class="rounded bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-900">Tahap 1</span>
                         </div>
                         <textarea id="template_waiting" form="provider-config-form" name="template_waiting" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_waiting', $setting->template_waiting ?: \App\Models\WhatsappSetting::defaultWaitingTemplate()) }}</textarea>
                     </div>
 
-                    {{-- Template 3: Pembayaran Terverifikasi --}}
+                    {{-- Template 2: Pembayaran Terverifikasi --}}
                     <div class="space-y-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/30 p-4">
                         <div class="flex items-center justify-between">
-                            <label for="template_verified" class="text-xs font-bold text-emerald-950">3. Pembayaran Terverifikasi</label>
-                            <span class="rounded bg-emerald-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-900">Tahap 3</span>
+                            <label for="template_verified" class="text-xs font-bold text-emerald-950">2. Pembayaran Terverifikasi</label>
+                            <span class="rounded bg-emerald-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-900">Tahap 2</span>
                         </div>
                         <textarea id="template_verified" form="provider-config-form" name="template_verified" rows="10" class="w-full rounded-xl border border-[#e8e4dc] bg-white p-3 text-xs font-mono text-stone-800 focus:border-[#b55322] focus:outline-none leading-relaxed">{{ old('template_verified', $setting->template_verified ?: \App\Models\WhatsappSetting::defaultVerifiedTemplate()) }}</textarea>
                     </div>
