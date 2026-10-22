@@ -96,32 +96,6 @@
                         Rp {{ number_format($selected->harga, 0, ',', '.') }}
                     </p>
 
-                    {{-- Baris Keunggulan --}}
-                    <div class="mt-6 grid grid-cols-3 divide-x divide-line border-y border-line py-4">
-                        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-                            <svg class="h-6 w-6 text-ink" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
-                            <span class="text-xs font-bold text-ink">Denpasar, Bali</span>
-                            <span class="text-[10px] leading-tight text-muted">Dirancang lokal</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-                            <svg class="h-6 w-6 text-ink" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-                            </svg>
-                            <span class="text-xs font-bold text-ink">Kualitas Premium</span>
-                            <span class="text-[10px] leading-tight text-muted">Dijahit rapi</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-                            <svg class="h-6 w-6 text-ink" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h.375c.621 0 1.125-.504 1.125-1.125V11.25c0-1.44-.72-2.72-1.92-3.49l-1.23-.76a1.125 1.125 0 0 0-1.24.18L13.5 7.5M3.375 18.75h4.125M3.375 14.25h4.125m4.5 0h4.125M16.5 7.5h.008v.008H16.5V7.5Zm-3 0h.008v.008h-.008V7.5Zm-3 0h.008v.008h-.008V7.5Z" />
-                            </svg>
-                            <span class="text-xs font-bold text-ink">Kirim Se-Indonesia</span>
-                            <span class="text-[10px] leading-tight text-muted">Aman &amp; terpercaya</span>
-                        </div>
-                    </div>
-
                     {{-- Ukuran --}}
                     <div class="mt-6">
                         <div class="flex items-center justify-between">
