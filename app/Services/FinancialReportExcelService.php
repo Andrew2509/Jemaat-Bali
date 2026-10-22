@@ -404,7 +404,7 @@ class FinancialReportExcelService
                 'uraian' => 'Donasi dari ' . $d->nama,
                 'debit' => (int) $d->nominal,
                 'kredit' => 0,
-                'catatan' => $d->catatan ?: ($d->metode_pembayaran ? 'Via ' . $d->metode_pembayaran : '-'),
+                'catatan' => $d->catatan ?: ($d->metode ? 'Via ' . $d->metode : '-'),
             ]);
         }
 
@@ -574,8 +574,21 @@ class FinancialReportExcelService
         $sheet->getStyle('G5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        $allDonasi = $donasis->merge(
-            collect($donasiSajaOrders ?? [])->map(fn($o) => (object) [
+        // Normalisasi kedua sumber data ke bentuk yang sama sebelum digabung.
+        // Jangan pakai Eloquent Collection::merge() karena item-nya stdClass
+        // (Eloquent\Collection::merge() memanggil getKey() pada tiap item).
+        $donasiRows = collect($donasis)->map(fn ($d) => (object) [
+            'tanggal' => $d->tanggal ? Carbon::parse($d->tanggal) : Carbon::parse('2026-01-01'),
+            'kode' => $d->kode,
+            'nama' => $d->nama,
+            'telepon' => $d->nomor,
+            'metode_pembayaran' => $d->metode,
+            'nominal' => (int) $d->nominal,
+            'catatan' => $d->catatan,
+        ]);
+
+        $allDonasi = $donasiRows->merge(
+            collect($donasiSajaOrders ?? [])->map(fn ($o) => (object) [
                 'tanggal' => $o->created_at ? Carbon::parse($o->created_at) : Carbon::parse('2026-01-01'),
                 'kode' => $o->nomor_pesanan,
                 'nama' => $o->nama,
