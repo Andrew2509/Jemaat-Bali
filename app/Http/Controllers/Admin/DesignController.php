@@ -190,7 +190,7 @@ class DesignController extends Controller
             'ukuran' => ['nullable', 'array'],
             'ukuran.*' => ['string', Rule::in(Design::ALL_UKURAN)],
             'gambar' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:10240'],
-            'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
+            'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov,gif', 'max:51200'],
         ]);
 
         $data['ukuran'] = $request->has('ukuran') ? array_values((array) $request->input('ukuran')) : [];
@@ -238,7 +238,7 @@ class DesignController extends Controller
             'ukuran' => ['nullable', 'array'],
             'ukuran.*' => ['string', Rule::in(Design::ALL_UKURAN)],
             'gambar' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:10240'],
-            'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
+            'video_360' => ['nullable', 'file', 'mimes:mp4,webm,mov,gif', 'max:51200'],
         ]);
 
         $data['ukuran'] = $request->has('ukuran') ? array_values((array) $request->input('ukuran')) : [];

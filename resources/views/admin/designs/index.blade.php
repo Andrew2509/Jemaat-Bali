@@ -230,7 +230,11 @@
                         </div>
                         @if ($selectedDesign->video_360 && $selectedDesign->video360Url())
                             <div id="insp-media-video" class="hidden h-full w-full flex items-center justify-center bg-stone-950/5 relative overflow-hidden">
-                                <video id="insp-video-player" src="{{ $selectedDesign->video360Url() }}" playsinline webkit-playsinline muted loop autoplay controls class="h-full w-full object-contain p-2"></video>
+                                @if ($selectedDesign->isVideo360Gif())
+                                    <img src="{{ $selectedDesign->video360Url() }}" alt="GIF 360 {{ $selectedDesign->nama }}" class="h-full w-full object-contain p-2">
+                                @else
+                                    <video id="insp-video-player" src="{{ $selectedDesign->video360Url() }}" playsinline webkit-playsinline muted loop autoplay controls class="h-full w-full object-contain p-2"></video>
+                                @endif
                                 <span class="absolute top-3 left-3 rounded-full bg-stone-900/90 text-white font-mono text-[9px] font-bold px-2.5 py-0.5 flex items-center gap-1 backdrop-blur-xs z-10 shadow-2xs">
                                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     360&deg; Video Playing

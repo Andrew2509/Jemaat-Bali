@@ -165,6 +165,18 @@ class Design extends Model
         return asset('designs/clean-kaos-bangun-bersama.svg');
     }
 
+    /**
+     * Periksa apakah berkas 360° berupa gambar animasi (GIF) alih-alih video.
+     */
+    public function isVideo360Gif(): bool
+    {
+        if (! $this->video_360) {
+            return false;
+        }
+
+        return strtolower(pathinfo(parse_url($this->video_360, PHP_URL_PATH) ?? $this->video_360, PATHINFO_EXTENSION)) === 'gif';
+    }
+
     public function video360Url(): ?string
     {
         if (! $this->video_360) {

@@ -97,26 +97,38 @@
                 <div class="flex flex-col items-center justify-center lg:col-span-5">
                     <div class="relative w-full max-w-[480px]">
                         @if ($selected->video360Url())
-                            {{-- 360° VIDEO PLAYING KHUSUS UNTUK DESAIN YANG MEMILIKI VIDEO 360 --}}
-                            <div id="viewer-360" class="relative aspect-square w-full cursor-grab select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm active:cursor-grabbing">
-                                <video id="viewer-360-video" src="{{ $selected->video360Url() }}" playsinline webkit-playsinline muted loop autoplay preload="metadata"
-                                    class="pointer-events-none absolute inset-0 h-full w-full object-contain p-6 will-change-transform"></video>
-                                <span class="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    360&deg; Video Playing
-                                </span>
-                                <span id="viewer-360-counter" class="absolute right-3 top-3 z-10 rounded-full bg-stone-900/85 px-3 py-1 font-mono text-[10px] font-bold text-white backdrop-blur-xs">0&deg;</span>
-                                <span class="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-line bg-white/95 px-3.5 py-1.5 text-[11px] font-semibold text-stone-600 shadow-xs backdrop-blur-xs">
-                                    Geser kiri/kanan untuk putar 360&deg;
-                                </span>
-                            </div>
+                            @if ($selected->isVideo360Gif())
+                                {{-- 360° GIF (GAMBAR ANIMASI) UNTUK DESAIN YANG MEMILIKI GIF 360 --}}
+                                <div id="viewer-360" class="relative aspect-square w-full select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm">
+                                    <img id="viewer-360-gif" src="{{ $selected->video360Url() }}" alt="GIF 360 {{ $selected->nama }}" draggable="false"
+                                        class="absolute inset-0 h-full w-full object-contain p-6">
+                                    <span class="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        360&deg; GIF Playing
+                                    </span>
+                                </div>
+                            @else
+                                {{-- 360° VIDEO PLAYING KHUSUS UNTUK DESAIN YANG MEMILIKI VIDEO 360 --}}
+                                <div id="viewer-360" class="relative aspect-square w-full cursor-grab select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm active:cursor-grabbing">
+                                    <video id="viewer-360-video" src="{{ $selected->video360Url() }}" playsinline webkit-playsinline muted loop autoplay preload="metadata"
+                                        class="pointer-events-none absolute inset-0 h-full w-full object-contain p-6 will-change-transform"></video>
+                                    <span class="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        360&deg; Video Playing
+                                    </span>
+                                    <span id="viewer-360-counter" class="absolute right-3 top-3 z-10 rounded-full bg-stone-900/85 px-3 py-1 font-mono text-[10px] font-bold text-white backdrop-blur-xs">0&deg;</span>
+                                    <span class="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-line bg-white/95 px-3.5 py-1.5 text-[11px] font-semibold text-stone-600 shadow-xs backdrop-blur-xs">
+                                        Geser kiri/kanan untuk putar 360&deg;
+                                    </span>
+                                </div>
 
-                            <div class="mt-4 flex items-center justify-center gap-2">
-                                <button type="button" data-putar="-10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar -10°">&minus;10&deg;</button>
-                                <button type="button" id="btn-jeda" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Jeda / putar otomatis">&#10074;&#10074;</button>
-                                <button type="button" data-putar="reset" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-xs font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Reset ke 0°">0&deg;</button>
-                                <button type="button" data-putar="10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar +10°">+10&deg;</button>
-                            </div>
+                                <div class="mt-4 flex items-center justify-center gap-2">
+                                    <button type="button" data-putar="-10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar -10°">&minus;10&deg;</button>
+                                    <button type="button" id="btn-jeda" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Jeda / putar otomatis">&#10074;&#10074;</button>
+                                    <button type="button" data-putar="reset" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-xs font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Reset ke 0°">0&deg;</button>
+                                    <button type="button" data-putar="10" class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-sm font-bold text-ink shadow-xs transition hover:border-primary hover:text-primary" title="Putar +10°">+10&deg;</button>
+                                </div>
+                            @endif
                         @else
                             {{-- DESAIN TANPA VIDEO 360: GAMBAR PAKAIAN STATIS ELEGAN & BERSIH --}}
                             <div class="relative aspect-square w-full select-none overflow-hidden rounded-3xl border border-line bg-stone-100 shadow-sm flex items-center justify-center p-8">

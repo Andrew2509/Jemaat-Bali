@@ -11,6 +11,7 @@
         $initialAktif = old('aktif', $design->exists ? ($design->aktif ? 1 : 0) : 1);
         $initialGambarUrl = $design->exists ? $design->gambarUrl() : null;
         $initialVideoUrl = $design->exists ? $design->video360Url() : null;
+        $initialVideoIsGif = $design->exists && $design->isVideo360Gif();
         $allSizes = \App\Models\Design::ALL_UKURAN;
         $initialUkuran = old('ukuran', $design->exists ? $design->pilihanUkuran() : $allSizes);
         if (!is_array($initialUkuran)) {
@@ -183,12 +184,12 @@
                         </span>
                     </div>
                     <p class="text-[11px] text-stone-500 mb-2.5">
-                        Unggah rekaman putaran pakaian 360 derajat untuk mengaktifkan fitur <strong>360&deg; Video Playing</strong> interaktif di katalog dan studio etalase jemaat.
+                        Unggah rekaman putaran pakaian 360 derajat untuk mengaktifkan fitur <strong>360&deg; Video Playing</strong> interaktif di katalog dan studio etalase jemaat. Bisa berupa video atau <strong>GIF animasi</strong> putaran 360&deg;.
                     </p>
                     <div class="relative">
-                        <input type="file" id="video_360" name="video_360" accept="video/mp4,video/webm,video/quicktime" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-900 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white hover:file:bg-stone-800 focus:outline-none cursor-pointer">
+                        <input type="file" id="video_360" name="video_360" accept="video/mp4,video/webm,video/quicktime,image/gif,.gif" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-900 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white hover:file:bg-stone-800 focus:outline-none cursor-pointer">
                     </div>
-                    <p class="mt-1.5 text-[11px] text-stone-400">Mendukung format video MP4, WebM, atau MOV &middot; Maksimal 50 MB</p>
+                    <p class="mt-1.5 text-[11px] text-stone-400">Mendukung video MP4, WebM, MOV, atau animasi GIF &middot; Maksimal 50 MB</p>
                     @error('video_360')
                         <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                     @enderror
@@ -281,7 +282,11 @@
                         <!-- 2. Video 360 View -->
                         <div id="view-video-container" class="hidden h-full w-full flex items-center justify-center bg-stone-950/5 relative overflow-hidden">
                             <!-- Actual Video Player -->
-                            <video id="preview-video" src="{{ $initialVideoUrl ?: '' }}" playsinline webkit-playsinline muted loop autoplay class="{{ $initialVideoUrl ? 'h-full w-full object-contain p-4' : 'hidden' }}"></video>
+                            <video id="preview-video" src="{{ ($initialVideoUrl && ! $initialVideoIsGif) ? $initialVideoUrl : '' }}" playsinline webkit-playsinline muted loop autoplay class="{{ ($initialVideoUrl && ! $initialVideoIsGif) ? 'h-full w-full object-contain p-4' : 'hidden' }}"></video>
+
+                            <!-- Actual GIF (image) Player for 360° GIF -->
+                            <img id="preview-video-gif" src="{{ $initialVideoIsGif ? $initialVideoUrl : '' }}" alt="Pratinjau GIF 360"
+                                class="{{ $initialVideoIsGif ? 'h-full w-full object-contain p-4' : 'hidden' }}">
 
                             <!-- Video Placeholder when no video -->
                             <div id="preview-video-placeholder" class="{{ $initialVideoUrl ? 'hidden' : 'flex flex-col items-center justify-center gap-2.5 text-stone-400 p-6 text-center' }}">
@@ -293,7 +298,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs font-bold text-stone-800">Video 360&deg; Belum Dipilih</p>
-                                    <p class="text-[11px] text-stone-400 mt-0.5 max-w-[220px]">Pilih file video MP4/WebM pada form di samping untuk menguji putaran 360&deg; secara langsung.</p>
+                                    <p class="text-[11px] text-stone-400 mt-0.5 max-w-[220px]">Pilih file video MP4/WebM atau GIF animasi pada form di samping untuk menguji putaran 360&deg; secara langsung.</p>
                                 </div>
                             </div>
 
@@ -302,7 +307,7 @@
                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                 <span>360&deg; Video Playing</span>
                             </span>
-                            <span id="preview-video-counter" class="{{ $initialVideoUrl ? 'block' : 'hidden' }} absolute right-3 bottom-3 rounded-full bg-stone-900/90 px-3 py-1 font-mono text-[10px] font-bold text-white backdrop-blur-xs shadow-2xs z-10">
+                            <span id="preview-video-counter" class="{{ ($initialVideoUrl && ! $initialVideoIsGif) ? 'block' : 'hidden' }} absolute right-3 bottom-3 rounded-full bg-stone-900/90 px-3 py-1 font-mono text-[10px] font-bold text-white backdrop-blur-xs shadow-2xs z-10">
                                 0&deg;
                             </span>
                         </div>
@@ -453,6 +458,7 @@
             // Video View Elements
             const viewVideoContainer = document.getElementById('view-video-container');
             const prevVideo = document.getElementById('preview-video');
+            const prevVideoGif = document.getElementById('preview-video-gif');
             const prevVideoPlaceholder = document.getElementById('preview-video-placeholder');
             const prevVideoBadge = document.getElementById('preview-video-badge');
             const prevVideoCounter = document.getElementById('preview-video-counter');
@@ -571,27 +577,40 @@
             function syncVideo() {
                 const file = inputVideo.files && inputVideo.files[0];
                 if (file) {
+                    const isGif = file.type === 'image/gif' || /\.gif$/i.test(file.name);
                     if (currentVideoBlobUrl) {
                         URL.revokeObjectURL(currentVideoBlobUrl);
                     }
                     currentVideoBlobUrl = URL.createObjectURL(file);
-                    prevVideo.src = currentVideoBlobUrl;
-                    prevVideo.classList.remove('hidden');
+                    if (isGif) {
+                        prevVideoGif.src = currentVideoBlobUrl;
+                        prevVideoGif.classList.remove('hidden');
+                        prevVideo.classList.add('hidden');
+                        prevVideo.removeAttribute('src');
+                    } else {
+                        prevVideo.src = currentVideoBlobUrl;
+                        prevVideo.classList.remove('hidden');
+                        prevVideoGif.classList.add('hidden');
+                        prevVideoGif.removeAttribute('src');
+                    }
                     prevVideoPlaceholder.classList.add('hidden');
                     prevVideoBadge.classList.remove('hidden');
                     prevVideoBadge.classList.add('flex');
-                    prevVideoCounter.classList.remove('hidden');
+                    prevVideoCounter.classList.toggle('hidden', isGif);
                     videoIndicatorBadge.classList.remove('hidden');
                     setChecklist(chkVideo, true);
                     switchTab('video');
-                    prevVideo.play().catch(function(){});
+                    if (!isGif) {
+                        prevVideo.play().catch(function(){});
+                    }
                 } else {
                     @if ($design->exists && $design->video_360)
                         setChecklist(chkVideo, true);
                         videoIndicatorBadge.classList.remove('hidden');
                     @else
-                        if (!prevVideo.src) {
+                        if (!prevVideo.src && !prevVideoGif.src) {
                             prevVideo.classList.add('hidden');
+                            prevVideoGif.classList.add('hidden');
                             prevVideoPlaceholder.classList.remove('hidden');
                             prevVideoBadge.classList.add('hidden');
                             prevVideoCounter.classList.add('hidden');
@@ -604,6 +623,7 @@
 
             // Update angle display from video playback
             prevVideo.addEventListener('timeupdate', function () {
+                if (!prevVideo.src) return;
                 const dur = prevVideo.duration || 2;
                 const ct = prevVideo.currentTime || 0;
                 const deg = Math.round((ct / dur) * 360) % 360;
@@ -764,8 +784,10 @@
 
             @if ($design->exists && $design->video_360)
                 setChecklist(chkVideo, true);
-                // If design has 360 video, start in video mode or have it ready
-                prevVideo.play().catch(function(){});
+                @if (! $initialVideoIsGif)
+                    // If design has 360 video, start in video mode or have it ready
+                    prevVideo.play().catch(function(){});
+                @endif
             @else
                 setChecklist(chkVideo, false);
             @endif
