@@ -16,6 +16,7 @@ class Progress extends Model
         'media_path',
         'video_url',
         'tahap',
+        'kategori',
         'status',
         'teks_alt',
         'published_at',

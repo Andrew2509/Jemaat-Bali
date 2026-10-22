@@ -15,9 +15,10 @@ class ProgressController extends Controller
             ->get();
 
         return view('progres', [
-            'fotos' => $semua->where('tipe', 'foto'),
-            'videos' => $semua->where('tipe', 'video'),
+            'entries' => $semua,
             'total' => $semua->count(),
+            'fotoCount' => $semua->where('tipe', 'foto')->count(),
+            'videoCount' => $semua->where('tipe', 'video')->count(),
             'programInfo' => ProgramInfo::first(),
         ]);
     }

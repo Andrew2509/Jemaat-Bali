@@ -50,8 +50,8 @@ class PublicPagesTest extends TestCase
 
         $this->get('/progres')
             ->assertStatus(200)
-            ->assertSee('Foto Lapangan')
-            ->assertSee('Video Lapangan')
+            ->assertSee('Dokumentasi Terbaru')
+            ->assertSee('Progres Pembangunan')
             ->assertSee('Pengecoran lantai dasar');
     }
 

@@ -9,6 +9,7 @@
         $previewTanggal = old('tanggal', $progress->tanggal ? $progress->tanggal->format('Y-m-d') : date('Y-m-d'));
         $previewJudul = old('judul', $progress->judul ?? '');
         $previewTahap = old('tahap', $progress->tahap ?? 'Fondasi');
+        $previewKategori = old('kategori', $progress->kategori ?? 'pembangunan');
         $previewDeskripsi = old('deskripsi', $progress->deskripsi ?? '');
         $previewTeksAlt = old('teks_alt', $progress->teks_alt ?? '');
         $previewVideoUrl = old('video_url', $progress->video_url ?? '');
@@ -81,6 +82,20 @@
                             <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
+
+                <!-- Kategori -->
+                <div>
+                    <label for="kategori" class="block text-xs font-semibold text-stone-700 mb-1">
+                        Kategori
+                    </label>
+                    <select id="kategori" name="kategori" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-700 focus:border-[#b55322] focus:outline-none">
+                        <option value="pembangunan" @selected($previewKategori === 'pembangunan')>Pembangunan — progres fisik bangunan</option>
+                        <option value="kegiatan" @selected($previewKategori === 'kegiatan')>Kegiatan — acara &amp; kegiatan jemaat</option>
+                    </select>
+                    @error('kategori')
+                        <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Status & Teks Alt -->
