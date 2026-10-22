@@ -348,7 +348,7 @@
                         </svg>
                         <div>
                             <p class="text-xs font-bold text-stone-900">Pesan Kaos + Donasi</p>
-                            <p class="mt-0.5 text-xs text-stone-500 leading-relaxed">Donasi minimal Rp200.000, terpisah dari harga kaos dan ongkir.</p>
+                            <p class="mt-0.5 text-xs text-stone-500 leading-relaxed">Donasi minimal Rp{{ number_format(config('donation.min_kaos_donasi'), 0, ',', '.') }}, terpisah dari harga kaos dan ongkir.</p>
                         </div>
                     </div>
                 </div>

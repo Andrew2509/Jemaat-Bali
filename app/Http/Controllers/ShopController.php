@@ -65,11 +65,11 @@ class ShopController extends Controller
                 'design_id' => ['required', 'integer', 'exists:designs,id'],
                 'ukuran' => ['required', 'string', 'in:S,M,L,XL,XXL'],
                 'jumlah' => ['required', 'integer', 'min:1', 'max:100'],
-                'donasi' => ['required', 'integer', 'min:200000', 'max:100000000'],
+                'donasi' => ['required', 'integer', 'min:' . config('donation.min_kaos_donasi'), 'max:100000000'],
                 'catatan' => ['nullable', 'string', 'max:500'],
             ], [
                 'nomor.regex' => 'Nomor HP tidak valid. Gunakan angka saja, contoh 08123456789.',
-                'donasi.min' => 'Nominal donasi untuk Kaos + Donasi minimal Rp 200.000.',
+                'donasi.min' => 'Nominal donasi untuk Kaos + Donasi minimal Rp ' . number_format(config('donation.min_kaos_donasi'), 0, ',', '.') . '.',
             ]);
 
             $design = Design::where('aktif', true)->find($data['design_id']);
@@ -113,11 +113,11 @@ class ShopController extends Controller
                 'nama' => ['required', 'string', 'max:120'],
                 'nomor' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{6,}$/'],
                 'email' => ['required', 'email', 'max:150'],
-                'donasi' => ['required', 'integer', 'min:1000', 'max:100000000'],
+                'donasi' => ['required', 'integer', 'min:' . config('donation.min_donasi_saja'), 'max:100000000'],
                 'catatan' => ['nullable', 'string', 'max:500'],
             ], [
                 'nomor.regex' => 'Nomor HP tidak valid. Gunakan angka saja, contoh 08123456789.',
-                'donasi.min' => 'Nominal donasi minimal Rp 1.000.',
+                'donasi.min' => 'Nominal donasi minimal Rp ' . number_format(config('donation.min_donasi_saja'), 0, ',', '.') . '.',
             ]);
 
             $donasi = (int) $data['donasi'];

@@ -51,7 +51,7 @@
                     <div class="radio-indicator mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full {{ $tab === 'kaos_donasi' ? 'bg-[#b05525]' : 'border-2 border-stone-300 bg-white' }}"></div>
                     <div>
                         <h3 class="font-bold text-sm text-stone-900">Pesan Kaos + Donasi</h3>
-                        <p class="text-xs text-stone-500 mt-0.5">Minimal Rp200.000 &bull; Lengkapi data pengiriman</p>
+                        <p class="text-xs text-stone-500 mt-0.5">Minimal Rp{{ number_format(config('donation.min_kaos_donasi'), 0, ',', '.') }} &bull; Lengkapi data pengiriman</p>
                     </div>
                 </button>
 
@@ -336,20 +336,20 @@
                         <div class="pt-2">
                             <h2 class="font-serif text-lg font-bold text-stone-900">Donasi</h2>
                             <div class="mt-3 rounded-xl bg-[#fff7ed] p-3 text-xs font-medium text-[#c2410c]">
-                                Pesan Kaos + Donasi: nominal minimal Rp200.000.
+                                Pesan Kaos + Donasi: nominal minimal Rp{{ number_format(config('donation.min_kaos_donasi'), 0, ',', '.') }}.
                             </div>
 
                             <div class="mt-4">
                                 <label for="kd-donasi" class="label">Nominal Donasi (Rp) <span class="text-error">*</span></label>
-                                <input type="number" id="kd-donasi" name="donasi" min="200000" step="10000"
-                                    value="{{ old('donasi') }}" placeholder="Minimal 200000"
+                                <input type="number" id="kd-donasi" name="donasi" min="{{ config('donation.min_kaos_donasi') }}" step="10000"
+                                    value="{{ old('donasi') }}" placeholder="Minimal {{ config('donation.min_kaos_donasi') }}"
                                     class="input @error('donasi') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
                                 @error('donasi')<p class="error-text">{{ $message }}</p>@enderror
                             </div>
 
-                            {{-- Chips Kaos + Donasi: 200.000, 250.000, 500.000, 1.000.000 --}}
+                            {{-- Chips Kaos + Donasi --}}
                             <div class="mt-3 flex flex-wrap gap-2.5">
-                                @foreach ([200000, 250000, 500000, 1000000] as $chip)
+                                @foreach (config('donation.preset_kaos_donasi') as $chip)
                                     <button type="button" data-nominal="{{ $chip }}"
                                         class="kd-chip rounded-full border border-stone-200 bg-white px-5 py-2 text-xs font-semibold text-stone-700 transition hover:border-[#b05525] hover:text-[#b05525] cursor-pointer">
                                         Rp {{ number_format($chip, 0, ',', '.') }}
@@ -437,7 +437,7 @@
                             </div>
                             <div class="flex items-start justify-between gap-3">
                                 <dt class="text-stone-500">Minimal Donasi</dt>
-                                <dd id="kd-side-min-donasi" class="font-bold text-stone-900 text-right">Rp200.000</dd>
+                                <dd id="kd-side-min-donasi" class="font-bold text-stone-900 text-right">Rp{{ number_format(config('donation.min_kaos_donasi'), 0, ',', '.') }}</dd>
                             </div>
                         </dl>
 
@@ -606,7 +606,7 @@
                 if (kdSideUkuranJumlah) kdSideUkuranJumlah.textContent = ukuran + ' / ' + qty;
                 if (kdSideSubtotal) kdSideSubtotal.textContent = 'Rp ' + rupiah(subtotal);
                 if (kdSideMinDonasi) {
-                    kdSideMinDonasi.textContent = donasi > 0 ? 'Rp' + rupiah(donasi) : 'Rp200.000';
+                    kdSideMinDonasi.textContent = donasi > 0 ? 'Rp' + rupiah(donasi) : 'Rp' + rupiah(@js(config('donation.min_kaos_donasi')));
                 }
                 if (kdSideTotal) {
                     kdSideTotal.textContent = total > 0 ? 'Rp ' + rupiah(total) : 'Rp 0';
