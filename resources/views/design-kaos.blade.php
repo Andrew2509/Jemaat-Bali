@@ -85,13 +85,6 @@
                         {{ $selected->nama }}
                     </h1>
 
-                    <div class="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                        <span class="font-bold text-ink">5.0</span>
-                        <span class="tracking-tight text-primary">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                        <span class="h-4 w-px bg-line"></span>
-                        <span class="text-muted">{{ number_format($selected->orders_count) }} pesanan</span>
-                    </div>
-
                     <p class="mt-5 font-display text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">
                         Rp {{ number_format($selected->harga, 0, ',', '.') }}
                     </p>
