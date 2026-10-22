@@ -253,7 +253,7 @@ class AdminAccessManagementTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)->get(route('admin.system.setup-database'));
 
-        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertRedirect(route('admin.system.optimize'));
         $response->assertSessionHas('success');
     }
 

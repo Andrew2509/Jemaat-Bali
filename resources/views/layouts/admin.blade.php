@@ -207,6 +207,15 @@
                         </a>
                     @endif
                 @endif
+
+                @if (Auth::user()->isSuperAdmin())
+                    <a href="{{ route('admin.system.optimize') }}" class="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[13px] font-semibold transition {{ request()->routeIs('admin.system.*') ? 'bg-[#f8eee7] text-[#b55322]' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                        </svg>
+                        <span class="truncate">Optimasi Cache</span>
+                    </a>
+                @endif
             </nav>
 
             <!-- Program Widget in Sidebar -->
