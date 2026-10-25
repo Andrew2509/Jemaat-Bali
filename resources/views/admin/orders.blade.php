@@ -1982,7 +1982,7 @@
 
 
 
-                        <div class="col-span-3">Pembayaran</div>
+                        <div class="col-span-2">Pembayaran</div>
 
 
 
@@ -1998,7 +1998,7 @@
 
 
 
-                        <div class="col-span-1 text-right pr-1">Produksi / kirim</div>
+                        <div class="col-span-2 text-right pr-1">Produksi / kirim</div>
 
 
 
@@ -2355,7 +2355,7 @@
 
 
 
-                                <a href="{{ $orderUrl }}" class="col-span-3 flex justify-end">
+                                <a href="{{ $orderUrl }}" class="col-span-2 flex justify-end">
 
 
 
@@ -2607,7 +2607,7 @@
 
 
 
-                                <a href="{{ $orderUrl }}" class="col-span-1 flex justify-end pr-1">
+                                <a href="{{ $orderUrl }}" class="col-span-2 flex justify-end pr-1">
 
 
 
