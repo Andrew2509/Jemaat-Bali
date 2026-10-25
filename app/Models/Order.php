@@ -71,11 +71,13 @@ class Order extends Model
         'verified_at',
         'verified_by',
         'dikirim_at',
+        'items',
     ];
 
     protected function casts(): array
     {
         return [
+            'items' => 'array',
             'jumlah' => 'integer',
             'donasi' => 'integer',
             'subtotal_kaos' => 'integer',
@@ -143,6 +145,31 @@ class Order extends Model
     }
 
     /**
+     * Return items array or fallback to single legacy item.
+     *
+     * @return array<array{design_id: int|null, nama: string, ukuran: string|null, jumlah: int, harga: int, subtotal: int}>
+     */
+    public function getItemsListAttribute(): array
+    {
+        if (is_array($this->items) && count($this->items) > 0) {
+            return $this->items;
+        }
+
+        if ($this->isDonasiOnly()) {
+            return [];
+        }
+
+        return [[
+            'design_id' => $this->design_id,
+            'nama' => $this->design?->nama ?? 'Kaos Merchandise',
+            'ukuran' => $this->ukuran,
+            'jumlah' => (int) ($this->jumlah ?: 1),
+            'harga' => $this->jumlah > 0 ? (int) ($this->subtotal_kaos / $this->jumlah) : (int) $this->subtotal_kaos,
+            'subtotal' => (int) $this->subtotal_kaos,
+        ]];
+    }
+
+    /**
      * Pesanan yang sudah dikirim tidak boleh dihapus dari panel daftar/detil.
      */
     public function canBeDeleted(): bool
@@ -170,17 +197,16 @@ class Order extends Model
             return 'Donasi sukarela';
         }
 
-        $desain = $this->design?->judul ?? 'Kaos Merchandise';
-        $specs = array_filter([
-            $this->ukuran ? "ukuran {$this->ukuran}" : null,
-            $this->jumlah ? "{$this->jumlah} pcs" : null,
-        ]);
-        $specText = !empty($specs) ? ' (' . implode(', ', $specs) . ')' : '';
+        $parts = [];
+        foreach ($this->items_list as $item) {
+            $parts[] = "{$item['nama']} ({$item['ukuran']}, {$item['jumlah']} pcs)";
+        }
+        $res = implode('; ', $parts);
 
-        $donasiText = (int) $this->donasi > 0
-            ? ' + Donasi Rp' . number_format($this->donasi, 0, ',', '.')
-            : '';
+        if ((int) $this->donasi > 0) {
+            $res .= ' + Donasi Rp' . number_format($this->donasi, 0, ',', '.');
+        }
 
-        return $desain . $specText . $donasiText;
+        return $res;
     }
 }

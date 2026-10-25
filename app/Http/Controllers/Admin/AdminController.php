@@ -699,7 +699,9 @@ class AdminController extends Controller
             }
             foreach ($orders as $o) {
                 $tgl = $o->created_at ? Carbon::parse($o->created_at)->format('d/m/Y') : '-';
-                fputcsv($handle, [$no++, $tgl, 'Pesanan Kaos', $o->nomor_pesanan, 'Penjualan Kaos', $o->nama . ' (' . ($o->design?->nama ?? 'Kaos') . ')', (int) $o->totalTagihan(), 0, 'Ukuran ' . $o->ukuran . ', ' . $o->jumlah . ' pcs']);
+                    foreach ($o->items_list as $item) {
+                    fputcsv($handle, [$no++, $tgl, 'Pesanan Kaos', $o->nomor_pesanan, 'Penjualan Kaos', $o->nama . ' (' . $item['nama'] . ')', (int) $item['subtotal'], 0, 'Ukuran ' . $item['ukuran'] . ', ' . $item['jumlah'] . ' pcs']);
+                }
             }
             foreach ($expenses as $e) {
                 $tgl = $e->tanggal ? Carbon::parse($e->tanggal)->format('d/m/Y') : '-';

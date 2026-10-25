@@ -252,8 +252,10 @@
                     <div class="relative aspect-[4/3] bg-stone-100">
                         <span class="absolute left-3 top-3 rounded-full bg-stone-900/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">Edisi 2026</span>
                         <span class="absolute right-3 top-3 text-[10px] font-bold uppercase tracking-widest text-white/90 drop-shadow">Jemaat Bali</span>
-                        @if ($order->design)
-                            <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                        @php($firstItem = $order->items_list[0] ?? null)
+                        @php($itemDesign = $firstItem ? \App\Models\Design::find($firstItem['design_id']) : null)
+                        @if ($itemDesign && $itemDesign->gambar)
+                            <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $firstItem['nama'] }}" class="h-full w-full object-cover">
                         @endif
                     </div>
 
@@ -267,20 +269,14 @@
                         </div>
                         <p class="mt-1.5 text-xs font-semibold uppercase tracking-wider text-muted">Pesan Kaos</p>
 
-                        @if ($order->design)
-                            <p class="mt-3 font-serif text-base font-bold text-ink">{{ $order->design->nama }}</p>
-                            <p class="mt-1 text-sm leading-relaxed text-muted">{{ $order->design->deskripsi }}</p>
-                        @endif
+                        @foreach ($order->items_list as $item)
+                            <div class="mt-3 border-t border-line pt-3">
+                                <p class="font-serif text-base font-bold text-ink">{{ $item['nama'] }}</p>
+                                <p class="mt-1 text-sm leading-relaxed text-muted">Ukuran {{ $item['ukuran'] }} · {{ $item['jumlah'] }} kaos · Rp{{ number_format($item['subtotal'], 0, ',', '.') }}</p>
+                            </div>
+                        @endforeach
 
                         <dl class="mt-4 space-y-2.5 border-t border-line pt-4 text-sm">
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-muted">Ukuran</dt>
-                                <dd class="font-semibold">{{ $order->ukuran }}</dd>
-                            </div>
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-muted">Jumlah</dt>
-                                <dd class="font-semibold">{{ $order->jumlah }} kaos</dd>
-                            </div>
                             <div class="flex items-start justify-between gap-3">
                                 <dt class="text-muted">Subtotal produk</dt>
                                 <dd class="font-semibold">Rp{{ number_format($order->subtotal_kaos, 0, ',', '.') }}</dd>

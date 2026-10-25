@@ -162,13 +162,11 @@
                         <div class="min-w-0">
                             <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-muted">Nomor pesanan</p>
                             <p class="mt-1 font-display text-xl font-extrabold tracking-tight text-ink">#{{ $order->nomor_pesanan }}</p>
-                            @if ($order->design)
-                                <p class="mt-2 font-serif text-base font-bold text-ink">{{ $order->design->nama }}</p>
+                            @if (!$order->isDonasiOnly())
+                                @php($firstItem = $order->items_list[0] ?? null)
+                                <p class="mt-2 font-serif text-base font-bold text-ink">{{ $firstItem['nama'] ?? 'Kaos Merchandise' }}</p>
                                 <p class="text-sm text-muted">
-                                    {{ $order->isDonasiOnly() ? 'Donasi Saja' : 'Pesan Kaos + Donasi' }}
-                                    @if (!$order->isDonasiOnly())
-                                        &middot; Ukuran {{ $order->ukuran }} &middot; {{ $order->jumlah }} kaos
-                                    @endif
+                                    {{ $order->jenisLabel() }} &middot; {{ count($order->items_list) }} item (&middot; {{ collect($order->items_list)->sum('jumlah') }} kaos)
                                 </p>
                             @else
                                 <p class="mt-2 text-sm font-semibold text-muted">

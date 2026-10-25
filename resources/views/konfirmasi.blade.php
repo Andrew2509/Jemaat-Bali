@@ -64,14 +64,20 @@
                     </p>
                 @endif
 
-                @if ($isKaos && $order->design)
-                    <div class="mt-6 flex items-center justify-center gap-3 border-t border-line pt-6">
-                        <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}"
-                            class="h-14 w-14 rounded-lg object-cover">
-                        <div class="text-left">
-                            <p class="font-serif text-base font-bold text-ink">{{ $order->design->nama }}</p>
-                            <p class="text-sm text-muted">Ukuran {{ $order->ukuran }} &middot; {{ $order->jumlah }} kaos</p>
-                        </div>
+                @if ($isKaos && count($order->items_list) > 0)
+                    <div class="mt-6 border-t border-line pt-6">
+                        @foreach ($order->items_list as $item)
+                            <div class="mt-2 flex items-center justify-center gap-3">
+                                @php($itemDesign = \App\Models\Design::find($item['design_id']))
+                                @if ($itemDesign && $itemDesign->gambar)
+                                    <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $item['nama'] }}" class="h-12 w-12 rounded-lg object-cover">
+                                @endif
+                                <div class="text-left">
+                                    <p class="font-serif text-base font-bold text-ink">{{ $item['nama'] }}</p>
+                                    <p class="text-sm text-muted">Ukuran {{ $item['ukuran'] }} &middot; {{ $item['jumlah'] }} kaos &middot; Rp{{ number_format($item['subtotal'], 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
 

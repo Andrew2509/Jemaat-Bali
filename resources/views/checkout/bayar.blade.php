@@ -257,30 +257,38 @@
                     <div class="relative aspect-[4/3] bg-stone-100">
                         <span class="absolute left-3 top-3 rounded-full bg-stone-900/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">Edisi 2026</span>
                         <span class="absolute right-3 top-3 text-[10px] font-bold uppercase tracking-widest text-white/90 drop-shadow">Jemaat Bali</span>
-                        <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                        @php($firstItem = $order->items_list[0] ?? null)
+                        @php($itemDesign = $firstItem ? \App\Models\Design::find($firstItem['design_id']) : null)
+                        @if ($itemDesign && $itemDesign->gambar)
+                            <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $firstItem['nama'] ?? 'Kaos' }}" class="h-full w-full object-cover">
+                        @else
+                            <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                        @endif
                     </div>
 
                     <div class="p-6">
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
-                            #{{ $order->design->id }} &middot; Ringkasan pesanan
-                        </span>
-                        <h2 class="mt-3 font-serif text-lg font-bold leading-snug">{{ $order->design->nama }}</h2>
-                        <p class="mt-1.5 text-sm leading-relaxed text-muted">{{ $order->design->deskripsi }}</p>
-                        <p class="mt-2 font-serif text-base font-bold text-ink">
-                            Rp {{ number_format($order->design->harga, 0, ',', '.') }}
-                            <span class="font-sans text-xs font-medium text-muted">/ kaos</span>
-                        </p>
+                        @if ($firstItem)
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                                {{ count($order->items_list) }} {{ count($order->items_list) > 1 ? 'item' : 'kaos' }} &middot; Ringkasan pesanan
+                            </span>
+                            <h2 class="mt-3 font-serif text-lg font-bold leading-snug">{{ $firstItem['nama'] }}</h2>
+                            <p class="mt-1.5 text-sm leading-relaxed text-muted">{{ count($order->items_list) }} produk kaos merchandise</p>
+                            <p class="mt-2 font-serif text-base font-bold text-ink">
+                                Rp {{ number_format($firstItem['harga'], 0, ',', '.') }}
+                                <span class="font-sans text-xs font-medium text-muted">/ pcs</span>
+                            </p>
 
-                        <div class="mt-4 flex items-center justify-between border-t border-line pt-4 text-sm">
-                            <span class="text-muted">Ukuran &middot; Jumlah</span>
-                            <span class="font-semibold">{{ $order->ukuran }} &middot; {{ $order->jumlah }}</span>
-                        </div>
+                            <div class="mt-4 flex items-center justify-between border-t border-line pt-4 text-sm">
+                                <span class="text-muted">Total qty</span>
+                                <span class="font-semibold">{{ collect($order->items_list)->sum('jumlah') }} kaos</span>
+                            </div>
+                        @endif
 
                         <div class="mt-5 border-t border-line pt-5">
                             <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-ink">Rincian pembayaran</p>
                             <dl class="mt-3 space-y-2.5 text-sm">
                                 <div class="flex items-start justify-between gap-3">
-                                    <dt class="text-muted">Subtotal produk ({{ $order->jumlah }} kaos)</dt>
+                                    <dt class="text-muted">Subtotal produk ({{ collect($order->items_list)->sum('jumlah') }} kaos)</dt>
                                     <dd class="font-semibold">Rp {{ number_format($order->subtotal_kaos, 0, ',', '.') }}</dd>
                                 </div>
                                 <div class="flex items-start justify-between gap-3">

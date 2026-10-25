@@ -62,27 +62,54 @@ class ShopController extends Controller
                 'kecamatan' => ['required', 'string', 'max:120'],
                 'kelurahan' => ['nullable', 'string', 'max:120'],
                 'kode_pos' => ['required', 'string', 'max:10'],
-                'design_id' => ['required', 'integer', 'exists:designs,id'],
-                'ukuran' => ['required', 'string', 'in:S,M,L,XL,XXL'],
-                'jumlah' => ['required', 'integer', 'min:1', 'max:100'],
+                'items' => ['required', 'array', 'min:1'],
+                'items.*.design_id' => ['required', 'integer', 'exists:designs,id'],
+                'items.*.ukuran' => ['required', 'string', 'in:S,M,L,XL,XXL'],
+                'items.*.jumlah' => ['required', 'integer', 'min:1', 'max:100'],
                 'donasi' => ['required', 'integer', 'min:' . config('donation.min_kaos_donasi'), 'max:100000000'],
                 'catatan' => ['nullable', 'string', 'max:500'],
             ], [
                 'nomor.regex' => 'Nomor HP tidak valid. Gunakan angka saja, contoh 08123456789.',
                 'donasi.min' => 'Nominal donasi untuk Kaos + Donasi minimal Rp ' . number_format(config('donation.min_kaos_donasi'), 0, ',', '.') . '.',
+                'items.required' => 'Minimal pilih satu item kaos.',
+                'items.min' => 'Minimal pilih satu item kaos.',
+                'items.*.design_id.exists' => 'Salah satu desain kaos tidak tersedia.',
             ]);
 
-            $design = Design::where('aktif', true)->find($data['design_id']);
-            if (!$design) {
-                throw ValidationException::withMessages([
-                    'design_id' => 'Desain kaos yang dipilih tidak tersedia.',
-                ]);
+            // Fetch all designs, validate and enrich items
+            $designIds = array_column($data['items'], 'design_id');
+            $designs = Design::where('aktif', true)->whereIn('id', $designIds)->get()->keyBy('id');
+
+            $items = [];
+            $totalKaos = 0;
+            foreach ($data['items'] as $itemData) {
+                $design = $designs->get($itemData['design_id']);
+                if (!$design) {
+                    throw ValidationException::withMessages([
+                        'items' => 'Salah satu desain kaos tidak tersedia.',
+                    ]);
+                }
+
+                $jumlah = (int) $itemData['jumlah'];
+                $subtotal = $design->harga * $jumlah;
+                $totalKaos += $subtotal;
+
+                $items[] = [
+                    'design_id' => $design->id,
+                    'nama' => $design->nama,
+                    'ukuran' => $itemData['ukuran'],
+                    'jumlah' => $jumlah,
+                    'harga' => $design->harga,
+                    'subtotal' => $subtotal,
+                ];
             }
 
-            $subtotal = $design->harga * (int) $data['jumlah'];
             $donasi = max(0, (int) ($data['donasi'] ?? 0));
-            $total = $subtotal + $donasi;
+            $total = $totalKaos + $donasi;
             $nomorPesanan = 'KD-' . now()->format('ymd') . '-' . str_pad((string) (Order::max('id') + 1), 4, '0', STR_PAD_LEFT);
+
+            // Use first item for legacy single-item fields
+            $firstItem = $items[0];
 
             $order = Order::create([
                 'nomor_pesanan' => $nomorPesanan,
@@ -96,17 +123,18 @@ class ShopController extends Controller
                 'kecamatan' => $data['kecamatan'],
                 'kelurahan' => $data['kelurahan'] ?? null,
                 'kode_pos' => $data['kode_pos'],
-                'ukuran' => $data['ukuran'],
-                'jumlah' => (int) $data['jumlah'],
-                'design_id' => $design->id,
+                'ukuran' => $firstItem['ukuran'],
+                'jumlah' => $firstItem['jumlah'],
+                'design_id' => $firstItem['design_id'],
                 'donasi' => $donasi,
-                'subtotal_kaos' => $subtotal,
+                'subtotal_kaos' => $totalKaos,
                 'ongkir' => 0,
                 'total' => $total,
                 'metode' => 'qris',
                 'catatan' => $data['catatan'] ?? null,
                 'status_pembayaran' => 'belum_bayar',
                 'status_pengiriman' => 'belum_diproduksi',
+                'items' => $items,
             ]);
         } else {
             $data = $request->validate([

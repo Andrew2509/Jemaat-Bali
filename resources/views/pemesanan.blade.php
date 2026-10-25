@@ -58,19 +58,23 @@
                         </span>
                     </div>
 
-                    @if ($isKaos && $order->design)
-                        <div class="mt-5 flex items-start gap-4 rounded-xl border border-line bg-canvas p-4">
-                            <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}"
-                                class="h-20 w-20 shrink-0 rounded-lg object-cover">
-                            <div class="min-w-0">
-                                <p class="font-serif text-base font-bold text-ink">{{ $order->design->nama }}</p>
-                                <p class="mt-1 text-sm font-semibold text-primary">
-                                    Rp {{ number_format($order->design->harga, 0, ',', '.') }}
-                                    <span class="font-sans text-xs font-medium text-muted">/ kaos</span>
-                                </p>
-                                <p class="mt-1.5 text-sm text-muted">Ukuran {{ $order->ukuran }} &middot; {{ $order->jumlah }} kaos</p>
+                    @if ($isKaos)
+                        @foreach ($order->items_list as $item)
+                            <div class="mt-3 flex items-start gap-4 rounded-xl border border-line bg-canvas p-4">
+                                @php($itemDesign = \App\Models\Design::find($item['design_id']))
+                                @if ($itemDesign && $itemDesign->gambar)
+                                    <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $item['nama'] }}" class="h-20 w-20 shrink-0 rounded-lg object-cover">
+                                @endif
+                                <div class="min-w-0">
+                                    <p class="font-serif text-base font-bold text-ink">{{ $item['nama'] }}</p>
+                                    <p class="mt-1 text-sm font-semibold text-primary">
+                                        Rp {{ number_format($item['harga'], 0, ',', '.') }}
+                                        <span class="font-sans text-xs font-medium text-muted">/ kaos</span>
+                                    </p>
+                                    <p class="mt-1.5 text-sm text-muted">Ukuran {{ $item['ukuran'] }} &middot; {{ $item['jumlah'] }} kaos &middot; Subtotal: Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</p>
+                                </div>
                             </div>
-                        </div>
+                        @endforeach
                     @endif
 
                     <dl class="mt-5 space-y-3 text-sm">
@@ -112,7 +116,7 @@
                     <dl class="mt-5 space-y-3 text-sm">
                         @if ($isKaos)
                             <div class="flex items-start justify-between gap-4">
-                                <dt class="text-muted">Subtotal produk ({{ $order->jumlah }} kaos)</dt>
+                                <dt class="text-muted">Subtotal produk ({{ collect($order->items_list)->sum('jumlah') }} kaos)</dt>
                                 <dd class="font-semibold text-ink">Rp {{ number_format($order->subtotal_kaos, 0, ',', '.') }}</dd>
                             </div>
                         @endif

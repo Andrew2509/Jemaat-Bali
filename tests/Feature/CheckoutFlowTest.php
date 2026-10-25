@@ -193,6 +193,102 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame(5, Order::count());
     }
 
+    public function test_multi_item_order_creation_calculates_subtotal_and_compatibility_fields(): void
+    {
+        $designs = Design::where('aktif', true)->take(2)->get();
+        if ($designs->count() < 2) {
+            $this->markTestSkipped('At least 2 active designs are needed for multi-item test.');
+        }
+
+        $d1 = $designs[0];
+        $d2 = $designs[1];
+
+        // Step 1: Save identity to session
+        $this->post(route('checkout.data.store'), [
+            'nama' => 'Multi Item Tester',
+            'nomor' => '081999888777',
+            'email' => 'multi@example.com',
+            'design_id' => $d1->id,
+            'tipe' => 'kaos_donasi',
+        ])->assertRedirect(route('checkout.pengiriman'));
+
+        // Step 2: Submit shipping + items
+        $this->post(route('checkout.pengiriman.store'), [
+            'alamat' => 'Jl. Bypass Ngurah Rai No. 99',
+            'provinsi' => 'Bali',
+            'kabupaten' => 'Badung',
+            'kecamatan' => 'Kuta Selatan',
+            'kelurahan' => 'Jimbaran',
+            'kode_pos' => '80361',
+            'items' => [
+                ['design_id' => $d1->id, 'ukuran' => 'M', 'jumlah' => 2],
+                ['design_id' => $d2->id, 'ukuran' => 'XL', 'jumlah' => 3],
+            ],
+            'donasi' => 50000,
+        ])->assertRedirect();
+
+        $order = Order::where('nama', 'Multi Item Tester')->latest('id')->firstOrFail();
+
+        $expectedSubtotal = ($d1->harga * 2) + ($d2->harga * 3);
+        $expectedTotal = $expectedSubtotal + 50000;
+
+        $this->assertSame($expectedSubtotal, (int) $order->subtotal_kaos);
+        $this->assertSame($expectedTotal, (int) $order->total);
+        $this->assertSame($expectedTotal, (int) $order->totalTagihan());
+
+        // Legacy compatibility fields should reflect the first item
+        $this->assertSame($d1->id, (int) $order->design_id);
+        $this->assertSame('M', $order->ukuran);
+        $this->assertSame(2, (int) $order->jumlah);
+
+        // Verify JSON items structure
+        $this->assertCount(2, $order->items_list);
+        $this->assertSame($d1->nama, $order->items_list[0]['nama']);
+        $this->assertSame($d2->nama, $order->items_list[1]['nama']);
+        $this->assertSame($d1->harga * 2, $order->items_list[0]['subtotal']);
+        $this->assertSame($d2->harga * 3, $order->items_list[1]['subtotal']);
+
+        // Test rincianProduk contains both items
+        $rincian = $order->rincianProduk();
+        $this->assertStringContainsString($d1->nama, $rincian);
+        $this->assertStringContainsString($d2->nama, $rincian);
+    }
+
+    public function test_order_rejects_inactive_design_in_multi_item(): void
+    {
+        $design = Design::where('aktif', true)->firstOrFail();
+        $inactive = Design::create([
+            'nama' => 'Desain Nonaktif Test',
+            'deskripsi' => 'Deskripsi',
+            'harga' => 150000,
+            'gambar' => 'images/test.jpg',
+            'aktif' => false,
+        ]);
+
+        // Step 1: Save identity to session
+        $this->post(route('checkout.data.store'), [
+            'nama' => 'Inactive Design Tester',
+            'nomor' => '081777666555',
+            'email' => 'inactive@example.com',
+            'design_id' => $design->id,
+            'tipe' => 'kaos_saja',
+        ])->assertRedirect(route('checkout.pengiriman'));
+
+        // Step 2: Try to submit with inactive design in items
+        $this->post(route('checkout.pengiriman.store'), [
+            'alamat' => 'Jl. Test No. 1',
+            'provinsi' => 'Bali',
+            'kabupaten' => 'Badung',
+            'kecamatan' => 'Kuta',
+            'kode_pos' => '80361',
+            'items' => [
+                ['design_id' => $inactive->id, 'ukuran' => 'L', 'jumlah' => 1],
+            ],
+        ])->assertSessionHasErrors('items');
+
+        $this->assertSame(0, Order::where('nomor', '081777666555')->count());
+    }
+
     public function test_design_cta_points_to_new_checkout(): void
     {
         $this->get('/design-kaos')

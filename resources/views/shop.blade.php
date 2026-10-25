@@ -285,51 +285,47 @@
                                 </a>
                             </div>
 
-                            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label for="kd-desain" class="label">Desain Kaos <span class="text-error">*</span></label>
-                                    <select id="kd-desain" name="design_id" class="input @error('design_id') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
-                                        <option value="" data-harga="0" data-nama="Belum dipilih">Pilih desain &blacktriangledown;</option>
-                                        @foreach ($designs as $d)
-                                            <option value="{{ $d->id }}" data-harga="{{ $d->harga }}" data-nama="{{ $d->nama }}"
-                                                data-sizes="{{ json_encode($d->pilihanUkuran()) }}"
-                                                @selected(old('design_id', $selectedDesign->id ?? null) == $d->id)>
-                                                {{ $d->nama }} &mdash; Rp {{ number_format($d->harga, 0, ',', '.') }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('design_id')<p class="error-text">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label for="kd-ukuran" class="label !mb-0">Ukuran Kaos <span class="text-error">*</span></label>
-                                        <button type="button" data-open-size-chart class="text-[11px] font-bold text-[#b05525] hover:underline cursor-pointer inline-flex items-center gap-1">
-                                            <span>📏 Panduan Ukuran</span>
-                                        </button>
+                            {{-- Cart Items List --}}
+                            <div id="kd-cart-list" class="mt-4 space-y-3"></div>
+
+                            {{-- Add Item Form --}}
+                            <div class="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                                <div class="grid gap-3 sm:grid-cols-4">
+                                    <div class="sm:col-span-2">
+                                        <label for="kd-add-desain" class="label">Desain</label>
+                                        <select id="kd-add-desain" class="input text-sm">
+                                            <option value="">Pilih desain</option>
+                                            @foreach ($designs as $d)
+                                                <option value="{{ $d->id }}" data-harga="{{ $d->harga }}" data-nama="{{ $d->nama }}" data-sizes="{{ json_encode($d->pilihanUkuran()) }}">
+                                                    {{ $d->nama }} &mdash; Rp {{ number_format($d->harga, 0, ',', '.') }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                    <select id="kd-ukuran" name="ukuran" class="input @error('ukuran') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
-                                        <option value="">Pilih ukuran &blacktriangledown;</option>
-                                        @foreach ($ukuran as $u)
-                                            <option value="{{ $u }}" @selected(old('ukuran', request('ukuran', 'L')) === $u)>{{ $u }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('ukuran')<p class="error-text">{{ $message }}</p>@enderror
+                                    <div>
+                                        <label for="kd-add-ukuran" class="label">Ukuran</label>
+                                        <select id="kd-add-ukuran" class="input text-sm">
+                                            <option value="">Ukuran</option>
+                                            @foreach ($ukuran as $u)
+                                                <option value="{{ $u }}">{{ $u }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="kd-add-jumlah" class="label">Jumlah</label>
+                                        <input type="number" id="kd-add-jumlah" min="1" max="100" value="1" class="input text-sm">
+                                    </div>
                                 </div>
+                                <button type="button" id="kd-add-btn" class="mt-3 w-full sm:w-auto rounded-lg bg-[#b05525] hover:bg-[#964319] text-white px-5 py-2 text-sm font-bold transition">
+                                    + Tambah ke Keranjang
+                                </button>
+                                <button type="button" data-open-size-chart class="mt-2 text-xs font-semibold text-[#b05525] hover:underline">
+                                    📏 Panduan Ukuran
+                                </button>
                             </div>
 
-                            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label for="kd-jumlah" class="label">Jumlah Kaos <span class="text-error">*</span></label>
-                                    <input type="number" id="kd-jumlah" name="jumlah" min="1" max="100" value="{{ old('jumlah', request('jumlah', 1)) }}"
-                                        class="input @error('jumlah') input-error @enderror" {{ $tab === 'kaos_donasi' ? 'required' : '' }}>
-                                    @error('jumlah')<p class="error-text">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <label for="kd-subtotal-display" class="label">Subtotal Kaos</label>
-                                    <input type="text" id="kd-subtotal-display" readonly value="Rp 0"
-                                        class="input bg-stone-50 text-stone-700 font-semibold cursor-not-allowed">
-                                </div>
-                            </div>
+                            <div id="kd-cart-hidden"></div>
+                            @error('items')<p class="error-text mt-2">{{ $message }}</p>@enderror
                         </div>
 
                         {{-- Donasi --}}
@@ -418,26 +414,21 @@
 
                     {{-- Ringkasan Mode 2: Kaos + Donasi (Screenshot 2) --}}
                     <div id="side-kaos-donasi" class="{{ $tab === 'kaos_donasi' ? '' : 'hidden' }}">
-                        <dl class="mt-4 space-y-3 text-xs sm:text-sm">
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-stone-500">Jenis</dt>
-                                <dd class="font-bold text-stone-900 text-right">Kaos + Donasi</dd>
+                        <div class="mt-4 space-y-3">
+                            <div class="text-xs font-bold text-stone-900">Keranjang</div>
+                            <div id="kd-side-items" class="space-y-2 text-xs">
+                                <p class="text-stone-400 italic">Belum ada item</p>
                             </div>
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-stone-500">Desain</dt>
-                                <dd id="kd-side-desain" class="font-bold text-stone-900 text-right">Belum dipilih</dd>
-                            </div>
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-stone-500">Ukuran / Jumlah</dt>
-                                <dd id="kd-side-ukuran-jumlah" class="font-bold text-stone-900 text-right">&mdash; / 1</dd>
-                            </div>
-                            <div class="flex items-start justify-between gap-3">
+                        </div>
+
+                        <dl class="mt-4 pt-4 border-t border-stone-200 space-y-2 text-xs sm:text-sm">
+                            <div class="flex items-center justify-between gap-3">
                                 <dt class="text-stone-500">Subtotal Kaos</dt>
-                                <dd id="kd-side-subtotal" class="font-bold text-stone-900 text-right">Rp 0</dd>
+                                <dd id="kd-side-subtotal" class="font-bold text-stone-900">Rp 0</dd>
                             </div>
-                            <div class="flex items-start justify-between gap-3">
-                                <dt class="text-stone-500">Minimal Donasi</dt>
-                                <dd id="kd-side-min-donasi" class="font-bold text-stone-900 text-right">Rp{{ number_format(config('donation.min_kaos_donasi'), 0, ',', '.') }}</dd>
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-stone-500">Donasi</dt>
+                                <dd id="kd-side-donasi" class="font-bold text-stone-900">Rp 0</dd>
                             </div>
                         </dl>
 
@@ -484,19 +475,140 @@
             const dsChips = document.querySelectorAll('.ds-chip');
 
             // Kaos + Donasi inputs
-            const kdDesain = document.getElementById('kd-desain');
-            const kdUkuran = document.getElementById('kd-ukuran');
-            const kdJumlah = document.getElementById('kd-jumlah');
-            const kdSubtotalDisplay = document.getElementById('kd-subtotal-display');
             const kdDonasi = document.getElementById('kd-donasi');
             const kdChips = document.querySelectorAll('.kd-chip');
 
-            // Kaos + Donasi sidebar elements
-            const kdSideDesain = document.getElementById('kd-side-desain');
-            const kdSideUkuranJumlah = document.getElementById('kd-side-ukuran-jumlah');
+            // Cart management
+            const kdAddDesain = document.getElementById('kd-add-desain');
+            const kdAddUkuran = document.getElementById('kd-add-ukuran');
+            const kdAddJumlah = document.getElementById('kd-add-jumlah');
+            const kdAddBtn = document.getElementById('kd-add-btn');
+            const kdCartList = document.getElementById('kd-cart-list');
+            const kdCartHidden = document.getElementById('kd-cart-hidden');
+
+            // Sidebar elements
+            const kdSideItems = document.getElementById('kd-side-items');
             const kdSideSubtotal = document.getElementById('kd-side-subtotal');
-            const kdSideMinDonasi = document.getElementById('kd-side-min-donasi');
+            const kdSideDonasi = document.getElementById('kd-side-donasi');
             const kdSideTotal = document.getElementById('kd-side-total');
+
+            let cartItems = [];
+
+            // Update size options based on selected design
+            kdAddDesain?.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                if (!opt || !opt.dataset.sizes) return;
+
+                try {
+                    const avail = JSON.parse(opt.dataset.sizes);
+                    Array.from(kdAddUkuran.options).forEach(o => {
+                        if (!o.value) return;
+                        const isAv = avail.includes(o.value);
+                        o.disabled = !isAv;
+                        o.textContent = isAv ? o.value : o.value + ' (Habis)';
+                    });
+                    if (kdAddUkuran.value && !avail.includes(kdAddUkuran.value)) {
+                        kdAddUkuran.value = avail[0] || '';
+                    }
+                } catch (e) {}
+            });
+
+            // Add item to cart
+            kdAddBtn?.addEventListener('click', function() {
+                const designOpt = kdAddDesain?.options[kdAddDesain.selectedIndex];
+                const ukuran = kdAddUkuran?.value;
+                const jumlah = parseInt(kdAddJumlah?.value || '1', 10);
+
+                if (!designOpt || !designOpt.value || !ukuran || jumlah < 1) {
+                    alert('Pilih desain, ukuran, dan jumlah yang valid.');
+                    return;
+                }
+
+                const designId = parseInt(designOpt.value, 10);
+                const nama = designOpt.dataset.nama;
+                const harga = parseInt(designOpt.dataset.harga || '0', 10);
+                const subtotal = harga * jumlah;
+
+                // Check if same design+size exists, update quantity
+                const existing = cartItems.find(item => item.design_id === designId && item.ukuran === ukuran);
+                if (existing) {
+                    existing.jumlah += jumlah;
+                    existing.subtotal = existing.harga * existing.jumlah;
+                } else {
+                    cartItems.push({ design_id: designId, nama, ukuran, jumlah, harga, subtotal });
+                }
+
+                renderCart();
+
+                // Reset add form
+                kdAddDesain.value = '';
+                kdAddUkuran.value = '';
+                kdAddJumlah.value = '1';
+            });
+
+            function removeItem(index) {
+                cartItems.splice(index, 1);
+                renderCart();
+            }
+
+            function renderCart() {
+                // Render cart list
+                if (cartItems.length === 0) {
+                    kdCartList.innerHTML = '<p class="text-sm text-stone-400 italic py-3">Belum ada item di keranjang. Tambahkan kaos di bawah.</p>';
+                } else {
+                    kdCartList.innerHTML = cartItems.map((item, idx) => `
+                        <div class="flex items-start gap-3 p-3 bg-white border border-stone-200 rounded-lg">
+                            <div class="flex-1 min-w-0">
+                                <div class="font-bold text-sm text-stone-900">${item.nama}</div>
+                                <div class="text-xs text-stone-500 mt-1">Ukuran ${item.ukuran} &bull; ${item.jumlah} pcs &bull; Rp${rupiah(item.subtotal)}</div>
+                            </div>
+                            <button type="button" onclick="window.kdRemoveItem(${idx})" class="text-error hover:text-red-700 font-bold text-lg leading-none">&times;</button>
+                        </div>
+                    `).join('');
+                }
+
+                // Render sidebar items
+                if (cartItems.length === 0) {
+                    kdSideItems.innerHTML = '<p class="text-stone-400 italic">Belum ada item</p>';
+                } else {
+                    kdSideItems.innerHTML = cartItems.map(item => `
+                        <div class="flex justify-between gap-2">
+                            <span class="text-stone-700">${item.nama} (${item.ukuran}) x${item.jumlah}</span>
+                            <span class="font-semibold text-stone-900">Rp${rupiah(item.subtotal)}</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Generate hidden inputs
+                kdCartHidden.innerHTML = cartItems.map((item, idx) => `
+                    <input type="hidden" name="items[${idx}][design_id]" value="${item.design_id}">
+                    <input type="hidden" name="items[${idx}][ukuran]" value="${item.ukuran}">
+                    <input type="hidden" name="items[${idx}][jumlah]" value="${item.jumlah}">
+                `).join('');
+
+                // Update totals
+                const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+                const donasi = parseInt(kdDonasi?.value || '0', 10) || 0;
+                const total = subtotal + donasi;
+
+                if (kdSideSubtotal) kdSideSubtotal.textContent = 'Rp ' + rupiah(subtotal);
+                if (kdSideDonasi) kdSideDonasi.textContent = 'Rp ' + rupiah(donasi);
+                if (kdSideTotal) kdSideTotal.textContent = total > 0 ? 'Rp ' + rupiah(total) : 'Rp 0';
+            }
+
+            // Expose remove function globally
+            window.kdRemoveItem = removeItem;
+
+            kdDonasi?.addEventListener('input', renderCart);
+
+            kdChips.forEach(chip => {
+                chip.addEventListener('click', function () {
+                    if (kdDonasi) {
+                        kdDonasi.value = this.dataset.nominal;
+                        renderCart();
+                    }
+                });
+            });
 
             function rupiah(n) {
                 return Number(n || 0).toLocaleString('id-ID');
@@ -570,67 +682,10 @@
                 });
             });
 
-            // Calc Kaos + Donasi
-            function renderKaosDonasi() {
-                const selOpt = kdDesain?.options[kdDesain.selectedIndex];
-                const harga = parseInt(selOpt?.dataset.harga || '0', 10) || 0;
-                const nama = selOpt?.dataset.nama || 'Belum dipilih';
-
-                // Sync ukuran availability based on chosen design
-                if (selOpt && selOpt.dataset.sizes && kdUkuran) {
-                    try {
-                        const avail = JSON.parse(selOpt.dataset.sizes);
-                        Array.from(kdUkuran.options).forEach(opt => {
-                            if (!opt.value) return;
-                            const isAv = avail.includes(opt.value);
-                            opt.disabled = !isAv;
-                            opt.textContent = isAv ? opt.value : opt.value + ' (Habis)';
-                        });
-                        if (kdUkuran.value && !avail.includes(kdUkuran.value)) {
-                            kdUkuran.value = avail[0] || '';
-                        }
-                    } catch (e) {}
-                }
-
-                const ukuran = kdUkuran?.value || '—';
-                const qty = Math.max(1, parseInt(kdJumlah?.value || '1', 10) || 1);
-                const subtotal = harga * qty;
-                const donasi = parseInt(kdDonasi?.value || '0', 10) || 0;
-                const total = subtotal + donasi;
-
-                if (kdSubtotalDisplay) {
-                    kdSubtotalDisplay.value = 'Rp ' + rupiah(subtotal);
-                }
-
-                if (kdSideDesain) kdSideDesain.textContent = nama;
-                if (kdSideUkuranJumlah) kdSideUkuranJumlah.textContent = ukuran + ' / ' + qty;
-                if (kdSideSubtotal) kdSideSubtotal.textContent = 'Rp ' + rupiah(subtotal);
-                if (kdSideMinDonasi) {
-                    kdSideMinDonasi.textContent = donasi > 0 ? 'Rp' + rupiah(donasi) : 'Rp' + rupiah(@js(config('donation.min_kaos_donasi')));
-                }
-                if (kdSideTotal) {
-                    kdSideTotal.textContent = total > 0 ? 'Rp ' + rupiah(total) : 'Rp 0';
-                }
-            }
-
-            kdDesain?.addEventListener('change', renderKaosDonasi);
-            kdUkuran?.addEventListener('change', renderKaosDonasi);
-            kdJumlah?.addEventListener('input', renderKaosDonasi);
-            kdDonasi?.addEventListener('input', renderKaosDonasi);
-
-            kdChips.forEach(chip => {
-                chip.addEventListener('click', function () {
-                    if (kdDonasi) {
-                        kdDonasi.value = this.dataset.nominal;
-                        renderKaosDonasi();
-                    }
-                });
-            });
-
             // Initial calls
             setMode('{{ $tab }}');
             renderDonasiSaja();
-            renderKaosDonasi();
+            renderCart();
         })();
 
         // Integrasi RajaOngkir pada form Shop (Pesan Kaos + Donasi)

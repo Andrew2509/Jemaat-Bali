@@ -293,16 +293,16 @@ class FonnteService
             ? $item->alamatLengkap()
             : '—';
 
-        $produk = ($item instanceof Order && $item->design)
-            ? $item->design->judul
+        $produk = ($item instanceof Order && count($item->items_list) > 0)
+            ? $item->items_list[0]['nama']
             : ($item instanceof Order ? 'Kaos Merchandise' : 'Donasi');
 
-        $ukuran = ($item instanceof Order && $item->ukuran)
-            ? $item->ukuran
+        $ukuran = ($item instanceof Order && count($item->items_list) > 0)
+            ? $item->items_list[0]['ukuran']
             : '—';
 
-        $jumlah = ($item instanceof Order && $item->jumlah)
-            ? ($item->jumlah . ' pcs')
+        $jumlah = ($item instanceof Order && count($item->items_list) > 0)
+            ? (collect($item->items_list)->sum('jumlah') . ' pcs')
             : '—';
 
         $message = $this->buildVerifiedMessage($item, $type);
@@ -348,16 +348,16 @@ class FonnteService
             ? $item->alamatLengkap()
             : '—';
 
-        $produk = ($item instanceof Order && $item->design)
-            ? $item->design->judul
+        $produk = ($item instanceof Order && count($item->items_list) > 0)
+            ? $item->items_list[0]['nama']
             : ($item instanceof Order ? 'Kaos Merchandise' : 'Donasi');
 
-        $ukuran = ($item instanceof Order && $item->ukuran)
-            ? $item->ukuran
+        $ukuran = ($item instanceof Order && count($item->items_list) > 0)
+            ? $item->items_list[0]['ukuran']
             : '—';
 
-        $jumlah = ($item instanceof Order && $item->jumlah)
-            ? ($item->jumlah . ' pcs')
+        $jumlah = ($item instanceof Order && count($item->items_list) > 0)
+            ? (collect($item->items_list)->sum('jumlah') . ' pcs')
             : '—';
 
         $template = $this->setting->template_verified ?: WhatsappSetting::defaultVerifiedTemplate();

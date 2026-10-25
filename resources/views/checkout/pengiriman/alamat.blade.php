@@ -19,8 +19,14 @@
                 <div><label for="kecamatan" class="label">Kecamatan *</label><input id="kecamatan" name="kecamatan" value="{{ old('kecamatan', $draft['kecamatan'] ?? '') }}" class="input" required>@error('kecamatan')<p class="error-text">{{ $message }}</p>@enderror</div>
                 <div><label for="kelurahan" class="label">Kelurahan / Desa</label><input id="kelurahan" name="kelurahan" value="{{ old('kelurahan', $draft['kelurahan'] ?? '') }}" class="input">@error('kelurahan')<p class="error-text">{{ $message }}</p>@enderror</div>
                 <div><label for="kode_pos" class="label">Kode pos *</label><input id="kode_pos" name="kode_pos" value="{{ old('kode_pos', $draft['kode_pos'] ?? '') }}" class="input" inputmode="numeric" required>@error('kode_pos')<p class="error-text">{{ $message }}</p>@enderror</div>
-                <div><label for="ukuran" class="label">Ukuran kaos *</label><div class="flex items-center justify-between"><span></span><button type="button" data-open-size-chart class="text-xs font-bold text-primary hover:underline">Panduan ukuran</button></div><select id="ukuran" name="ukuran" class="input" required><option value="">— Pilih ukuran —</option>@foreach ($ukuran as $u) @php($available = $selected->isUkuranTersedia($u))<option value="{{ $u }}" @disabled(!$available) @selected(old('ukuran', $draft['ukuran'] ?? '') === $u)>{{ $u }}{{ $available ? '' : ' (Habis)' }}</option>@endforeach</select>@error('ukuran')<p class="error-text">{{ $message }}</p>@enderror</div>
-                <div><label for="jumlah" class="label">Jumlah *</label><input id="jumlah" name="jumlah" type="number" min="1" max="100" value="{{ old('jumlah', $draft['jumlah'] ?? 1) }}" class="input" required>@error('jumlah')<p class="error-text">{{ $message }}</p>@enderror</div>
+                <div class="sm:col-span-2">
+                    <div class="flex items-center justify-between"><h2 class="label">Daftar kaos *</h2><button type="button" data-open-size-chart class="text-xs font-bold text-primary hover:underline">Panduan ukuran</button></div>
+                    <div id="co-cart" class="mt-2 space-y-3"></div>
+                    <button type="button" id="co-add-item" class="btn btn-outline mt-3">+ Tambahkan baju lainnya</button>
+                    <div id="co-hidden-items"></div>
+                    @error('items')<p class="error-text">{{ $message }}</p>@enderror
+                    @error('items.*.ukuran')<p class="error-text">{{ $message }}</p>@enderror
+                </div>
             </div>
             <div><label for="catatan" class="label">Catatan <span class="font-normal text-muted">(opsional)</span></label><input id="catatan" name="catatan" value="{{ old('catatan', $draft['catatan'] ?? '') }}" class="input" maxlength="500"></div>
             @if (($tipe ?? 'kaos_saja') === 'kaos_donasi')
@@ -33,4 +39,58 @@
     </div>
 </section>
 @include('components.size-chart-modal')
+@push('scripts')
+<script>
+(function() {
+    const form = document.querySelector('form[action="{{ route('checkout.pengiriman.store') }}"]');
+    const cart = document.getElementById('co-cart');
+    const hidden = document.getElementById('co-hidden-items');
+    const designs = {!! json_encode($designsJson) !!};
+    const initial = {!! json_encode($initialItems) !!};
+    const money = value => new Intl.NumberFormat('id-ID').format(value);
+
+    function render() {
+        cart.innerHTML = initial.map((item, index) => {
+            const selected = designs.find(design => design.id == item.design_id) || designs[0];
+            return `<div class="grid gap-3 rounded-xl border border-stone-200 p-4 sm:grid-cols-3">
+                <label class="text-sm font-semibold">Desain<select data-field="design_id" class="input mt-1">${designs.map(design => `<option value="${design.id}" ${selected.id == design.id ? 'selected' : ''}>${design.nama} — Rp${money(design.harga)}</option>`).join('')}</select></label>
+                <label class="text-sm font-semibold">Ukuran<select data-field="ukuran" class="input mt-1" required><option value="">Pilih ukuran</option>${selected.sizes.map(size => `<option value="${size}" ${item.ukuran === size ? 'selected' : ''}>${size}</option>`).join('')}</select></label>
+                <label class="text-sm font-semibold">Jumlah<input data-field="jumlah" type="number" min="1" max="100" value="${item.jumlah || 1}" class="input mt-1" required></label>
+                ${initial.length > 1 ? `<button type="button" data-remove="${index}" class="text-left text-sm font-semibold text-error">Hapus kaos</button>` : ''}
+            </div>`;
+        }).join('');
+        hidden.innerHTML = initial.map((item, index) => `<input type="hidden" name="items[${index}][design_id]" value="${item.design_id}"><input type="hidden" name="items[${index}][ukuran]" value="${item.ukuran}"><input type="hidden" name="items[${index}][jumlah]" value="${item.jumlah}">`).join('');
+    }
+
+    cart.addEventListener('change', event => {
+        const row = event.target.closest('.grid');
+        if (!row) return;
+        const index = [...cart.children].indexOf(row);
+        initial[index][event.target.dataset.field] = event.target.value;
+        if (event.target.dataset.field === 'design_id') initial[index].ukuran = '';
+        render();
+    });
+    cart.addEventListener('input', event => {
+        if (event.target.dataset.field === 'jumlah') {
+            const index = [...cart.children].indexOf(event.target.closest('.grid'));
+            initial[index].jumlah = event.target.value;
+            render();
+        }
+    });
+    cart.addEventListener('click', event => {
+        const index = event.target.dataset.remove;
+        if (index !== undefined) { initial.splice(index, 1); render(); }
+    });
+    document.getElementById('co-add-item').addEventListener('click', () => {
+        initial.push({design_id: designs[0].id, ukuran: '', jumlah: 1});
+        render();
+    });
+    form.addEventListener('submit', () => {
+        [...cart.querySelectorAll('.grid')].forEach((row, index) => row.querySelectorAll('[data-field]').forEach(input => initial[index][input.dataset.field] = input.value));
+        render();
+    });
+    render();
+})();
+</script>
+@endpush
 @endsection

@@ -16,11 +16,10 @@
             <div><label for="email" class="label">Email <span class="font-normal text-muted">(opsional)</span></label><input id="email" name="email" type="email" value="{{ old('email', $draft['email'] ?? '') }}" class="input" autocomplete="email">@error('email')<p class="error-text">{{ $message }}</p>@enderror</div>
             <input type="hidden" name="design_id" value="{{ $selected->id }}">
             <input type="hidden" name="tipe" value="{{ $draft['tipe'] ?? 'kaos_saja' }}">
-            <input type="hidden" name="ukuran" value="{{ old('ukuran', $draft['ukuran'] ?? request('ukuran')) }}">
-            <input type="hidden" name="jumlah" value="{{ old('jumlah', $draft['jumlah'] ?? request('jumlah', 1)) }}">
             <button class="btn btn-primary w-full !py-3.5" type="submit">Lanjut ke pengiriman &rarr;</button>
         </form>
         <aside class="card overflow-hidden p-0"><img src="{{ asset($selected->gambar) }}" alt="{{ $selected->nama }}" class="aspect-[4/3] w-full object-cover"><div class="p-5"><h2 class="font-serif text-lg font-bold">{{ $selected->nama }}</h2><p class="mt-2 font-bold">Rp {{ number_format($selected->harga, 0, ',', '.') }} / kaos</p></div></aside>
     </div>
 </section>
+@include('components.size-chart-modal')
 @endsection

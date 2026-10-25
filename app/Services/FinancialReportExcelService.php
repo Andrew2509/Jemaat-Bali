@@ -423,13 +423,13 @@ class FinancialReportExcelService
 
         foreach ($orders as $o) {
             $total = (int) $o->totalTagihan();
-            $itemDesc = $o->design?->nama ?? 'Kaos Jemaat';
+            $rincian = $o->rincianProduk();
             $transactions->push([
                 'tanggal' => $o->created_at ? Carbon::parse($o->created_at) : Carbon::parse('2026-07-01'),
                 'ref' => $o->nomor_pesanan,
                 'jenis' => 'Pesanan Kaos',
                 'kategori' => 'Penjualan Kaos',
-                'uraian' => "Pembayaran pesanan {$o->nama} ({$itemDesc}, uk. {$o->ukuran}, {$o->jumlah} pcs)",
+                'uraian' => "Pembayaran pesanan {$o->nama} ({$rincian})",
                 'debit' => $total,
                 'kredit' => 0,
                 'catatan' => $o->donasi > 0 ? 'Termasuk donasi Rp' . number_format($o->donasi, 0, ',', '.') : '-',
@@ -694,33 +694,34 @@ class FinancialReportExcelService
         $sheet->getStyle('I5:L5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         $r = 6;
-        foreach ($orders as $idx => $o) {
-            $sheet->setCellValue("A{$r}", $idx + 1);
-            $sheet->setCellValue("B{$r}", $o->created_at ? $o->created_at->format('d/m/Y') : '-');
-            $sheet->setCellValue("C{$r}", $o->nomor_pesanan);
-            $sheet->setCellValue("D{$r}", $o->nama);
-            $sheet->setCellValue("E{$r}", $o->telepon ?: '-');
-            $sheet->setCellValue("F{$r}", $o->design?->nama ?? 'Kaos Jemaat');
-            $sheet->setCellValue("G{$r}", strtoupper($o->ukuran ?: '-'));
-            $sheet->setCellValue("H{$r}", (int) $o->jumlah);
-            $sheet->setCellValue("I{$r}", (int) $o->subtotal_kaos);
-            $sheet->setCellValue("J{$r}", (int) $o->donasi);
-            $sheet->setCellValue("K{$r}", (int) $o->ongkir);
-            $sheet->setCellValue("L{$r}", (int) $o->totalTagihan());
+        foreach ($orders as $oIdx => $o) {
+            foreach ($o->items_list as $iIdx => $item) {
+                $sheet->setCellValue("A{$r}", $oIdx + 1);
+                $sheet->setCellValue("B{$r}", $o->created_at ? $o->created_at->format('d/m/Y') : '-');
+                $sheet->setCellValue("C{$r}", $o->nomor_pesanan);
+                $sheet->setCellValue("D{$r}", $o->nama);
+                $sheet->setCellValue("E{$r}", $o->telepon ?: '-');
+                $sheet->setCellValue("F{$r}", $item['nama']);
+                $sheet->setCellValue("G{$r}", strtoupper($item['ukuran'] ?: '-'));
+                $sheet->setCellValue("H{$r}", (int) $item['jumlah']);
+                $sheet->setCellValue("I{$r}", (int) $item['subtotal']);
+                $sheet->setCellValue("J{$r}", $iIdx === 0 ? (int) $o->donasi : 0);
+                $sheet->setCellValue("K{$r}", $iIdx === 0 ? (int) $o->ongkir : 0);
+                $sheet->setCellValue("L{$r}", $iIdx === 0 ? (int) $o->totalTagihan() : 0);
 
-            $sheet->getStyle("A{$r}:C{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("D{$r}:F{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $sheet->getStyle("G{$r}:H{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("I{$r}:L{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("A{$r}:C{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("D{$r}:F{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle("G{$r}:H{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("I{$r}:L{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("I{$r}:L{$r}")->getNumberFormat()->setFormatCode(self::FORMAT_CURRENCY);
 
-            $sheet->getStyle("I{$r}:L{$r}")->getNumberFormat()->setFormatCode(self::FORMAT_CURRENCY);
+                if ($oIdx % 2 == 1) {
+                    $sheet->getStyle("A{$r}:L{$r}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::COLOR_ZEBRA);
+                }
 
-            if ($idx % 2 == 1) {
-                $sheet->getStyle("A{$r}:L{$r}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::COLOR_ZEBRA);
+                $sheet->getStyle("A{$r}:L{$r}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB(self::COLOR_BORDER);
+                $r++;
             }
-
-            $sheet->getStyle("A{$r}:L{$r}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB(self::COLOR_BORDER);
-            $r++;
         }
 
         $lastDataRow = $r - 1;

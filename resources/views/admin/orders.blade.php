@@ -2119,10 +2119,10 @@
                                 $isSelected = $selectedOrder && $selectedOrder->id === $o->id;
 
                                 $designNama = trim(
-                                    str_replace(['Kaos', '"'], '', $o->design?->nama ?? 'Keluarga Kudus'),
+                                    str_replace(['Kaos', '"'], '', $o->items_list[0]['nama'] ?? 'Keluarga Kudus'),
                                 );
 
-                                $hargaSatuan = $o->jumlah > 0 ? $o->subtotal_kaos / $o->jumlah : 145000;
+                                $hargaSatuan = count($o->items_list) > 0 ? $o->items_list[0]['harga'] : 145000;
 
                                 $orderUrl = route(
                                     'admin.orders',

@@ -69,9 +69,7 @@ class DonationFormTest extends TestCase
             'kecamatan' => 'Kuta',
             'kelurahan' => 'Legian',
             'kode_pos' => '80361',
-            'design_id' => $design->id,
-            'ukuran' => 'L',
-            'jumlah' => 1,
+            'items' => [['design_id' => $design->id, 'ukuran' => 'L', 'jumlah' => 1]],
             'donasi' => 50000,
             'metode' => 'qris',
         ], $overrides);

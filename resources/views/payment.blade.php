@@ -207,20 +207,31 @@
             </div>
 
             <aside class="lg:col-span-1">
-                @if ($order->design)
+                @if (!$order->isDonasiOnly())
                 <div class="card overflow-hidden !p-0">
                     <div class="relative aspect-[4/3] bg-stone-100">
-                        <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                        @php($firstItem = $order->items_list[0] ?? null)
+                        @php($itemDesign = $firstItem ? \App\Models\Design::find($firstItem['design_id']) : null)
+                        @if ($itemDesign && $itemDesign->gambar)
+                            <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $firstItem['nama'] ?? 'Kaos' }}" class="h-full w-full object-cover">
+                        @else
+                            <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                        @endif
                     </div>
                     <div class="p-6">
                         <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">{{ $nomor }} &middot; Ringkasan Pesanan</p>
-                        <h2 class="mt-2 font-display text-lg font-bold leading-snug">{{ $order->design->nama }}</h2>
-                        <p class="mt-1.5 line-clamp-2 text-sm text-muted">{{ $order->design->deskripsi }}</p>
-                        <p class="mt-2 font-display text-sm font-bold text-ink">Rp {{ number_format($order->design->harga, 0, ',', '.') }} <span class="font-sans text-xs font-medium text-muted">/ kaos</span></p>
+                        @if ($firstItem)
+                            <h2 class="mt-2 font-display text-lg font-bold leading-snug">{{ $firstItem['nama'] }}</h2>
+                            <p class="mt-1.5 text-sm text-muted">{{ count($order->items_list) }} {{ count($order->items_list) > 1 ? 'item' : 'kaos' }}</p>
+                            <p class="mt-2 font-display text-sm font-bold text-ink">Rp {{ number_format($firstItem['harga'], 0, ',', '.') }} <span class="font-sans text-xs font-medium text-muted">/ pcs</span></p>
+                        @else
+                            <h2 class="mt-2 font-display text-lg font-bold leading-snug">{{ $order->design->nama }}</h2>
+                            <p class="mt-2 font-display text-sm font-bold text-ink">Rp {{ number_format($order->design->harga, 0, ',', '.') }} <span class="font-sans text-xs font-medium text-muted">/ kaos</span></p>
+                        @endif
 
                         <div class="mt-4 flex items-center justify-between border-t border-line pt-4 text-sm">
-                            <span class="text-muted">Ukuran &middot; Jumlah</span>
-                            <span class="font-semibold">{{ $order->ukuran }} &middot; {{ $order->jumlah }}</span>
+                            <span class="text-muted">Total qty</span>
+                            <span class="font-semibold">{{ collect($order->items_list)->sum('jumlah') }} kaos</span>
                         </div>
                 @else
                 <div class="card overflow-hidden !p-0">
@@ -235,7 +246,7 @@
                             <dl class="mt-3 space-y-2.5 text-sm">
                                 @if ($order->design)
                                 <div class="flex items-start justify-between gap-3">
-                                    <dt class="text-muted">Subtotal produk ({{ $order->jumlah }} kaos)</dt>
+                                    <dt class="text-muted">Subtotal produk ({{ collect($order->items_list)->sum('jumlah') }} kaos)</dt>
                                     <dd class="font-semibold">Rp {{ number_format($order->subtotal_kaos, 0, ',', '.') }}</dd>
                                 </div>
                                 <div class="flex items-start justify-between gap-3">

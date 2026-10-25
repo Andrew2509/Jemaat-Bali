@@ -151,8 +151,9 @@ class RajaOngkirIntegrationTest extends TestCase
             'kecamatan' => 'KUTA',
             'kelurahan' => 'LEGIAN',
             'kode_pos' => '80361',
-            'ukuran' => 'XL',
-            'jumlah' => 2,
+            'items' => [
+                ['design_id' => $design->id, 'ukuran' => 'XL', 'jumlah' => 2],
+            ],
         ];
 
         $response = $this->post(route('checkout.pengiriman.store'), $payload);
@@ -184,11 +185,10 @@ class RajaOngkirIntegrationTest extends TestCase
             'kecamatan' => 'DENPASAR SELATAN',
             'kelurahan' => 'SANUR',
             'kode_pos' => '80228',
-            'design_id' => $design->id,
-            'ukuran' => 'M',
-            'jumlah' => 1,
+            'items' => [
+                ['design_id' => $design->id, 'ukuran' => 'M', 'jumlah' => 1],
+            ],
             'donasi' => 200000,
-            'metode' => 'qris',
         ];
 
         $response = $this->post(route('shop.store'), $payload);

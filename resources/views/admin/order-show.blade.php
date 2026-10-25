@@ -89,19 +89,24 @@
             <div class="card p-5 sm:p-6">
                 <h2 class="font-serif text-lg font-bold">Rincian pesanan</h2>
 
-                @if ($order->design)
-                    <div class="mt-4 flex items-center gap-4 rounded-xl bg-canvas p-4">
-                        <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-20 w-20 shrink-0 rounded-xl border border-line bg-white object-cover">
-                        <div class="min-w-0 flex-1">
-                            <p class="font-serif text-lg font-bold">{{ $order->design->nama }}</p>
-                            <p class="mt-0.5 text-xs text-muted">Rp{{ number_format($order->design->harga, 0, ',', '.') }} / kaos</p>
-                        </div>
-                        <div class="shrink-0 text-right">
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-muted">Ukuran / Jumlah</p>
-                            <p class="mt-1 font-serif text-xl font-bold">{{ $order->ukuran }} &middot; {{ $order->jumlah }}</p>
-                        </div>
-                    </div>
-                @endif
+                    @if ($order->design)
+                        @foreach ($order->items_list as $item)
+                            <div class="mt-4 flex items-center gap-4 rounded-xl bg-canvas p-4">
+                                @php($itemDesign = \App\Models\Design::find($item['design_id']))
+                                @if ($itemDesign && $itemDesign->gambar)
+                                    <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $item['nama'] }}" class="h-20 w-20 shrink-0 rounded-xl border border-line bg-white object-cover">
+                                @endif
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-serif text-lg font-bold">{{ $item['nama'] }}</p>
+                                    <p class="mt-0.5 text-xs text-muted">Rp{{ number_format($item['harga'], 0, ',', '.') }} / kaos</p>
+                                </div>
+                                <div class="shrink-0 text-right">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-muted">Ukuran / Jumlah</p>
+                                    <p class="mt-1 font-serif text-xl font-bold">{{ $item['ukuran'] }} &middot; {{ $item['jumlah'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
 
                 <div class="mt-4 divide-y divide-line text-sm">
                     @unless ($order->isDonasiOnly())
