@@ -151,10 +151,11 @@
             }
 
             if (btnSaja) {
-                btnSaja.href = baseUrl + '?desain=' + encodeURIComponent(designId) +
+                const shopUrl = options.shopUrl || '{{ route("shop") }}';
+                btnSaja.href = shopUrl + '?tab=kaos_donasi' +
+                    '&desain=' + encodeURIComponent(designId) +
                     '&ukuran=' + encodeURIComponent(size) +
-                    '&jumlah=' + encodeURIComponent(qty) +
-                    '&tipe=kaos_saja';
+                    '&jumlah=' + encodeURIComponent(qty);
             }
 
             if (btnDonasi) {
