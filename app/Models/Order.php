@@ -142,6 +142,14 @@ class Order extends Model
         return $this->subtotal_kaos + $this->ongkir + $this->donasi;
     }
 
+    /**
+     * Pesanan yang sudah dikirim tidak boleh dihapus dari panel daftar/detil.
+     */
+    public function canBeDeleted(): bool
+    {
+        return $this->status_pengiriman !== 'terkirim';
+    }
+
     public function alamatLengkap(): string
     {
         $parts = array_filter([
