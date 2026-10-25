@@ -12,9 +12,12 @@
     {{-- Video memakai position absolute di dalam section overflow-hidden, sehingga:
          - tidak pernah tertutup navbar (section berada di flow, tepat di bawah header)
          - tidak pernah tertutup konten di bawahnya (section ter-clip, konten mulai setelahnya)
-         - object-contain di mobile => seluruh frame video terlihat, tidak kepotong --}}
+         - TANPA max-height: tinggi section selalu mengikuti rasio video asli (aspect-ratio
+           disinkronkan JS dari videoWidth/videoHeight) sehingga video tidak pernah kepotong,
+           baik di mobile maupun layar lebar
+         - object-contain => seluruh frame tampil utuh, tanpa crop --}}
     <section id="hero-section"
-        class="relative w-full aspect-[854/480] max-h-[340px] sm:max-h-[420px] lg:max-h-[480px] overflow-hidden bg-stone-900 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}"
+        class="relative w-full aspect-[854/480] overflow-hidden bg-stone-900 {{ $heroVideoType === 'gdrive' ? 'pointer-events-auto' : 'pointer-events-none' }}"
         aria-hidden="true">
         @if ($heroVideoType === 'gdrive' && $heroVideoEmbedUrl)
             <div class="relative h-full w-full bg-stone-900">
@@ -26,7 +29,7 @@
             </div>
         @else
             <video id="hero-bg-video" autoplay muted loop playsinline preload="metadata" poster="{{ $heroPosterUrl }}"
-                class="absolute inset-0 h-full w-full object-contain lg:object-cover">
+                class="absolute inset-0 h-full w-full object-contain">
                 <source src="{{ $heroVideoUrl }}" type="video/mp4">
                 @if ($heroVideoType === 'default')
                     <source src="{{ asset('videos/hero-bg.webm') }}" type="video/webm">

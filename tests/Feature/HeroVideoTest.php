@@ -52,8 +52,11 @@ class HeroVideoTest extends TestCase
         $response->assertSee('aspect-[854/480]', false);
         $response->assertSee('overflow-hidden', false);
 
-        // Video mengikuti ukuran aslinya (object-contain) di mobile
-        $response->assertSee('object-contain lg:object-cover', false);
+        // Tinggi hero mengikuti rasio video (tanpa max-height clamp) sehingga frame
+        // video tidak pernah kepotong, dan video selalu object-contain di semua layar.
+        $response->assertSee('object-contain"', false);
+        $response->assertDontSee('object-contain lg:object-cover', false);
+        $response->assertDontSee('max-h-[480px]', false);
 
         // Tidak ada lagi wrapper video fixed / spacer lama
         $response->assertDontSee('hero-video-wrapper', false);
