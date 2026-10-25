@@ -846,6 +846,28 @@
                     </div>
                 </div>
 
+                <!-- Informasi Rekening Bank (ditampilkan di bawah logo QRIS pada halaman pembayaran) -->
+                <div>
+                    <p class="block text-xs font-semibold text-stone-700 mb-1">Informasi rekening bank</p>
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <div>
+                            <label for="bank_nama" class="block text-[11px] font-medium text-stone-500 mb-1">Nama bank</label>
+                            <input type="text" id="bank_nama" name="bank_nama" value="{{ old('bank_nama', $programInfo->bank_nama ?? '') }}" placeholder="BCA / Mandiri / BRI" maxlength="60" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank_rek" class="block text-[11px] font-medium text-stone-500 mb-1">Nomor rekening</label>
+                            <input type="text" id="bank_rek" name="bank_rek" value="{{ old('bank_rek', $programInfo->bank_rek ?? '') }}" placeholder="1234567890" maxlength="40" inputmode="numeric" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 font-mono text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="bank_atas_nama" class="block text-[11px] font-medium text-stone-500 mb-1">Atas nama</label>
+                            <input type="text" id="bank_atas_nama" name="bank_atas_nama" value="{{ old('bank_atas_nama', $programInfo->bank_atas_nama ?? '') }}" placeholder="Yayasan ..." maxlength="120" class="w-full rounded-xl border border-[#e8e4dc] bg-white px-3.5 py-2.5 text-xs text-stone-900 focus:border-[#b55322] focus:outline-none">
+                        </div>
+                    </div>
+                    <p class="mt-2 text-[11px] leading-relaxed text-stone-500">
+                        Ditampilkan tepat di bawah logo QRIS pada halaman pembayaran (donasi &amp; pesanan kaos). Kosongkan ketiganya jika tidak ingin menampilkan rekening bank.
+                    </p>
+                </div>
+
                 <!-- Nama Program & Slogan / Subjudul -->
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>

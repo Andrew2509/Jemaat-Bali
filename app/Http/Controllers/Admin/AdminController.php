@@ -950,6 +950,9 @@ class AdminController extends Controller
             'logo_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
             'hapus_logo' => ['nullable', 'boolean'],
             'qris_code' => ['nullable', 'string', 'max:1000'],
+            'bank_nama' => ['nullable', 'string', 'max:60'],
+            'bank_rek' => ['nullable', 'string', 'max:40'],
+            'bank_atas_nama' => ['nullable', 'string', 'max:120'],
             'deskripsi' => ['required', 'string', 'max:500'],
             'whatsapp' => ['required', 'string', 'max:30'],
             'email' => ['required', 'email', 'max:150'],
@@ -1006,6 +1009,15 @@ class AdminController extends Controller
             $data['qris_code'] = trim(str_replace(["\r", "\n", "\t"], '', (string) $data['qris_code']));
             if ($data['qris_code'] === '') {
                 $data['qris_code'] = null;
+            }
+        }
+
+        // Informasi rekening bank (opsional): bersihkan spasi berlebih, kosong disimpan sebagai null
+        foreach (['bank_nama', 'bank_rek', 'bank_atas_nama'] as $bankField) {
+            if (array_key_exists($bankField, $data)) {
+                $clean = trim(preg_replace('/[\r\n\t]+/', ' ', (string) $data[$bankField]));
+                $clean = preg_replace('/\s{2,}/', ' ', $clean);
+                $data[$bankField] = $clean === '' ? null : $clean;
             }
         }
 

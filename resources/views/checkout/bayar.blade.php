@@ -65,21 +65,32 @@
                     </div>
                 @endif
 
-                <div class="card p-6 sm:p-8">
-                    <div class="flex items-center gap-3">
-                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ink font-display text-sm font-extrabold text-white">01</span>
-                        <div>
-                            <h2 class="font-serif text-lg font-bold">Bayar dengan QRIS</h2>
-                            <p class="text-sm text-muted">Pembayaran diproses manual oleh admin Jemaat Bali.</p>
+                <div class="card relative overflow-hidden p-6 pb-8 sm:p-9 sm:pb-10">
+                    {{-- Dekorasi ombak di kiri bawah kartu --}}
+                    <svg class="pointer-events-none absolute bottom-0 left-0 h-20 w-60 sm:h-28 sm:w-96" viewBox="0 0 400 120" preserveAspectRatio="none" fill="none" aria-hidden="true">
+                        <path d="M0 120 L0 60 C70 30 145 48 215 78 C285 108 335 116 400 119 L400 120 Z" fill="#c7cbb5" fill-opacity=".9" />
+                        <path d="M0 120 L0 88 C65 66 135 82 200 104 C265 126 330 122 400 120 Z" fill="#8b9179" />
+                    </svg>
+
+                    <div class="relative flex flex-wrap items-start justify-between gap-4">
+                        <span class="inline-flex items-center gap-2.5 rounded-full bg-[#4d5642] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-sm">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h4.5v4.5h-4.5V4.5Zm0 10.5h4.5v4.5h-4.5V15Zm10.5-10.5h4.5v4.5h-4.5V4.5Zm0 10.5h4.5v4.5h-4.5V15Zm-6-6h6M9 15h1.5M15 15h.75M15 19.5h1.5M19.5 19.5h.75" />
+                            </svg>
+                            Bayar dengan QRIS
+                        </span>
+                        <div class="ml-auto text-right">
+                            <p class="font-display text-sm font-extrabold uppercase tracking-wide text-[#2e3427]">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</p>
+                            <p class="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#8a8f7c]">{{ $programInfo->tagline_or_default ?? ($programInfo->tagline ?? '') }}</p>
                         </div>
                     </div>
 
-                    <div class="mt-5 flex items-start gap-2.5 rounded-xl bg-stone-100 p-4 text-sm text-ink">
-                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-ink" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
-                        </svg>
-                        <p>
-                            <span class="font-semibold">Menunggu konfirmasi ongkir &amp; total final.</span><br>
+                    <p class="relative mt-4 text-[15px] leading-relaxed text-[#5f6457]">Pembayaran diproses manual oleh admin Jemaat Bali.</p>
+
+                    <div class="relative mt-5 flex items-start gap-3 rounded-2xl bg-[#efeee6] p-4">
+                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#4d5642] font-serif text-[13px] font-bold italic leading-none text-white">i</span>
+                        <p class="text-[15px] leading-relaxed text-[#5f6457]">
+                            <span class="font-bold text-[#2e3427]">Menunggu konfirmasi ongkir &amp; total final.</span><br>
                             @if (!empty($programInfo->qris_code) || !empty($programInfo->qris_image_url))
                                 Pembayaran belum dapat dilakukan. Tunggu total final dari admin melalui WhatsApp.
                             @else
@@ -88,24 +99,18 @@
                         </p>
                     </div>
 
-                    @if (!empty($programInfo->qris_code))
-                        <div class="mt-5 mx-auto w-full max-w-[280px]" data-qris-wrapper>
-                            <div class="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
-                                <div class="grid h-full w-full place-items-center rounded-xl bg-canvas px-4 text-center text-xs font-medium text-muted" data-qris-placeholder>Memuat QRIS&hellip;</div>
-                                <img data-qris-code="{{ $programInfo->qris_code }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="hidden absolute inset-0 m-auto h-full w-full rounded-2xl object-contain p-3">
-                            </div>
-                            <p class="mt-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted">QRIS &middot; Scan to Pay</p>
-                        </div>
-                        <p class="mt-4 text-xs leading-relaxed text-muted">
-                            Pindai QRIS di atas dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.
-                        </p>
-                    @elseif (!empty($programInfo->qris_image_url))
-                        <div class="mt-5 mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
+                    @if (!empty($programInfo->qris_image_url))
+                        <div class="relative mx-auto mt-6 w-full max-w-[340px] overflow-hidden rounded-2xl border border-line bg-white p-4 shadow-sm">
                             <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="w-full rounded-xl object-contain">
                         </div>
-                        <p class="mt-4 text-xs leading-relaxed text-muted">
-                            Pindai QRIS di atas dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.
-                        </p>
+                    @elseif (!empty($programInfo->qris_code))
+                        <div class="relative mx-auto mt-6 w-full max-w-[340px]" data-qris-wrapper>
+                            <div class="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-white p-4 shadow-sm">
+                                <div class="grid h-full w-full place-items-center rounded-xl bg-canvas px-4 text-center text-xs font-medium text-muted" data-qris-placeholder>Memuat QRIS&hellip;</div>
+                                <img data-qris-code="{{ $programInfo->qris_code }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="hidden absolute inset-0 m-auto h-full w-full rounded-2xl object-contain p-4">
+                            </div>
+                            <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted">QRIS &middot; Scan to Pay</p>
+                        </div>
                     @else
                         <div class="mt-5 grid aspect-square w-full max-w-[280px] mx-auto place-items-center rounded-2xl border-2 border-dashed border-line bg-canvas p-6">
                             <div class="text-center">
@@ -122,40 +127,88 @@
                         </p>
                     @endif
 
-                    <h3 class="mt-8 font-serif text-base font-bold">Cara pembayaran manual</h3>
-                    <ol class="mt-4 space-y-4">
-                        <li class="flex gap-3">
-                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-xs font-extrabold text-white">1</span>
+                    {{-- Informasi rekening bank: diisi admin di Konten → Informasi program --}}
+                    @if (!empty($programInfo->bank_nama) || !empty($programInfo->bank_rek))
+                        <div class="relative mt-6 flex items-center gap-4 rounded-2xl bg-[#eae9e0] p-5 sm:gap-5 sm:p-6">
+                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#4d5642] text-white">
+                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3.7 3.8 8h16.4L12 3.7Z" />
+                                    <path d="M5.5 8.7v7M9.5 8.7v7M14.5 8.7v7M18.5 8.7v7" />
+                                    <path d="M4 16.6h16M3 19.6h18" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-[#6f7466]">Atau Transfer Bank</p>
+                                <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                                    @if (!empty($programInfo->bank_nama))
+                                        <span class="text-2xl font-extrabold tracking-tight text-[#2e3427]">{{ $programInfo->bank_nama }}</span>
+                                    @endif
+                                    @if (!empty($programInfo->bank_rek))
+                                        <span class="text-2xl font-extrabold tabular-nums tracking-wide text-[#2e3427]">{{ $programInfo->bank_rek }}</span>
+                                    @endif
+                                </div>
+                                @if (!empty($programInfo->bank_atas_nama))
+                                    <p class="mt-0.5 text-[15px] text-[#5f6457]">a.n. {{ $programInfo->bank_atas_nama }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="relative mt-9 flex items-center gap-4">
+                        <h3 class="font-serif text-xl font-bold text-[#2e3427] sm:text-2xl">Cara pembayaran manual</h3>
+                        <span class="hidden h-px flex-1 bg-[#dcd9cc] sm:block"></span>
+                    </div>
+
+                    <ol class="relative mt-2">
+                        <li class="flex gap-4 border-b border-[#e3e1d6] py-4">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">1</span>
                             <div>
-                                <p class="text-sm font-semibold text-ink">Tunggu konfirmasi total final</p>
-                                <p class="mt-0.5 text-sm leading-relaxed text-muted">Admin mengonfirmasi pesanan dan ongkir melalui WhatsApp. Jangan gunakan total sementara sebagai nominal pembayaran.</p>
+                                <p class="text-[15px] font-bold text-[#2e3427]">Tunggu konfirmasi total final</p>
+                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Admin mengonfirmasi pesanan dan ongkir melalui WhatsApp. Jangan gunakan total sementara sebagai nominal pembayaran.</p>
                             </div>
                         </li>
-                        <li class="flex gap-3">
-                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-xs font-extrabold text-white">2</span>
+                        <li class="flex gap-4 border-b border-[#e3e1d6] py-4">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">2</span>
                             <div>
-                                <p class="text-sm font-semibold text-ink">Bayar melalui QRIS merchant</p>
-                                <p class="mt-0.5 text-sm leading-relaxed text-muted">Setelah QRIS tersedia, pindai dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.</p>
+                                <p class="text-[15px] font-bold text-[#2e3427]">Bayar melalui QRIS merchant</p>
+                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Setelah QRIS tersedia, pindai dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.</p>
                             </div>
                         </li>
-                        <li class="flex gap-3">
-                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-xs font-extrabold text-white">3</span>
+                        <li class="flex gap-4 py-4">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">3</span>
                             <div>
-                                <p class="text-sm font-semibold text-ink">Simpan dan kirim bukti pembayaran</p>
-                                <p class="mt-0.5 text-sm leading-relaxed text-muted">Unggah bukti transaksi yang jelas, lalu kirim untuk verifikasi manual. Pembayaran tidak otomatis berstatus lunas.</p>
+                                <p class="text-[15px] font-bold text-[#2e3427]">Simpan dan kirim bukti pembayaran</p>
+                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Unggah bukti transaksi yang jelas, lalu kirim untuk verifikasi manual. Pembayaran tidak otomatis berstatus lunas.</p>
                             </div>
                         </li>
                     </ol>
+
+                    <div class="relative mt-4 flex justify-end">
+                        <p class="text-right font-script text-[26px] leading-tight text-[#3d4435]">
+                            Terima Kasih<br>
+                            <span class="inline-flex items-center gap-2">
+                                <span class="relative inline-block">atas Dukungan Anda
+                                    <svg class="pointer-events-none absolute -bottom-1.5 left-0 h-2.5 w-full" viewBox="0 0 160 10" preserveAspectRatio="none" fill="none" aria-hidden="true">
+                                        <path d="M2 7C40 2 110 1 158 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7" />
+                                    </svg>
+                                </span>
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 8.5c0 4.5-9 10-9 10s-9-5.5-9-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3Z" />
+                                </svg>
+                            </span>
+                        </p>
+                    </div>
                 </div>
 
                 <div class="card p-6 sm:p-8">
-                    <div class="flex items-center gap-3">
-                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ink font-display text-sm font-extrabold text-white">02</span>
-                        <div>
-                            <h2 class="font-serif text-lg font-bold">Unggah bukti pembayaran</h2>
-                            <p class="text-sm text-muted">Bukti pembayaran wajib dikirim setelah transaksi berhasil.</p>
-                        </div>
-                    </div>
+                    <span class="inline-flex items-center gap-2.5 rounded-full bg-[#4d5642] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-sm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M12 3v13.5m0 0 4.5-4.5M12 16.5l-4.5-4.5" />
+                        </svg>
+                        Unggah bukti pembayaran
+                    </span>
+
+                    <p class="mt-4 text-[15px] leading-relaxed text-[#5f6457]">Bukti pembayaran wajib dikirim setelah transaksi berhasil.</p>
 
                     <form action="{{ route('checkout.bayar.store', $order) }}" method="POST" enctype="multipart/form-data" class="mt-6">
                         @csrf

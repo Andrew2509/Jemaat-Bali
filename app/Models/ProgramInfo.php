@@ -21,6 +21,9 @@ class ProgramInfo extends Model
         'proposal_canva_url_en',
         'qris_image',
         'qris_code',
+        'bank_nama',
+        'bank_rek',
+        'bank_atas_nama',
         'size_chart',
         'hero_video_type',
         'hero_video_path',
@@ -179,6 +182,13 @@ class ProgramInfo extends Model
 
         $model = cache()->rememberForever('program_info', fn () => static::query()->first());
 
+        // Objek dari cache berasal dari serialize lama: hydrate ulang ke instance
+        // baru agar properti kelas (fillable, dsb.) selalu mengikuti kode terbaru.
+        // Tanpa ini, kolom baru (mis. info bank) bisa gugur saat mass-assignment.
+        if ($model instanceof self) {
+            $model = (new static)->newFromBuilder($model->getAttributes());
+        }
+
         static::$memoInstance = $model;
         static::$memoRequestId = $requestId;
 
@@ -308,6 +318,15 @@ class ProgramInfo extends Model
     public function hasQrisCode(): bool
     {
         return !empty(trim((string) $this->qris_code));
+    }
+
+    /**
+     * Cek apakah informasi rekening bank sudah diisi admin
+     */
+    public function hasBankInfo(): bool
+    {
+        return !empty(trim((string) $this->bank_nama))
+            || !empty(trim((string) $this->bank_rek));
     }
 
     /**

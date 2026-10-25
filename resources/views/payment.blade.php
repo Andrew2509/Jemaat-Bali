@@ -114,6 +114,24 @@
                         </p>
                     @endif
 
+                    {{-- Informasi rekening bank: diisi admin di Konten → Informasi program --}}
+                    @if (!empty($programInfo->bank_nama) || !empty($programInfo->bank_rek))
+                        <div class="mt-5 rounded-2xl border border-line bg-canvas p-4">
+                            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">Atau Transfer Bank</p>
+                            <div class="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                @if (!empty($programInfo->bank_nama))
+                                    <span class="font-serif text-base font-bold text-ink">{{ $programInfo->bank_nama }}</span>
+                                @endif
+                                @if (!empty($programInfo->bank_rek))
+                                    <span class="font-mono text-lg font-bold tracking-wide text-ink">{{ $programInfo->bank_rek }}</span>
+                                @endif
+                            </div>
+                            @if (!empty($programInfo->bank_atas_nama))
+                                <p class="mt-1 text-xs text-muted">a.n. {{ $programInfo->bank_atas_nama }}</p>
+                            @endif
+                        </div>
+                    @endif
+
                     <h3 class="mt-8 font-serif text-base font-bold">Cara pembayaran manual</h3>
                     <ol class="mt-4 space-y-4">
                         <li class="flex gap-3">
