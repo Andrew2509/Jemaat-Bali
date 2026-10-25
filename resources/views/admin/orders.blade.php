@@ -118,12 +118,13 @@
                 <!-- Table -->
                 <div class="mt-4 overflow-x-auto">
                     <!-- Table Header Bar -->
-                    <div class="grid grid-cols-12 gap-2 rounded-xl bg-[#f4efe8] px-4 py-2.5 text-[11px] font-semibold text-stone-600 min-w-[660px]">
+                    <div class="grid grid-cols-12 gap-2 rounded-xl bg-[#f4efe8] px-4 py-2.5 text-[11px] font-semibold text-stone-600 min-w-[720px]">
                         <div class="col-span-3">Pemesanan / tanggal</div>
                         <div class="col-span-2">Desain kaos</div>
                         <div class="col-span-2">Uk. / Jml.</div>
                         <div class="col-span-3">Pembayaran</div>
-                        <div class="col-span-2 text-right pr-2">Produksi / kirim</div>
+                        <div class="col-span-1 text-right pr-1">Produksi / kirim</div>
+                        <div class="col-span-1 text-right pr-1">Aksi</div>
                     </div>
 
                     <!-- Table Rows -->
@@ -135,6 +136,7 @@
                                 $isSelected = $selectedOrder && $selectedOrder->id === $o->id;
                                 $designNama = trim(str_replace(['Kaos', '"'], '', $o->design?->nama ?? 'Keluarga Kudus'));
                                 $hargaSatuan = $o->jumlah > 0 ? ($o->subtotal_kaos / $o->jumlah) : 145000;
+                                $orderUrl = route('admin.orders', array_merge(request()->query(), ['selected_id' => $o->id]));
                                 
                                 // Clean matching logic for produksi / kirim badge from design mockup
                                 $kirimLabel = match ($kirimStatus) {
@@ -144,20 +146,19 @@
                                     default => ($bayarStatus === 'menunggu_verifikasi' ? 'Ditahan' : 'Belum diproses'),
                                 };
                             @endphp
-                            <a href="{{ route('admin.orders', array_merge(request()->query(), ['selected_id' => $o->id])) }}" 
-                               class="grid grid-cols-12 gap-2 items-center px-4 py-3 rounded-xl transition cursor-pointer {{ $isSelected ? 'bg-[#faefe8] border border-[#f0dcd0]' : 'hover:bg-stone-50/80 border border-transparent' }}">
-                                <div class="col-span-3">
+                            <div class="grid grid-cols-12 gap-2 items-center px-4 py-3 rounded-xl transition {{ $isSelected ? 'bg-[#faefe8] border border-[#f0dcd0]' : 'hover:bg-stone-50/80 border border-transparent' }}">
+                                <a href="{{ $orderUrl }}" class="col-span-3 flex flex-col cursor-pointer">
                                     <p class="text-xs font-bold text-stone-900 leading-tight">{{ $o->nama }}</p>
                                     <p class="text-[11px] text-stone-400 mt-0.5">{{ $o->nomor_pesanan }} &middot; {{ $o->created_at ? $o->created_at->translatedFormat('d M') : '10 Okt' }}</p>
-                                </div>
-                                <div class="col-span-2">
+                                </a>
+                                <a href="{{ $orderUrl }}" class="col-span-2 flex flex-col cursor-pointer">
                                     <p class="text-xs text-stone-800 leading-tight">{{ $designNama }}</p>
                                     <p class="text-[11px] text-stone-400 mt-0.5">Rp{{ number_format($hargaSatuan, 0, ',', '.') }} / kaos</p>
-                                </div>
-                                <div class="col-span-2">
+                                </a>
+                                <a href="{{ $orderUrl }}" class="col-span-2 flex flex-col items-center cursor-pointer">
                                     <p class="text-xs text-stone-700 font-medium">{{ $o->ukuran }} &middot; {{ $o->jumlah }}</p>
-                                </div>
-                                <div class="col-span-3">
+                                </a>
+                                <a href="{{ $orderUrl }}" class="col-span-3 flex justify-end">
                                     @if ($bayarStatus === 'terverifikasi')
                                         <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 whitespace-nowrap">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -179,14 +180,38 @@
                                             Belum bayar
                                         </span>
                                     @endif
-                                </div>
-                                <div class="col-span-2 flex justify-end pr-2">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] px-2.5 py-0.5 text-[11px] font-semibold text-stone-600 whitespace-nowrap">
+                                </a>
+                                <a href="{{ $orderUrl }}" class="col-span-1 flex justify-end pr-1">
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] px-2 py-0.5 text-[11px] font-semibold text-stone-600 whitespace-nowrap">
                                         <span class="h-1.5 w-1.5 rounded-full bg-stone-500"></span>
                                         {{ $kirimLabel }}
                                     </span>
+                                </a>
+                                <div class="col-span-1 flex justify-end pr-1">
+                                    @if($o->buktiUrl())
+                                        <a href="{{ $o->buktiUrl() }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] px-2 py-0.5 text-[11px] font-semibold text-stone-700 hover:bg-[#e8e0d3] transition whitespace-nowrap" title="Lihat bukti pembayaran">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5 text-stone-500">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            Lihat bukti
+                                        </a>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-400 whitespace-nowrap">
+                                            Belum ada bukti
+                                        </span>
+                                    @endif
+                                    <form method="POST" action="{{ route('admin.orders.destroy', $o) }}" onsubmit="return confirm('Hapus pesanan {{ $o->nomor_pesanan }} ({{ $o->nama }})? Data &amp; berkas bukti akan hilang permanen.');" class="inline-flex items-center justify-end ml-1">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50/60 px-2 py-0.5 text-[11px] font-semibold text-red-700 hover:bg-red-100/80 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5 text-red-600">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </form>
                                 </div>
-                            </a>
+                            </div>
                         @empty
                             <div class="py-10 text-center text-xs text-stone-400">Tidak ada pesanan yang cocok dengan filter.</div>
                         @endforelse
