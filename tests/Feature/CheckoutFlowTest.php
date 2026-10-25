@@ -50,8 +50,8 @@ class CheckoutFlowTest extends TestCase
     {
         $this->get(route('checkout.pemesanan', ['desain' => $this->design->id, 'ukuran' => 'L', 'jumlah' => 2]))
             ->assertStatus(200)
-            ->assertSee('Selesaikan Pemesanan', false)
             ->assertSee('Data pemesan', false)
+            ->assertSee('Beli Kaos Saja', false)
             ->assertSee($this->design->nama)
             ->assertDontSee('name="donasi"', false);
     }

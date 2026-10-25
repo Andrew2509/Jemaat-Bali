@@ -102,7 +102,13 @@ class RajaOngkirIntegrationTest extends TestCase
     {
         $design = Design::where('aktif', true)->firstOrFail();
 
-        $response = $this->get(route('checkout.pemesanan', ['desain' => $design->id]));
+        $this->post(route('checkout.data.store'), [
+            'nama' => 'Tester',
+            'nomor' => '08123456789',
+            'design_id' => $design->id,
+        ]);
+
+        $response = $this->get(route('checkout.pengiriman'));
 
         $response->assertStatus(200)
             ->assertSee('id="provinsi"', false)
@@ -110,7 +116,6 @@ class RajaOngkirIntegrationTest extends TestCase
             ->assertSee('id="kecamatan"', false)
             ->assertSee('id="kelurahan"', false)
             ->assertSee('id="kode_pos"', false)
-            ->assertSee('badge-kodepos', false)
             ->assertSee('BALI', false);
     }
 
@@ -132,23 +137,25 @@ class RajaOngkirIntegrationTest extends TestCase
     {
         $design = Design::where('aktif', true)->firstOrFail();
 
-        $payload = [
+        $this->post(route('checkout.data.store'), [
             'nama' => 'I Putu Semeton',
             'nomor' => '081234567890',
             'email' => 'semeton@example.com',
+            'design_id' => $design->id,
+        ]);
+
+        $payload = [
             'alamat' => 'Jl. Sunset Road No. 88',
             'provinsi' => 'BALI',
             'kabupaten' => 'KABUPATEN BADUNG',
             'kecamatan' => 'KUTA',
             'kelurahan' => 'LEGIAN',
             'kode_pos' => '80361',
-            'design_id' => $design->id,
             'ukuran' => 'XL',
             'jumlah' => 2,
-            'metode' => 'qris',
         ];
 
-        $response = $this->post(route('checkout.store'), $payload);
+        $response = $this->post(route('checkout.pengiriman.store'), $payload);
 
         $order = Order::where('nomor', '081234567890')->first();
         $this->assertNotNull($order);

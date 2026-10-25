@@ -37,6 +37,9 @@ Route::get('/bukti/{type}/{id}', [BuktiController::class, 'show'])->middleware('
 
 // Alur pesan kaos (tanpa donasi): Pemesanan -> Pembayaran -> Menunggu konfirmasi
 Route::get('/pesan-kaos', [CheckoutController::class, 'create'])->name('checkout.pemesanan');
+Route::post('/pesan-kaos/data', [CheckoutController::class, 'dataStore'])->name('checkout.data.store');
+Route::get('/pesan-kaos/pengiriman', [CheckoutController::class, 'pengiriman'])->name('checkout.pengiriman');
+Route::post('/pesan-kaos/pengiriman', [CheckoutController::class, 'pengirimanStore'])->name('checkout.pengiriman.store');
 Route::post('/pesan-kaos', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/pesan-kaos/{order}/pembayaran', [CheckoutController::class, 'bayar'])->name('checkout.bayar');
 Route::post('/pesan-kaos/{order}/pembayaran', [CheckoutController::class, 'bayarStore'])->name('checkout.bayar.store');
