@@ -80,18 +80,18 @@ class AdminOrderDeleteDisabledTest extends TestCase
         $response->assertSee($deliveredOrder->nomor_pesanan);
         $response->assertSee($deletableOrder->nomor_pesanan);
 
-        // Page should show the informational chip for the delivered order.
+        // Page should show the informational (locked) state for the delivered order.
         $response->assertSee('Sudah dikirim');
 
         // Both rows now open a small popup modal instead of browser confirm().
         // A delivered row must not render its own trigger button or hidden delete form.
-        $response->assertDontSee('data-order-id="' . $deliveredOrder->id . '"');
-        $response->assertDontSee('delete-form-' . $deliveredOrder->id);
+        $response->assertDontSeeHtml('data-order-id="' . $deliveredOrder->id . '"');
+        $response->assertDontSeeHtml('delete-form-' . $deliveredOrder->id);
 
         // A non-delivered row must still expose its trigger button and hidden delete
         // form so the modal can submit the right endpoint for eligible rows.
-        $response->assertSee('data-order-id="' . $deletableOrder->id . '"');
-        $response->assertSee('delete-form-' . $deletableOrder->id);
+        $response->assertSeeHtml('data-order-id="' . $deletableOrder->id . '"');
+        $response->assertSeeHtml('delete-form-' . $deletableOrder->id);
 
         // Do not assertDontSee('Hapus') globally: other rows may still use the
         // word "Hapus" for their own delete trigger, which is expected behavior.

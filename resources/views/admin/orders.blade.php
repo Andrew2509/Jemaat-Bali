@@ -1966,7 +1966,7 @@
 
 
 
-                        <div class="col-span-2">Uk. / Jml.</div>
+                        <div class="col-span-1 text-center">Uk. / Jml.</div>
 
 
 
@@ -2014,7 +2014,7 @@
 
 
 
-                        <div class="col-span-1 text-right pr-1">Aksi</div>
+                        <div class="col-span-2 text-right pr-1">Aksi</div>
 
 
 
@@ -2159,7 +2159,7 @@
 
 
                             <div
-                                class="grid grid-cols-12 gap-2 items-center px-4 py-3 rounded-xl transition {{ $isSelected ? 'bg-[#faefe8] border border-[#f0dcd0]' : 'hover:bg-stone-50/80 border border-transparent' }}">
+                                class="grid grid-cols-12 gap-2 items-center px-4 py-3 rounded-xl transition min-w-[720px] {{ $isSelected ? 'bg-[#faefe8] border border-[#f0dcd0]' : 'hover:bg-stone-50/80 border border-transparent' }}">
 
 
 
@@ -2306,7 +2306,7 @@
 
 
                                 <a href="{{ $orderUrl }}"
-                                    class="col-span-2 flex flex-col items-center cursor-pointer">
+                                    class="col-span-1 flex flex-col items-center cursor-pointer">
 
 
 
@@ -2704,235 +2704,59 @@
 
 
 
-                                <div class="col-span-1 flex justify-end pr-1">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                <div class="col-span-2 flex items-center justify-end gap-1.5 pr-1">
                                     @if ($o->buktiUrl())
                                         <a href="{{ $o->buktiUrl() }}" target="_blank" rel="noopener noreferrer"
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-[#f2eee7] px-2 py-0.5 text-[11px] font-semibold text-stone-700 hover:bg-[#e8e0d3] transition whitespace-nowrap"
-                                            title="Lihat bukti pembayaran">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#f2eee7] text-stone-600 transition hover:bg-[#e8e0d3] hover:text-stone-900"
+                                            title="Lihat bukti pembayaran" aria-label="Lihat bukti pembayaran">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.8" stroke="currentColor"
-                                                class="h-3.5 w-3.5 text-stone-500">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                                stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                             </svg>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                            Lihat bukti
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                         </a>
                                     @else
                                         <span
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-400 whitespace-nowrap">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                            Belum ada bukti
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 text-stone-300"
+                                            title="Belum ada bukti pembayaran" aria-label="Belum ada bukti pembayaran">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                            </svg>
                                         </span>
                                     @endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                                     @if ($bisaHapus)
-                                        <button type="button" title="Tidak bisa dihapus" disabled>Sudah dikirim</button>
-
-
-
-
-
-
-
-                                        Sudah dikirim
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                        <button type="button" data-order-id="{{ $o->id }}"
+                                            data-order-no="{{ $o->nomor_pesanan }}"
+                                            data-order-name="{{ $o->nama }}"
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-red-200 bg-red-50/60 text-red-600 shadow-2xs transition hover:bg-red-100/80 cursor-pointer"
+                                            title="Hapus pesanan" aria-label="Hapus pesanan">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
+                                        <form method="POST" action="{{ route('admin.orders.destroy', $o) }}"
+                                            id="delete-form-{{ $o->id }}" class="hidden">
+                                            @csrf
+                                        </form>
+                                    @else
+                                        <span
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 text-stone-300"
+                                            title="Sudah dikirim, tidak bisa dihapus"
+                                            aria-label="Sudah dikirim, tidak bisa dihapus">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="h-3.5 w-3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                            </svg>
                                         </span>
                                     @endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                 </div>
 
 
