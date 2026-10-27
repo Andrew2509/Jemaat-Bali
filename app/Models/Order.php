@@ -144,6 +144,15 @@ class Order extends Model
         return $this->subtotal_kaos + $this->ongkir + $this->donasi;
     }
 
+    public function metodeLabel(): string
+    {
+        if (empty($this->metode)) {
+            return 'Transfer Bank';
+        }
+
+        return strtolower($this->metode) === 'qris' ? 'QRIS' : 'Transfer Bank';
+    }
+
     /**
      * Return items array or fallback to single legacy item.
      *
@@ -199,7 +208,8 @@ class Order extends Model
 
         $parts = [];
         foreach ($this->items_list as $item) {
-            $parts[] = "{$item['nama']} ({$item['ukuran']}, {$item['jumlah']} pcs)";
+            $gender = ! empty($item['gender']) ? ucfirst($item['gender']) : null;
+            $parts[] = "{$item['nama']} ({$item['ukuran']}" . ($gender ? ", {$gender}" : '') . ", {$item['jumlah']} pcs)";
         }
         $res = implode('; ', $parts);
 

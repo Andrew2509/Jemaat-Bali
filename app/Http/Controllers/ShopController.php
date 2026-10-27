@@ -65,9 +65,11 @@ class ShopController extends Controller
                 'items' => ['required', 'array', 'min:1'],
                 'items.*.design_id' => ['required', 'integer', 'exists:designs,id'],
                 'items.*.ukuran' => ['required', 'string', 'in:S,M,L,XL,XXL'],
+                'items.*.gender' => ['nullable', 'string', 'in:pria,wanita'],
                 'items.*.jumlah' => ['required', 'integer', 'min:1', 'max:100'],
                 'donasi' => ['required', 'integer', 'min:' . config('donation.min_kaos_donasi'), 'max:100000000'],
                 'catatan' => ['nullable', 'string', 'max:500'],
+                'metode' => ['nullable', 'string', 'in:transfer,qris'],
             ], [
                 'nomor.regex' => 'Nomor HP tidak valid. Gunakan angka saja, contoh 08123456789.',
                 'donasi.min' => 'Nominal donasi untuk Kaos + Donasi minimal Rp ' . number_format(config('donation.min_kaos_donasi'), 0, ',', '.') . '.',
@@ -98,6 +100,7 @@ class ShopController extends Controller
                     'design_id' => $design->id,
                     'nama' => $design->nama,
                     'ukuran' => $itemData['ukuran'],
+                    'gender' => (($itemData['gender'] ?? 'pria') === 'wanita') ? 'wanita' : 'pria',
                     'jumlah' => $jumlah,
                     'harga' => $design->harga,
                     'subtotal' => $subtotal,
@@ -110,6 +113,8 @@ class ShopController extends Controller
 
             // Use first item for legacy single-item fields
             $firstItem = $items[0];
+
+            $metode = in_array($request->input('metode'), ['transfer', 'qris'], true) ? $request->input('metode') : 'qris';
 
             $order = Order::create([
                 'nomor_pesanan' => $nomorPesanan,
@@ -130,12 +135,14 @@ class ShopController extends Controller
                 'subtotal_kaos' => $totalKaos,
                 'ongkir' => 0,
                 'total' => $total,
-                'metode' => 'qris',
+                'metode' => $metode,
                 'catatan' => $data['catatan'] ?? null,
                 'status_pembayaran' => 'belum_bayar',
                 'status_pengiriman' => 'belum_diproduksi',
                 'items' => $items,
             ]);
+
+            return redirect()->route('checkout.bayar', $order);
         } else {
             $data = $request->validate([
                 'nama' => ['required', 'string', 'max:120'],
@@ -163,9 +170,9 @@ class ShopController extends Controller
                 'status_pembayaran' => 'belum_bayar',
                 'status_pengiriman' => 'belum_diproduksi',
             ]);
-        }
 
-        return redirect()->route('shop.pemesanan', $order);
+            return redirect()->route('shop.pemesanan', $order);
+        }
     }
 
     public function pemesanan(Order $order)
@@ -177,6 +184,10 @@ class ShopController extends Controller
 
     public function payment(Order $order)
     {
+        if ($order->jenis === 'kaos_donasi') {
+            return redirect()->route('checkout.bayar', $order);
+        }
+
         abort_unless($order->status_pembayaran === 'belum_bayar' || $order->status_pembayaran === 'bukti_ulang', 403);
 
         return view('payment', [
@@ -186,6 +197,10 @@ class ShopController extends Controller
 
     public function paymentStore(Request $request, Order $order): RedirectResponse
     {
+        if ($order->jenis === 'kaos_donasi') {
+            return app(CheckoutController::class)->bayarStore($request, $order);
+        }
+
         abort_unless($order->status_pembayaran === 'belum_bayar' || $order->status_pembayaran === 'bukti_ulang', 403);
 
         $data = $request->validate([
@@ -219,16 +234,8 @@ class ShopController extends Controller
 
     public function waiting(Order $order)
     {
-        // Jika status menunggu_verifikasi dan belum tercatat dikirim, coba kirimkan pesan WA
-        if ($order->status_pembayaran === 'menunggu_verifikasi' && !Cache::has("wa_waiting_sent_{$order->id}")) {
-            try {
-                $sendRes = app(FonnteService::class)->sendWaitingNotification($order);
-                if ($sendRes && ($sendRes['success'] ?? false)) {
-                    Cache::put("wa_waiting_sent_{$order->id}", true, now()->addDays(7));
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Fonnte sendWaitingNotification fallback failed: ' . $e->getMessage());
-            }
+        if ($order->jenis === 'kaos_donasi') {
+            return redirect()->route('checkout.menunggu', $order);
         }
 
         return view('waiting', [

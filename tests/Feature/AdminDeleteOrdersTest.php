@@ -83,7 +83,7 @@ class AdminDeleteOrdersTest extends TestCase
             'donasi' => 0,
             'ongkir' => 15000,
             'total' => 315000,
-            'jenis' => 'kaos',
+            'jenis' => 'kaos_donasi',
             'status_pembayaran' => 'menunggu_verifikasi',
             'status_pengiriman' => 'belum_diproduksi',
             'bukti_path' => $fakePath,
@@ -132,6 +132,51 @@ class AdminDeleteOrdersTest extends TestCase
         Storage::disk('public')->assertMissing($fakePath);
     }
 
+    public function test_admin_can_bulk_delete_orders_and_donations(): void
+    {
+        Storage::fake('public');
+        $orderProof = 'bukti/bulk_order.jpg';
+        $donationProof = 'bukti/bulk_donation.jpg';
+        Storage::disk('public')->put($orderProof, 'order proof');
+        Storage::disk('public')->put($donationProof, 'donation proof');
+
+        $order = Order::create([
+            'nomor_pesanan' => 'ORD-BULK-001',
+            'nama' => 'Bulk Order',
+            'nomor' => '081234567890',
+            'ukuran' => 'L',
+            'jumlah' => 1,
+            'subtotal_kaos' => 150000,
+            'donasi' => 0,
+            'ongkir' => 0,
+            'total' => 150000,
+            'jenis' => 'kaos_donasi',
+            'status_pembayaran' => 'menunggu_verifikasi',
+            'status_pengiriman' => 'belum_diproduksi',
+            'bukti_path' => $orderProof,
+        ]);
+        $donation = Donation::create([
+            'kode' => 'DN-BULK-001',
+            'nama' => 'Bulk Donation',
+            'nomor' => '081234567890',
+            'nominal' => 50000,
+            'tanggal' => now(),
+            'status' => 'menunggu_verifikasi',
+            'bukti_path' => $donationProof,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin)->post(route('admin.verification.bulk_delete'), [
+            'ids' => json_encode([$order->id . '_order', $donation->id . '_donation']),
+        ]);
+
+        $response->assertRedirect(route('admin.verification'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertDatabaseMissing('donations', ['id' => $donation->id]);
+        Storage::disk('public')->assertMissing($orderProof);
+        Storage::disk('public')->assertMissing($donationProof);
+    }
+
     public function test_unauthenticated_cannot_delete(): void
     {
         $order = Order::create([
@@ -144,7 +189,7 @@ class AdminDeleteOrdersTest extends TestCase
             'donasi' => 0,
             'ongkir' => 10000,
             'total' => 110000,
-            'jenis' => 'kaos',
+            'jenis' => 'kaos_donasi',
             'status_pembayaran' => 'menunggu_verifikasi',
             'status_pengiriman' => 'belum_diproduksi',
         ]);

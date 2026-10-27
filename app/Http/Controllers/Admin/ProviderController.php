@@ -10,6 +10,7 @@ use App\Services\RajaOngkirService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ProviderController extends Controller
@@ -155,6 +156,7 @@ class ProviderController extends Controller
         // Persist ke database dan backup JSON
         $shippingSetting->saveSettings($data);
         $service->setSetting($shippingSetting);
+        Cache::forget('rajaongkir_provinces');
 
         // Langsung tes koneksi jika API key terisi
         $effectiveKey = $shippingSetting->getEffectiveApiKey();

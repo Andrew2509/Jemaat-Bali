@@ -25,9 +25,20 @@ function bootProduct360() {
     });
 }
 
+function bootKaosSelector() {
+    if (!document.querySelector('[data-kaos-selector]')) {
+        return;
+    }
+
+    import('./components/KaosSelector').then(({ initKaosSelector }) => {
+        initKaosSelector();
+    });
+}
+
 function boot() {
     bootQrisRenderer();
     bootProduct360();
+    bootKaosSelector();
 }
 
 if (document.readyState === 'loading') {

@@ -140,6 +140,7 @@ class AdminController extends Controller
             'statBuktiUlang' => Order::where('status_pembayaran', 'bukti_ulang')->count() + Donation::where('status', 'bukti_ulang')->count(),
             'statTerverifikasi' => Order::where('status_pembayaran', 'terverifikasi')->count() + Donation::where('status', 'terverifikasi')->count(),
             'statBelumBayar' => Order::where('status_pembayaran', 'belum_bayar')->count() + Donation::where('status', 'belum_bayar')->count(),
+            'statDitolak' => Order::where('status_pembayaran', 'ditolak')->count() + Donation::where('status', 'ditolak')->count(),
             'rpMenunggu' => $rpMenunggu,
             'rpBuktiUlang' => $rpBuktiUlang,
             'rpBelumBayar' => $rpBelumBayar,
@@ -168,6 +169,13 @@ class AdminController extends Controller
         } else {
             $item = Donation::findOrFail($id);
             $col = 'status';
+        }
+
+        if ($data['aksi'] === 'verifikasi' && empty($item->bukti_path)) {
+            return redirect()->route('admin.verification', [
+                'selected_id' => $id,
+                'selected_tipe' => $tipe,
+            ])->with('error', 'Pembayaran belum dapat diverifikasi karena pemesan/donatur belum mengunggah bukti pembayaran.');
         }
 
         $waFeedback = '';
@@ -281,8 +289,43 @@ class AdminController extends Controller
     }
 
     /**
-     * Hapus data transaksi verifikasi (baik pesanan kaos maupun donasi)
+     * Hapus data transaksi massal verifikasi.
      */
+    public function verificationBulkDestroy(Request $request)
+    {
+        $entries = json_decode($request->input('ids', '[]'), true);
+        if (!is_array($entries) || empty($entries)) {
+            return redirect()->route('admin.verification')->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+        }
+
+        $orderIds = [];
+        $donationIds = [];
+        foreach ($entries as $entry) {
+            if (!is_string($entry) || !preg_match('/^([1-9]\d*)_(order|donation)$/D', $entry, $matches)) {
+                return redirect()->route('admin.verification')->with('error', 'Data pilihan tidak valid.');
+            }
+
+            if ($matches[2] === 'order') {
+                $orderIds[] = (int) $matches[1];
+            } else {
+                $donationIds[] = (int) $matches[1];
+            }
+        }
+
+        $items = Order::whereKey(array_unique($orderIds))->get()
+            ->concat(Donation::whereKey(array_unique($donationIds))->get());
+
+        foreach ($items as $item) {
+            if ($item->bukti_path && Storage::disk('public')->exists($item->bukti_path)) {
+                Storage::disk('public')->delete($item->bukti_path);
+            }
+            $item->delete();
+        }
+
+        \Illuminate\Support\Facades\Cache::forget('admin_verification_totals');
+
+        return redirect()->route('admin.verification')->with('success', "Berhasil menghapus {$items->count()} data transaksi terpilih.");
+    }
     public function verificationDestroy(Request $request, int $id, string $tipe)
     {
         if ($tipe === 'order' || $tipe === 'pesanan') {
@@ -428,6 +471,11 @@ class AdminController extends Controller
             'aksi' => ['required', Rule::in(['verifikasi', 'tolak', 'bukti_ulang'])],
             'catatan_panitia' => ['nullable', 'string', 'max:500'],
         ]);
+
+        if ($data['aksi'] === 'verifikasi' && empty($donation->bukti_path)) {
+            return redirect()->route('admin.donations.show', $donation)
+                ->with('error', 'Donasi belum dapat diverifikasi karena donatur belum mengunggah bukti pembayaran.');
+        }
 
         $waFeedback = '';
 

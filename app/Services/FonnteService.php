@@ -217,7 +217,7 @@ class FonnteService
             '{nomor_pesanan}' => $order->nomor_pesanan ?: ('ORD-' . $order->id),
             '{jenis}' => $order->jenisLabel(),
             '{total}' => number_format($order->totalTagihan(), 0, ',', '.'),
-            '{metode}' => $order->metode ? strtoupper($order->metode) : 'QRIS Manual',
+            '{metode}' => $order->metodeLabel(),
             '{link}' => $link,
             '{nama_program}' => $programName,
         ];
@@ -332,9 +332,9 @@ class FonnteService
                 : route('shop.waiting', $item))
             : route('home');
 
-        $metode = ($item instanceof Order && $item->metode)
-            ? strtoupper($item->metode)
-            : 'QRIS Manual';
+        $metode = method_exists($item, 'metodeLabel')
+            ? $item->metodeLabel()
+            : ($item->metode ? strtoupper($item->metode) : 'Transfer Bank');
 
         $jenis = ($item instanceof Order)
             ? $item->jenisLabel()

@@ -19,7 +19,7 @@
                 </span>
             </a>
             <a href="{{ route('shop') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-muted transition hover:text-primary">
-                &larr; Kembali ke formulir donasi
+                &larr; Kembali ke Shop + Donasi
             </a>
         </div>
     </section>
@@ -27,9 +27,9 @@
     <section class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <nav class="text-xs font-semibold uppercase tracking-widest text-muted" aria-label="Breadcrumb">
             <ol class="flex flex-wrap items-center gap-2">
-                <li><a href="{{ route('design') }}" class="hover:text-primary">Donasi</a></li>
+                <li><a href="{{ route('shop') }}" class="hover:text-primary">Shop + Donasi</a></li>
                 <li>&gt;</li>
-                <li><a href="{{ route('shop') }}" class="hover:text-primary">Pemesanan</a></li>
+                <li><a href="{{ route('shop') }}" class="hover:text-primary">Data &amp; Donasi</a></li>
                 <li>&gt;</li>
                 <li class="text-ink">Pembayaran</li>
             </ol>

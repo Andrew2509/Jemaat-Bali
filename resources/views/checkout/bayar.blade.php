@@ -1,63 +1,96 @@
 @extends('layouts.app')
 
 @section('title', 'Pembayaran Kaos — ' . ($programInfo->nama_program ?? 'Jemaat Bali'))
-@section('description', 'Pembayaran pesanan kaos ' . ($programInfo->nama_program ?? 'Jemaat Bali') . ': QRIS manual dan unggah bukti pembayaran.')
+@section('description', 'Pembayaran pesanan kaos ' . ($programInfo->nama_program ?? 'Jemaat Bali') . ': selesaikan pembayaran setelah total final dikonfirmasi admin.')
 
 @section('content')
     @php
         $nomor = $order->nomor_pesanan ? '#' . $order->nomor_pesanan : '#' . $order->id;
         $totalSementara = (int) $order->subtotal_kaos;
         $waLink = $programInfo->wa_url ?? '#';
+        $firstItem = $order->items_list[0] ?? null;
+        $itemDesign = $firstItem && !empty($firstItem['design_id']) ? \App\Models\Design::find($firstItem['design_id']) : null;
+        $displayDesign = $itemDesign ?? $order->design;
+        $rawName = $firstItem['nama'] ?? ($displayDesign->nama ?? 'Satu Jemaat');
+        $cleanName = trim(preg_replace('/^kaos\s+/i', '', $rawName), '"\' ');
+        $formattedName = 'Kaos "' . $cleanName . '"';
+        $itemPrice = $firstItem['harga'] ?? ($displayDesign->harga ?? 135000);
+        $totalQty = collect($order->items_list)->sum('jumlah') ?: ($order->jumlah ?: 1);
+        $bankNama = $programInfo->bank_nama ?? 'MANDIRI';
+        $bankRek = $programInfo->bank_rek ?? '123456789';
+        $bankAtasNama = $programInfo->bank_atas_nama ?? 'Yayasan';
+        $hasBank = !empty($programInfo->bank_nama) || !empty($programInfo->bank_rek);
+        $isTransfer = ($order->metode === 'transfer' && $hasBank);
+        $totalBayar = $order->totalTagihan() > 0 ? $order->totalTagihan() : ($order->total > 0 ? $order->total : ($order->subtotal_kaos + $order->donasi));
     @endphp
 
-    <section class="border-b border-line bg-white">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-            <a href="{{ route('checkout.pemesanan') }}" class="flex items-center gap-2.5">
-                <span class="grid h-8 w-8 place-items-center rounded-full bg-primary font-display text-xs font-extrabold text-white">{{ $programInfo->initials ?? 'JB' }}</span>
-                <span class="leading-tight">
-                    <span class="block font-display text-sm font-extrabold tracking-tight text-ink">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</span>
-                    <span class="block text-[9px] font-bold uppercase tracking-[0.2em] text-muted">Merch Resmi &middot; Edisi {{ date('Y') }}</span>
-                </span>
-            </a>
-            <a href="{{ route('checkout.pemesanan') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-muted transition hover:text-primary">
-                &larr; Kembali ke pemesanan
-            </a>
-        </div>
-    </section>
-
-    <section class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <nav class="text-xs font-semibold uppercase tracking-widest text-muted" aria-label="Breadcrumb">
+    <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        {{-- Breadcrumb --}}
+        <nav class="text-xs text-stone-500 font-medium mb-3" aria-label="Breadcrumb">
             <ol class="flex flex-wrap items-center gap-2">
-                <li><a href="{{ route('design') }}" class="hover:text-primary">Koleksi kaos</a></li>
-                <li>&gt;</li>
-                <li><a href="{{ route('checkout.pemesanan') }}" class="hover:text-primary">Pemesanan</a></li>
-                <li>&gt;</li>
-                <li class="text-ink">Pembayaran</li>
+                <li><a href="{{ route('design') }}" class="hover:text-primary transition">Koleksi Kaos</a></li>
+                <li class="text-stone-300">&gt;</li>
+                <li><a href="{{ route('checkout.pemesanan') }}" class="hover:text-primary transition">Pemesanan</a></li>
+                <li class="text-stone-300">&gt;</li>
+                <li class="text-[#c85a32] font-semibold">Pembayaran</li>
             </ol>
         </nav>
 
-        <div class="mt-4 flex flex-wrap items-center gap-3">
-            <h1 class="font-display text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">Pembayaran Kaos</h1>
-            <span class="rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">QRIS Manual</span>
-        </div>
-        <p class="mt-3 max-w-2xl text-base leading-relaxed text-muted">
-            Bayar setelah total final dikonfirmasi, lalu unggah bukti pembayaran untuk verifikasi manual.
-        </p>
-
-        <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold uppercase tracking-[0.18em]">
-            <span class="text-muted">01 / Pemesanan</span>
-            <span class="text-line">&mdash;</span>
-            <span class="text-primary">02 / Pembayaran</span>
-            <span class="text-line">&mdash;</span>
-            <span class="text-muted">03 / Verifikasi manual</span>
+        {{-- Heading & Subtitle --}}
+        <div class="mt-2">
+            <h1 class="font-serif text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight leading-tight">
+                Pembayaran Kaos
+            </h1>
+            <p class="mt-2 text-sm text-stone-600 max-w-2xl leading-relaxed">
+                Selesaikan pembayaran setelah total final dikonfirmasi admin.
+            </p>
         </div>
 
-        <div class="mt-10 grid gap-8 lg:grid-cols-3">
-            <div class="space-y-8 lg:col-span-2">
+        {{-- Stepper (Gambar 1) --}}
+        <div class="mt-6 flex items-center gap-2 sm:gap-3">
+            {{-- Step 1: Pilih Kaos (Checked Green) --}}
+            <div class="flex items-center gap-2">
+                <span class="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-[#245236] text-[10px] sm:text-xs font-bold text-white shadow-2xs">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <span class="text-xs sm:text-sm font-bold text-stone-800">Pilih Kaos</span>
+            </div>
+
+            {{-- Connector 1-2 --}}
+            <span class="h-[1px] w-8 sm:w-16 bg-stone-300"></span>
+
+            {{-- Step 2: Data & Alamat (Checked Green) --}}
+            <div class="flex items-center gap-2">
+                <span class="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-[#245236] text-[10px] sm:text-xs font-bold text-white shadow-2xs">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <span class="text-xs sm:text-sm font-bold text-stone-800">Data &amp; Alamat</span>
+            </div>
+
+            {{-- Connector 2-3 --}}
+            <span class="h-[1px] w-8 sm:w-16 bg-[#e2ad99]"></span>
+
+            {{-- Step 3: Pembayaran (Active Terracotta 3) --}}
+            <div class="flex items-center gap-2">
+                <span class="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-[#c85a32] text-[10px] sm:text-xs font-bold text-white shadow-2xs">
+                    3
+                </span>
+                <span class="text-xs sm:text-sm font-bold text-stone-800">Pembayaran</span>
+            </div>
+        </div>
+
+        {{-- Main Grid Content --}}
+        <div class="mt-8 grid gap-8 lg:grid-cols-3">
+            {{-- Left Column: Cards --}}
+            <div class="space-y-6 lg:col-span-2">
                 @if ($errors->any())
-                    <div class="rounded-2xl border border-error/30 bg-error/5 p-5">
-                        <p class="font-display font-bold text-error">Mohon periksa kembali isian Anda:</p>
-                        <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-error">
+                    <div class="rounded-2xl border border-red-200 bg-red-50/80 p-5">
+                        <p class="font-bold text-red-800 text-sm">Mohon periksa kembali isian Anda:</p>
+                        <ul class="mt-2 list-inside list-disc space-y-1 text-xs text-red-700">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -65,263 +98,277 @@
                     </div>
                 @endif
 
-                <div class="card relative overflow-hidden p-6 pb-8 sm:p-9 sm:pb-10">
-                    {{-- Dekorasi ombak di kiri bawah kartu --}}
-                    <svg class="pointer-events-none absolute bottom-0 left-0 h-20 w-60 sm:h-28 sm:w-96" viewBox="0 0 400 120" preserveAspectRatio="none" fill="none" aria-hidden="true">
-                        <path d="M0 120 L0 60 C70 30 145 48 215 78 C285 108 335 116 400 119 L400 120 Z" fill="#c7cbb5" fill-opacity=".9" />
-                        <path d="M0 120 L0 88 C65 66 135 82 200 104 C265 126 330 122 400 120 Z" fill="#8b9179" />
-                    </svg>
-
-                    <div class="relative flex flex-wrap items-start justify-between gap-4">
-                        <span class="inline-flex items-center gap-2.5 rounded-full bg-[#4d5642] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-sm">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h4.5v4.5h-4.5V4.5Zm0 10.5h4.5v4.5h-4.5V15Zm10.5-10.5h4.5v4.5h-4.5V4.5Zm0 10.5h4.5v4.5h-4.5V15Zm-6-6h6M9 15h1.5M15 15h.75M15 19.5h1.5M19.5 19.5h.75" />
-                            </svg>
-                            Bayar dengan QRIS
-                        </span>
-                        <div class="ml-auto text-right">
-                            <p class="font-display text-sm font-extrabold uppercase tracking-wide text-[#2e3427]">{{ $programInfo->nama_program ?? 'Jemaat Bali' }}</p>
-                            <p class="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#8a8f7c]">{{ $programInfo->tagline_or_default ?? ($programInfo->tagline ?? '') }}</p>
-                        </div>
+                {{-- Notice Banner --}}
+                <div class="flex items-start gap-3.5 rounded-2xl border border-[#d6e5d8] bg-[#edf4ee] p-4 sm:p-5">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeadd] text-[#245236]">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3" />
+                        </svg>
                     </div>
-
-                    <p class="relative mt-4 text-[15px] leading-relaxed text-[#5f6457]">Pembayaran diproses manual oleh admin Jemaat Bali.</p>
-
-                    <div class="relative mt-5 flex items-start gap-3 rounded-2xl bg-[#efeee6] p-4">
-                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#4d5642] font-serif text-[13px] font-bold italic leading-none text-white">i</span>
-                        <p class="text-[15px] leading-relaxed text-[#5f6457]">
-                            <span class="font-bold text-[#2e3427]">Menunggu konfirmasi ongkir &amp; total final.</span><br>
-                            @if (!empty($programInfo->qris_code) || !empty($programInfo->qris_image_url))
-                                Pembayaran belum dapat dilakukan. Tunggu total final dari admin melalui WhatsApp.
-                            @else
-                                Pembayaran belum dapat dilakukan. Tunggu total final dan QRIS merchant dari admin melalui WhatsApp.
-                            @endif
-                        </p>
-                    </div>
-
-                    @if (!empty($programInfo->qris_image_url))
-                        <div class="relative mx-auto mt-6 w-full max-w-[340px] overflow-hidden rounded-2xl border border-line bg-white p-4 shadow-sm">
-                            <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="w-full rounded-xl object-contain">
-                        </div>
-                    @elseif (!empty($programInfo->qris_code))
-                        <div class="relative mx-auto mt-6 w-full max-w-[340px]" data-qris-wrapper>
-                            <div class="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-white p-4 shadow-sm">
-                                <div class="grid h-full w-full place-items-center rounded-xl bg-canvas px-4 text-center text-xs font-medium text-muted" data-qris-placeholder>Memuat QRIS&hellip;</div>
-                                <img data-qris-code="{{ $programInfo->qris_code }}" alt="QRIS Merchant {{ $programInfo->nama_program ?? 'Jemaat Bali' }}" class="hidden absolute inset-0 m-auto h-full w-full rounded-2xl object-contain p-4">
-                            </div>
-                            <p class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted">QRIS &middot; Scan to Pay</p>
-                        </div>
-                    @else
-                        <div class="mt-5 grid aspect-square w-full max-w-[280px] mx-auto place-items-center rounded-2xl border-2 border-dashed border-line bg-canvas p-6">
-                            <div class="text-center">
-                                <svg class="mx-auto h-10 w-10 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008H12V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                                <p class="mt-3 text-sm font-semibold text-ink">QRIS merchant belum tersedia</p>
-                                <p class="mt-1 text-xs text-muted">Bukan kode pembayaran</p>
-                            </div>
-                        </div>
-
-                        <p class="mt-4 text-xs leading-relaxed text-muted">
-                            QRIS asli akan ditampilkan setelah tersedia dari admin. Jangan melakukan pembayaran sebelum dikonfirmasi.
-                        </p>
-                    @endif
-
-                    {{-- Informasi rekening bank: diisi admin di Konten → Informasi program --}}
-                    @if (!empty($programInfo->bank_nama) || !empty($programInfo->bank_rek))
-                        <div class="relative mt-6 flex items-center gap-4 rounded-2xl bg-[#eae9e0] p-5 sm:gap-5 sm:p-6">
-                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#4d5642] text-white">
-                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 3.7 3.8 8h16.4L12 3.7Z" />
-                                    <path d="M5.5 8.7v7M9.5 8.7v7M14.5 8.7v7M18.5 8.7v7" />
-                                    <path d="M4 16.6h16M3 19.6h18" />
-                                </svg>
-                            </span>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-[#6f7466]">Atau Transfer Bank</p>
-                                <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                                    @if (!empty($programInfo->bank_nama))
-                                        <span class="text-2xl font-extrabold tracking-tight text-[#2e3427]">{{ $programInfo->bank_nama }}</span>
-                                    @endif
-                                    @if (!empty($programInfo->bank_rek))
-                                        <span class="text-2xl font-extrabold tabular-nums tracking-wide text-[#2e3427]">{{ $programInfo->bank_rek }}</span>
-                                    @endif
-                                </div>
-                                @if (!empty($programInfo->bank_atas_nama))
-                                    <p class="mt-0.5 text-[15px] text-[#5f6457]">a.n. {{ $programInfo->bank_atas_nama }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="relative mt-9 flex items-center gap-4">
-                        <h3 class="font-serif text-xl font-bold text-[#2e3427] sm:text-2xl">Cara pembayaran manual</h3>
-                        <span class="hidden h-px flex-1 bg-[#dcd9cc] sm:block"></span>
-                    </div>
-
-                    <ol class="relative mt-2">
-                        <li class="flex gap-4 border-b border-[#e3e1d6] py-4">
-                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">1</span>
-                            <div>
-                                <p class="text-[15px] font-bold text-[#2e3427]">Tunggu konfirmasi total final</p>
-                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Admin mengonfirmasi pesanan dan ongkir melalui WhatsApp. Jangan gunakan total sementara sebagai nominal pembayaran.</p>
-                            </div>
-                        </li>
-                        <li class="flex gap-4 border-b border-[#e3e1d6] py-4">
-                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">2</span>
-                            <div>
-                                <p class="text-[15px] font-bold text-[#2e3427]">Bayar melalui QRIS merchant</p>
-                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Setelah QRIS tersedia, pindai dengan aplikasi bank atau e-wallet. Periksa nama merchant dan bayar sesuai total final dari admin.</p>
-                            </div>
-                        </li>
-                        <li class="flex gap-4 py-4">
-                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#4d5642] text-sm font-bold text-white">3</span>
-                            <div>
-                                <p class="text-[15px] font-bold text-[#2e3427]">Simpan dan kirim bukti pembayaran</p>
-                                <p class="mt-1 text-sm leading-relaxed text-[#6c7163]">Unggah bukti transaksi yang jelas, lalu kirim untuk verifikasi manual. Pembayaran tidak otomatis berstatus lunas.</p>
-                            </div>
-                        </li>
-                    </ol>
-
-                    <div class="relative mt-4 flex justify-end">
-                        <p class="text-right font-script text-[26px] leading-tight text-[#3d4435]">
-                            Terima Kasih<br>
-                            <span class="inline-flex items-center gap-2">
-                                <span class="relative inline-block">atas Dukungan Anda
-                                    <svg class="pointer-events-none absolute -bottom-1.5 left-0 h-2.5 w-full" viewBox="0 0 160 10" preserveAspectRatio="none" fill="none" aria-hidden="true">
-                                        <path d="M2 7C40 2 110 1 158 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7" />
-                                    </svg>
-                                </span>
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 8.5c0 4.5-9 10-9 10s-9-5.5-9-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3Z" />
-                                </svg>
-                            </span>
+                    <div>
+                        <h2 class="text-sm sm:text-base font-bold text-[#1b3d26]">Menunggu konfirmasi admin</h2>
+                        <p class="mt-0.5 text-xs sm:text-sm text-[#2e5239] leading-relaxed">
+                            Biaya pengiriman dan total akhir akan dikonfirmasi melalui WhatsApp sebelum Anda melakukan pembayaran.
                         </p>
                     </div>
                 </div>
 
-                <div class="card p-6 sm:p-8">
-                    <span class="inline-flex items-center gap-2.5 rounded-full bg-[#4d5642] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-sm">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M12 3v13.5m0 0 4.5-4.5M12 16.5l-4.5-4.5" />
-                        </svg>
-                        Unggah bukti pembayaran
-                    </span>
-
-                    <p class="mt-4 text-[15px] leading-relaxed text-[#5f6457]">Bukti pembayaran wajib dikirim setelah transaksi berhasil.</p>
-
-                    <form action="{{ route('checkout.bayar.store', $order) }}" method="POST" enctype="multipart/form-data" class="mt-6">
-                        @csrf
-
-                        <div class="flex items-center gap-2">
-                            <label for="bukti" class="label !mb-0">Bukti pembayaran QRIS <span class="text-error">*</span></label>
-                            <span class="rounded-full bg-error/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-error">Wajib</span>
+                {{-- QRIS & Transfer Bank Card (Menyesuaikan dengan pilihan metode) --}}
+                <div class="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-4 mb-5">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base sm:text-lg font-bold text-stone-900" id="payment-box-title">
+                                    {{ $isTransfer ? 'Transfer Bank' : 'QRIS' }}
+                                </h2>
+                                <span class="inline-flex items-center gap-1 rounded-full bg-[#eaf4ec] px-2.5 py-0.5 text-[11px] font-bold text-[#245236] border border-[#245236]/20">
+                                    Metode Dipilih
+                                </span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-0.5">Selesaikan pembayaran sesuai instruksi di bawah ini.</p>
                         </div>
 
-                        <input type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only" required>
-                        <label for="bukti" class="dropzone mt-3 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-line bg-canvas px-6 py-10 text-center transition hover:border-primary/50">
-                            <svg class="h-9 w-9 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        @if ($hasBank)
+                            <div class="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200/70" role="tablist">
+                                <button type="button" id="tab-btn-qris" data-method="qris"
+                                    class="tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer {{ !$isTransfer ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500 hover:text-stone-900' }}">
+                                    <svg class="h-3.5 w-3.5 text-[#245236]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect width="6" height="6" x="3" y="3" rx="1" /><rect width="6" height="6" x="15" y="3" rx="1" /><rect width="6" height="6" x="3" y="15" rx="1" />
+                                        <path d="M14 14.5h2.5v2.5H14zM18.5 14.5H21v2.5h-2.5zM14 19h2.5v2.5H14zM18.5 19H21v2.5h-2.5z" fill="currentColor" stroke="none" />
+                                    </svg>
+                                    QRIS
+                                </button>
+                                <button type="button" id="tab-btn-transfer" data-method="transfer"
+                                    class="tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer {{ $isTransfer ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500 hover:text-stone-900' }}">
+                                    <svg class="h-3.5 w-3.5 text-[#245236]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 3 8h18l-9-5Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 9v8m4-8v8m6-8v8m4-8v8M3 17h18M3 21h18" />
+                                    </svg>
+                                    Transfer Bank
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- QRIS Section --}}
+                    <div id="view-qris" class="{{ $isTransfer ? 'hidden' : '' }}">
+                        <h3 class="text-sm font-bold text-stone-900 mb-2">Pembayaran via QRIS</h3>
+                        @if (!empty($programInfo->qris_image_url))
+                            <div class="mt-2 flex flex-col items-center justify-center rounded-xl border border-stone-200 bg-[#faf9f6] p-6 text-center">
+                                <img src="{{ $programInfo->qris_image_url }}" alt="QRIS Merchant" class="max-h-64 w-auto rounded-lg object-contain">
+                                <p class="mt-3 text-xs font-bold uppercase tracking-wider text-stone-600">Scan to Pay</p>
+                            </div>
+                        @else
+                            <div class="mt-2 rounded-xl border-2 border-dashed border-stone-200 bg-[#faf9f6] py-10 px-6 text-center">
+                                <svg class="mx-auto h-10 w-10 text-stone-300 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                    <circle cx="9" cy="9" r="2" />
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                </svg>
+                                <p class="text-sm font-bold text-stone-800 leading-snug">
+                                    QRIS merchant akan tersedia<br>setelah konfirmasi admin
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Transfer Bank Section --}}
+                    @if ($hasBank)
+                        <div id="view-transfer" class="{{ $isTransfer ? '' : 'hidden' }}">
+                            <span class="sr-only">Atau Transfer Bank</span>
+                            <h3 class="text-sm font-bold text-stone-900 mb-2">Rekening Transfer Bank</h3>
+                            <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 rounded-xl bg-[#eef5f0] p-4 sm:p-5 border border-[#d6e5d8]">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#245236] text-white">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 3 8h18l-9-5Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 9v8m4-8v8m6-8v8m4-8v8M3 17h18M3 21h18" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-extrabold text-stone-900 tracking-wide uppercase">{{ $bankNama }}</h4>
+                                        <p class="text-xs text-stone-500 mt-0.5">a.n. {{ $bankAtasNama }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-left sm:text-right w-full sm:w-auto">
+                                    <p class="text-xl font-extrabold text-stone-900 tracking-wider tabular-nums">{{ $bankRek }}</p>
+                                    <div class="mt-1 flex sm:justify-end">
+                                        <button type="button" data-copy-rek="{{ $bankRek }}"
+                                            class="inline-flex items-center gap-1.5 rounded-lg border border-stone-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-2xs transition hover:bg-stone-50 cursor-pointer">
+                                            <svg class="h-3.5 w-3.5 text-stone-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                            </svg>
+                                            <span class="copy-text">Salin nomor</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Cara Pembayaran --}}
+                    <div class="mt-6 pt-5 border-t border-stone-100">
+                        <h3 class="text-sm sm:text-base font-bold text-stone-900 mb-3">Cara pembayaran:</h3>
+                        <ol class="space-y-2.5 text-xs sm:text-sm text-stone-700">
+                            <li class="flex items-start gap-3">
+                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#245236] text-[11px] font-bold text-white mt-0.5">
+                                    1
+                                </span>
+                                <span>Tunggu konfirmasi total akhir dari admin.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#245236] text-[11px] font-bold text-white mt-0.5">
+                                    2
+                                </span>
+                                <span id="step-instruction-text">
+                                    {{ $isTransfer ? 'Lakukan transfer ke rekening bank di atas.' : 'Lakukan pembayaran menggunakan scan QRIS di atas.' }}
+                                </span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#245236] text-[11px] font-bold text-white mt-0.5">
+                                    3
+                                </span>
+                                <span>Unggah bukti pembayaran.</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                {{-- Unggah Bukti Pembayaran Card --}}
+                <div class="rounded-2xl border border-stone-200/90 bg-white p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                    <div class="flex items-center gap-3.5">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#edf5ee] text-[#245236]">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                             </svg>
-                            <span class="mt-3 text-sm font-semibold text-ink">Pilih atau tarik file ke sini</span>
-                            <span class="mt-1 text-xs text-muted">JPG, PNG, atau PDF &middot; Maksimal 5 MB</span>
-                            <span id="nama-file" class="mt-2 text-xs font-medium text-muted">Belum ada file dipilih</span>
-                            <span class="mt-4 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm transition hover:bg-primary-dark">Pilih File</span>
-                        </label>
-                        @error('bukti')<p class="error-text">{{ $message }}</p>@enderror
-
-                        <p class="mt-4 text-xs leading-relaxed text-muted">
-                            Pastikan nominal, tanggal transaksi, dan nama merchant terlihat jelas. Bukti wajib diunggah sebelum dapat dikirim.
-                        </p>
-
-                        <button type="submit" class="btn btn-primary mt-6 w-full !py-3.5 text-sm font-bold uppercase tracking-widest">
-                            Kirim bukti pembayaran &rarr;
-                        </button>
-                        <p class="mt-3 text-center text-xs text-muted">Tombol aktif setelah total final dikonfirmasi dan bukti diunggah.</p>
-                    </form>
-
-                    <div class="mt-6 flex items-start gap-2.5 rounded-xl border border-line bg-canvas p-4 text-sm">
-                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
-                        </svg>
-                        <p>
-                            <span class="font-semibold">Setelah dikirim: menunggu verifikasi.</span><br>
-                            <span class="text-muted">Admin akan memeriksa bukti secara manual. Status belum lunas sampai pembayaran dikonfirmasi melalui WhatsApp.</span>
-                        </p>
+                        </div>
+                        <h2 class="font-serif text-xl font-bold text-stone-900">Unggah Bukti Pembayaran</h2>
                     </div>
+
+                    <form action="{{ route('checkout.bayar.store', $order) }}" method="POST" enctype="multipart/form-data" class="mt-5">
+                        @csrf
+                        <input type="hidden" name="metode" id="input-metode-bayar" value="{{ $isTransfer ? 'transfer' : 'qris' }}">
+                        <input type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only" required>
+
+                        <label for="bukti" id="dropzone-box"
+                            class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-stone-200 bg-[#faf9f6] p-8 text-center cursor-pointer transition hover:border-[#c85a32]/60">
+                            <svg class="h-8 w-8 text-stone-400 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                            </svg>
+                            <span class="text-sm font-bold text-stone-800">Pilih atau tarik file ke sini</span>
+                            <span class="mt-1 text-xs text-stone-400">JPG, PNG, PDF - Maksimal 5 MB</span>
+                            <span id="nama-file" class="mt-2 text-xs font-semibold text-[#c85a32] hidden"></span>
+                            <span class="mt-3 inline-block rounded-lg bg-[#c85a32] px-5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#b04b25]">
+                                Pilih File
+                            </span>
+                        </label>
+                        @error('bukti')
+                            <p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+
+                        <button type="submit" id="btn-kirim-bukti"
+                            class="mt-5 w-full rounded-xl bg-[#c85a32] py-3.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#b04b25] cursor-pointer">
+                            Kirim Bukti Pembayaran
+                        </button>
+
+                        <div class="mt-3 flex items-center justify-center gap-1.5 text-xs text-stone-400">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Pembayaran akan diverifikasi admin secara manual.</span>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <aside class="lg:col-span-1">
-                <div class="card sticky top-24 !p-0 overflow-hidden">
-                    <div class="relative aspect-[4/3] bg-stone-100">
-                        <span class="absolute left-3 top-3 rounded-full bg-stone-900/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-xs">Edisi 2026</span>
-                        <span class="absolute right-3 top-3 text-[10px] font-bold uppercase tracking-widest text-white/90 drop-shadow">Jemaat Bali</span>
-                        @php($firstItem = $order->items_list[0] ?? null)
-                        @php($itemDesign = $firstItem ? \App\Models\Design::find($firstItem['design_id']) : null)
-                        @if ($itemDesign && $itemDesign->gambar)
-                            <img src="{{ asset($itemDesign->gambar) }}" alt="{{ $firstItem['nama'] ?? 'Kaos' }}" class="h-full w-full object-cover">
+            {{-- Right Column: Order Summary & Help --}}
+            <aside class="space-y-4">
+                {{-- Product Card --}}
+                <div class="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                    <div class="relative aspect-square sm:aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-50">
+                        <span class="absolute left-2.5 top-2.5 z-10 rounded-md bg-stone-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                            EDISI 2026
+                        </span>
+                        @if ($displayDesign && $displayDesign->gambar)
+                            <img src="{{ asset($displayDesign->gambar) }}" alt="{{ $formattedName }}" class="h-full w-full object-cover">
                         @else
-                            <img src="{{ asset($order->design->gambar) }}" alt="{{ $order->design->nama }}" class="h-full w-full object-cover">
+                            <div class="grid h-full w-full place-items-center bg-stone-100 text-xs text-stone-400">
+                                Gambar kaos
+                            </div>
                         @endif
                     </div>
 
-                    <div class="p-6">
-                        @if ($firstItem)
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
-                                {{ count($order->items_list) }} {{ count($order->items_list) > 1 ? 'item' : 'kaos' }} &middot; Ringkasan pesanan
-                            </span>
-                            <h2 class="mt-3 font-serif text-lg font-bold leading-snug">{{ $firstItem['nama'] }}</h2>
-                            <p class="mt-1.5 text-sm leading-relaxed text-muted">{{ count($order->items_list) }} produk kaos merchandise</p>
-                            <p class="mt-2 font-serif text-base font-bold text-ink">
-                                Rp {{ number_format($firstItem['harga'], 0, ',', '.') }}
-                                <span class="font-sans text-xs font-medium text-muted">/ pcs</span>
-                            </p>
+                    <h2 class="mt-3.5 text-base font-bold text-stone-900">
+                        {{ $formattedName }}
+                    </h2>
+                    <p class="mt-0.5 text-xs text-stone-500">
+                        {{ count($order->items_list) }} produk · Kaos merchandise
+                    </p>
+                    <p class="mt-1 text-sm font-bold text-stone-900">
+                        Rp {{ number_format($itemPrice, 0, ',', '.') }}
+                        <span class="text-xs font-normal text-stone-400">/ pcs</span>
+                    </p>
 
-                            <div class="mt-4 flex items-center justify-between border-t border-line pt-4 text-sm">
-                                <span class="text-muted">Total qty</span>
-                                <span class="font-semibold">{{ collect($order->items_list)->sum('jumlah') }} kaos</span>
+                    <div class="mt-4 space-y-2.5 border-t border-stone-100 pt-3 text-xs">
+                        <div class="flex items-center justify-between text-stone-600">
+                            <span>Jumlah</span>
+                            <span class="font-medium text-stone-900">{{ $totalQty }} kaos</span>
+                        </div>
+                        <div class="flex items-center justify-between text-stone-600">
+                            <span>Subtotal</span>
+                            <span class="font-bold text-stone-900">Rp {{ number_format($order->subtotal_kaos, 0, ',', '.') }}</span>
+                        </div>
+                        @if ($order->donasi > 0)
+                            <div class="flex items-center justify-between text-stone-600">
+                                <span>Donasi sukarela</span>
+                                <span class="font-bold text-stone-900">Rp {{ number_format($order->donasi, 0, ',', '.') }}</span>
                             </div>
                         @endif
-
-                        <div class="mt-5 border-t border-line pt-5">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-ink">Rincian pembayaran</p>
-                            <dl class="mt-3 space-y-2.5 text-sm">
-                                <div class="flex items-start justify-between gap-3">
-                                    <dt class="text-muted">Subtotal produk ({{ collect($order->items_list)->sum('jumlah') }} kaos)</dt>
-                                    <dd class="font-semibold">Rp {{ number_format($order->subtotal_kaos, 0, ',', '.') }}</dd>
-                                </div>
-                                <div class="flex items-start justify-between gap-3">
-                                    <dt class="text-muted">Ongkir</dt>
-                                    <dd class="font-semibold text-muted">Belum dihitung</dd>
-                                </div>
-                            </dl>
-
-                            <div class="mt-4 flex items-center justify-between border-t border-line pt-4">
-                                <span class="font-serif font-bold">Total sementara</span>
-                                <span class="font-serif text-2xl font-extrabold text-primary">Rp {{ number_format($totalSementara, 0, ',', '.') }}</span>
-                            </div>
-                            <p class="mt-2 text-xs leading-relaxed text-muted">
-                                Belum termasuk ongkir. Total akhir akan dikonfirmasi sebelum pembayaran.
-                            </p>
+                        <div class="flex items-center justify-between text-stone-600">
+                            <span>Ongkir</span>
+                            @if ($order->ongkir > 0)
+                                <span class="font-bold text-stone-900">Rp {{ number_format($order->ongkir, 0, ',', '.') }}</span>
+                            @else
+                                <span class="font-semibold text-[#c85a32]">Menunggu konfirmasi</span>
+                            @endif
                         </div>
-
-                        <div class="mt-5 rounded-xl border border-line bg-canvas p-4">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-muted">Total final</p>
-                            <p class="mt-1.5 font-serif text-base font-bold text-ink">Menunggu konfirmasi admin</p>
-                            <p class="mt-1 text-xs leading-relaxed text-muted">
-                                Nominal pembayaran akan disampaikan melalui WhatsApp setelah ongkir dihitung.
-                            </p>
+                        <div class="flex items-center justify-between text-stone-600">
+                            <span>Metode</span>
+                            <span id="sidebar-metode-name" class="font-bold text-stone-900">{{ $isTransfer ? 'Transfer Bank' : 'QRIS' }}</span>
                         </div>
+                    </div>
+
+                    {{-- Total Box --}}
+                    <div class="mt-4 flex items-center justify-between rounded-xl bg-[#eaf4ec] p-3.5 sm:p-4">
+                        <span class="text-xs sm:text-sm font-medium text-stone-700">Total</span>
+                        <span class="text-sm sm:text-base font-bold text-[#245236]">Rp {{ number_format($totalBayar, 0, ',', '.') }}</span>
                     </div>
                 </div>
 
-                <div class="card mt-6 p-6">
-                    <p class="font-serif text-base font-bold">Butuh bantuan pembayaran?</p>
-                    <p class="mt-2 text-sm leading-relaxed text-muted">
-                        Hubungi admin melalui percakapan WhatsApp konfirmasi pesanan Anda. Jangan membayar ke QRIS yang belum dikonfirmasi.
-                    </p>
-                    <a href="{{ $waLink }}" target="_blank" rel="noopener" class="btn btn-outline mt-4 w-full">Hubungi via WhatsApp</a>
+                {{-- Butuh Bantuan Card --}}
+                <div class="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#edf5ee] text-[#245236]">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0-9-9c0 1.48.36 2.88 1 4.11L3 21l4.89-1A8.94 8.94 0 0 0 12 21Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-stone-900">Butuh bantuan?</h3>
+                            <p class="mt-1 text-xs text-stone-500 leading-relaxed">
+                                Hubungi kami melalui WhatsApp jika ada kendala terkait pesanan Anda.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ $waLink }}" target="_blank" rel="noopener noreferrer"
+                        class="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-stone-200/90 py-2.5 px-4 text-xs font-semibold text-stone-800 transition hover:bg-stone-50">
+                        <svg class="h-4 w-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                        </svg>
+                        Hubungi via WhatsApp
+                    </a>
                 </div>
             </aside>
         </div>
@@ -331,13 +378,118 @@
 @push('scripts')
     <script>
         (function () {
+            // Tab switch QRIS / Transfer Bank
+            var tabQris = document.getElementById('tab-btn-qris');
+            var tabTransfer = document.getElementById('tab-btn-transfer');
+            var viewQris = document.getElementById('view-qris');
+            var viewTransfer = document.getElementById('view-transfer');
+            var titleBox = document.getElementById('payment-box-title');
+            var instructionText = document.getElementById('step-instruction-text');
+            var inputMetode = document.getElementById('input-metode-bayar');
+            var sidebarMetode = document.getElementById('sidebar-metode-name');
+
+            function setMethod(method) {
+                if (method === 'transfer') {
+                    if (viewQris) viewQris.classList.add('hidden');
+                    if (viewTransfer) viewTransfer.classList.remove('hidden');
+                    if (titleBox) titleBox.textContent = 'Transfer Bank';
+                    if (instructionText) instructionText.textContent = 'Lakukan transfer ke rekening bank di atas.';
+                    if (sidebarMetode) sidebarMetode.textContent = 'Transfer Bank';
+                    if (inputMetode) inputMetode.value = 'transfer';
+
+                    if (tabTransfer) {
+                        tabTransfer.className = 'tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer bg-white text-stone-900 shadow-2xs';
+                    }
+                    if (tabQris) {
+                        tabQris.className = 'tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer text-stone-500 hover:text-stone-900';
+                    }
+                } else {
+                    if (viewTransfer) viewTransfer.classList.add('hidden');
+                    if (viewQris) viewQris.classList.remove('hidden');
+                    if (titleBox) titleBox.textContent = 'QRIS';
+                    if (instructionText) instructionText.textContent = 'Lakukan pembayaran menggunakan scan QRIS di atas.';
+                    if (sidebarMetode) sidebarMetode.textContent = 'QRIS';
+                    if (inputMetode) inputMetode.value = 'qris';
+
+                    if (tabQris) {
+                        tabQris.className = 'tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer bg-white text-stone-900 shadow-2xs';
+                    }
+                    if (tabTransfer) {
+                        tabTransfer.className = 'tab-btn inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition cursor-pointer text-stone-500 hover:text-stone-900';
+                    }
+                }
+            }
+
+            if (tabQris) {
+                tabQris.addEventListener('click', function () {
+                    setMethod('qris');
+                });
+            }
+            if (tabTransfer) {
+                tabTransfer.addEventListener('click', function () {
+                    setMethod('transfer');
+                });
+            }
+
+            // Salin nomor rekening
+            document.querySelectorAll('[data-copy-rek]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var rek = this.getAttribute('data-copy-rek');
+                    if (!rek) return;
+                    navigator.clipboard.writeText(rek).then(function() {
+                        var label = btn.querySelector('.copy-text');
+                        if (label) {
+                            var original = label.textContent;
+                            label.textContent = 'Tersalin!';
+                            setTimeout(function() { label.textContent = original; }, 2000);
+                        }
+                    });
+                });
+            });
+
+            // File upload & dropzone feedback
             var input = document.getElementById('bukti');
             var nama = document.getElementById('nama-file');
-            if (!input || !nama) return;
-            input.addEventListener('change', function () {
-                nama.textContent = input.files.length ? input.files[0].name : 'Belum ada file dipilih';
-                nama.classList.toggle('text-primary', input.files.length > 0);
-            });
+            var dropzone = document.getElementById('dropzone-box');
+
+            function updateFileInfo(file) {
+                if (!file) return;
+                if (nama) {
+                    nama.textContent = file.name;
+                    nama.classList.remove('hidden');
+                }
+            }
+
+            if (input) {
+                input.addEventListener('change', function () {
+                    if (input.files.length) {
+                        updateFileInfo(input.files[0]);
+                    }
+                });
+            }
+
+            if (dropzone && input) {
+                ['dragenter', 'dragover'].forEach(function(evt) {
+                    dropzone.addEventListener(evt, function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.add('border-[#c85a32]');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(function(evt) {
+                    dropzone.addEventListener(evt, function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.remove('border-[#c85a32]');
+                    });
+                });
+                dropzone.addEventListener('drop', function(e) {
+                    if (e.dataTransfer && e.dataTransfer.files.length) {
+                        input.files = e.dataTransfer.files;
+                        updateFileInfo(e.dataTransfer.files[0]);
+                    }
+                });
+            }
         })();
     </script>
 @endpush

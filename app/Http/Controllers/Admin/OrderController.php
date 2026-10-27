@@ -334,10 +334,6 @@ class OrderController extends Controller
             }
         }
 
-        if (!$selectedOrder && $pesananAll->isNotEmpty()) {
-            $selectedOrder = $pesananAll->firstWhere('nomor_pesanan', 'KS-001') ?? $pesananAll->first();
-        }
-
         $page = (int) Paginator::resolveCurrentPage();
         $perPage = 10;
         $slice = $pesananAll->forPage($page, $perPage);
@@ -381,7 +377,11 @@ class OrderController extends Controller
             ])->with('info', 'Pesanan ini belum diverifikasi. Silakan periksa pembayaran terlebih dahulu.');
         }
 
-        return redirect()->route('admin.orders', ['selected_id' => $order->id]);
+        $order->load('design', 'verifier');
+
+        $waLink = app(\App\Services\FonnteService::class)->getDirectWaLink($order);
+
+        return view('admin.order-show', ['order' => $order, 'waLink' => $waLink]);
     }
 
     public function ship(Request $request, Order $order)

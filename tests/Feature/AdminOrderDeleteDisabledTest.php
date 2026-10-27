@@ -126,7 +126,7 @@ class AdminOrderDeleteDisabledTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)
-            ->get(route('admin.orders', ['selected_id' => $deliveredOrder->id]));
+            ->get(route('admin.orders.show', $deliveredOrder));
 
         $response->assertStatus(200);
         $response->assertSee($deliveredOrder->nomor_pesanan);

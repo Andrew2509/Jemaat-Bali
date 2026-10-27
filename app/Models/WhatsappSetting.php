@@ -94,7 +94,7 @@ class WhatsappSetting extends Model
     public static function defaultVerifiedTemplate(): string
     {
         return "Halo *{nama}*,\n\n"
-            . "Puji Tuhan! Pembayaran Anda untuk pesanan *#{nomor_pesanan}* sebesar *Rp{nominal}* telah *TERVERIFIKASI* oleh panitia *{nama_program}*.\n\n"
+            . "Puji Tuhan! Pembayaran Anda untuk donasi *#{nomor_pesanan}* sebesar *Rp{nominal}* telah *TERVERIFIKASI* oleh panitia *{nama_program}*.\n\n"
             . "*Rincian Pesanan:*\n"
             . "• Nomor: #{nomor_pesanan}\n"
             . "• Rincian: {rincian}\n"
@@ -104,7 +104,7 @@ class WhatsappSetting extends Model
             . "• Alamat Kirim: {alamat}\n\n"
             . "Pesanan Anda sedang dipersiapkan oleh panitia. Anda dapat memantau status pesanan kapan saja melalui tautan:\n"
             . "{link}\n\n"
-            . "Terima kasih banyak atas partisipasi dan dukungan kasih Anda bagi kelancaran program *{nama_program}*. Semoga Tuhan senantiasa memberkati Anda sekeluarga!\n\n"
+            . "Terima kasih banyak atas partisipasi, donasi dan dukungan kasih Anda bagi kelancaran program fundraising pembangunan *{nama_program}*. Semoga Tuhan senantiasa memberkati Anda sekeluarga!\n\n"
             . "Salam kasih,\n"
             . "Panitia {nama_program}";
     }
@@ -127,11 +127,11 @@ class WhatsappSetting extends Model
             ]);
         } else {
             $updates = [];
-            if (empty($setting->template_waiting)) {
+            if (empty($setting->template_waiting) || !str_contains($setting->template_waiting, '{jenis}')) {
                 $updates['auto_notify_waiting'] = true;
                 $updates['template_waiting'] = static::defaultWaitingTemplate();
             }
-            if (empty($setting->template_verified) || !str_contains($setting->template_verified, '{rincian}')) {
+            if (empty($setting->template_verified) || !str_contains($setting->template_verified, 'fundraising pembangunan')) {
                 $updates['template_verified'] = static::defaultVerifiedTemplate();
             }
             if (!empty($updates)) {

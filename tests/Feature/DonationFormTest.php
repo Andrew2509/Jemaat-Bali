@@ -147,4 +147,75 @@ class DonationFormTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Verifikasi');
     }
+
+    public function test_kaos_donation_flow_reaches_payment_and_admin_verification(): void
+    {
+        $this->seed(\Database\Seeders\AdminSeeder::class);
+        $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+        $admin = \App\Models\User::where('email', 'admin@jemaatbali.or.id')->first();
+
+        \App\Models\ProgramInfo::firstOrCreate(
+            ['id' => 1],
+            [
+                'nama_program' => 'Pembangunan Jemaat Bali',
+                'deskripsi' => 'Penggalangan dana pembangunan bersama.',
+                'whatsapp' => '0812-0000-0000',
+                'email' => 'admin@jemaatbali.or.id',
+                'judul_proposal' => 'Proposal pembangunan',
+                'proposal_tipe' => 'pdf',
+                'bank_nama' => 'BCA',
+                'bank_rek' => '1234567890',
+                'bank_atas_nama' => 'Panitia Pembangunan',
+            ]
+        );
+
+        $response = $this->post('/shop', $this->kaosDonasiPayload([
+            'donasi' => 75000,
+            'metode' => 'transfer',
+        ]));
+
+        $order = Order::where('nomor', '081298765432')->latest('id')->first();
+        $this->assertNotNull($order);
+        $this->assertSame('kaos_donasi', $order->jenis);
+        $this->assertSame('transfer', $order->metode);
+        $this->assertSame(75000, (int) $order->donasi);
+
+        $response->assertRedirect(route('checkout.bayar', $order));
+
+        $this->get(route('checkout.bayar', $order))
+            ->assertStatus(200)
+            ->assertSee('Transfer Bank')
+            ->assertSee('Donasi sukarela');
+
+        $file = \Illuminate\Http\UploadedFile::fake()->create('bukti.png', 20, 'image/png');
+        $this->post(route('checkout.bayar.store', $order), [
+            '_token' => csrf_token(),
+            'bukti' => $file,
+            'metode' => 'transfer',
+        ])->assertRedirect(route('checkout.menunggu', $order));
+
+        $this->assertSame('menunggu_verifikasi', $order->fresh()->status_pembayaran);
+
+        // Check in admin verification
+        $this->actingAs($admin)
+            ->get(route('admin.verification', ['q' => $order->nomor_pesanan]))
+            ->assertStatus(200)
+            ->assertSee($order->nomor_pesanan);
+
+        // Verify order in admin
+        $this->actingAs($admin)
+            ->post(route('admin.verification.action', ['id' => $order->id, 'tipe' => 'order']), [
+                'aksi' => 'verifikasi',
+                'kirim_wa' => false,
+            ])->assertRedirect();
+
+        $this->assertSame('terverifikasi', $order->fresh()->status_pembayaran);
+
+        // Check in admin orders
+        $this->actingAs($admin)
+            ->get(route('admin.orders', ['q' => $order->nomor_pesanan]))
+            ->assertStatus(200)
+            ->assertSee($order->nomor_pesanan);
+    }
 }
+

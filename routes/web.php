@@ -67,6 +67,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::post('/verifikasi/{id}/{tipe}/kirim-wa', [AdminController::class, 'resendVerificationWa'])->name('verification.resend_wa');
         Route::post('/verifikasi/{id}/{tipe}/hapus', [AdminController::class, 'verificationDestroy'])->name('verification.destroy');
         Route::delete('/verifikasi/{id}/{tipe}', [AdminController::class, 'verificationDestroy'])->name('verification.delete');
+        Route::post('/verifikasi/bulk-delete', [AdminController::class, 'verificationBulkDestroy'])->name('verification.bulk_delete');
     });
 
     // 3. Pesanan Kaos

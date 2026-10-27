@@ -50,10 +50,52 @@ class CheckoutFlowTest extends TestCase
     {
         $this->get(route('checkout.pemesanan', ['desain' => $this->design->id, 'ukuran' => 'L', 'jumlah' => 2]))
             ->assertStatus(200)
-            ->assertSee('Data pemesan', false)
+            ->assertSee('Data Pribadi', false)
+            ->assertSee('Alamat Pengiriman', false)
             ->assertSee('Beli Kaos Saja', false)
             ->assertSee($this->design->nama)
             ->assertDontSee('name="donasi"', false);
+    }
+
+    public function test_pemesanan_ui_matches_shop_layout_with_size_selection_and_cart(): void
+    {
+        $response = $this->get(route('checkout.pemesanan'));
+        $response->assertStatus(200);
+
+        // Header and hero identical layout
+        $response->assertSee('Beli Kaos Saja', false);
+        $response->assertSee('Satu Kaos, Sejuta Arti', false);
+        $response->assertSee('Pesanan', false);
+
+        // Mode pill toggle
+        $response->assertSee('Pesan Kaos + Donasi', false);
+        $response->assertSee('Donasi Saja', false);
+
+        // Wizard steps indicator
+        $response->assertSee('PILIH KAOS', false);
+        $response->assertSee('DATA &amp; ALAMAT', false);
+        $response->assertSee('PEMBAYARAN', false);
+
+        // Product selection, steppers, and sidebar containers
+        $response->assertSee('id="product-cards"', false);
+        $response->assertSee('id="product-detail"', false);
+        $response->assertSee('id="other-products"', false);
+        $response->assertSee('Ringkasan Pesanan', false);
+        $response->assertSee('Subtotal', false);
+        $response->assertSee('Total Pembayaran', false);
+        $response->assertSee('Lanjut ke Data &amp; Alamat', false);
+
+        // Trust badges
+        $response->assertSee('Pengiriman ke seluruh Indonesia', false);
+        $response->assertSee('Pembayaran Aman', false);
+        $response->assertSee('Setiap Pembelian Berdampak', false);
+
+        // Size guide modal integration
+        $response->assertSee('data-open-size-chart', false);
+        $response->assertSee('id="size-chart-modal"', false);
+
+        // No donation field
+        $response->assertDontSee('name="donasi"', false);
     }
 
     public function test_pemesanan_falls_back_to_first_design_when_id_missing(): void
@@ -301,4 +343,123 @@ class CheckoutFlowTest extends TestCase
             ->assertSee('pesan-kaos', false)
             ->assertDontSee('/shop?desain=', false);
     }
+
+    public function test_checkout_page_renders_payment_method_options(): void
+    {
+        $this->get(route('checkout.pemesanan'))
+            ->assertStatus(200)
+            ->assertSee('Pilih Metode Pembayaran')
+            ->assertSee('QRIS')
+            ->assertSee('Scan QRIS untuk melakukan pembayaran.')
+            ->assertSee('Transfer Bank')
+            ->assertSee('Transfer melalui rekening bank terdaftar.')
+            ->assertSee('Pilih metode pembayaran di bawah');
+    }
+
+    public function test_checkout_can_select_transfer_bank_payment_method(): void
+    {
+        $design = Design::where('aktif', true)->firstOrFail();
+
+        $response = $this->post(route('checkout.data.store'), [
+            'nama' => 'Transfer Tester',
+            'nomor' => '08123456789',
+            'email' => 'transfer@example.com',
+            'design_id' => $design->id,
+            'ukuran' => 'L',
+            'jumlah' => 1,
+            'alamat' => 'Jl. Teuku Umar No. 10',
+            'provinsi' => 'Bali',
+            'kabupaten' => 'Kota Denpasar',
+            'kecamatan' => 'Denpasar Barat',
+            'kode_pos' => '80113',
+            'metode' => 'transfer',
+        ]);
+
+        $order = Order::where('nama', 'Transfer Tester')->latest('id')->firstOrFail();
+        $this->assertSame('transfer', $order->metode);
+        $response->assertRedirect(route('checkout.bayar', $order));
+    }
+
+    public function test_payment_page_adapts_to_order_payment_method(): void
+    {
+        $design = Design::where('aktif', true)->firstOrFail();
+        \App\Models\ProgramInfo::first()->update([
+            'bank_nama' => 'BCA',
+            'bank_rekening' => '1234567890',
+            'bank_atas_nama' => 'Panitia Pembangunan',
+        ]);
+
+        $transferOrder = Order::create([
+            'nama' => 'User Transfer',
+            'nomor' => '08111222333',
+            'email' => 'transfer@test.com',
+            'alamat' => 'Alamat Transfer',
+            'total' => 150000,
+            'metode' => 'transfer',
+            'status' => 'menunggu_pembayaran',
+            'order_type' => 'kaos',
+            'design_id' => $design->id,
+            'ukuran' => 'XL',
+            'jumlah' => 1,
+            'harga_satuan' => 150000,
+        ]);
+
+        $qrisOrder = Order::create([
+            'nama' => 'User QRIS',
+            'nomor' => '08111222444',
+            'email' => 'qris@test.com',
+            'alamat' => 'Alamat QRIS',
+            'total' => 150000,
+            'metode' => 'qris',
+            'status' => 'menunggu_pembayaran',
+            'order_type' => 'kaos',
+            'design_id' => $design->id,
+            'ukuran' => 'M',
+            'jumlah' => 1,
+            'harga_satuan' => 150000,
+        ]);
+
+        $this->get(route('checkout.bayar', $transferOrder))
+            ->assertStatus(200)
+            ->assertSee('Transfer Bank')
+            ->assertSee('Lakukan transfer ke rekening bank di atas.')
+            ->assertSee('name="metode" id="input-metode-bayar" value="transfer"', false);
+
+        $this->get(route('checkout.bayar', $qrisOrder))
+            ->assertStatus(200)
+            ->assertSee('Pembayaran via QRIS')
+            ->assertSee('Lakukan pembayaran menggunakan scan QRIS di atas.')
+            ->assertSee('name="metode" id="input-metode-bayar" value="qris"', false);
+    }
+
+    public function test_payment_submission_updates_order_metode_if_switched(): void
+    {
+        $design = Design::where('aktif', true)->firstOrFail();
+
+        $order = Order::create([
+            'nama' => 'Switch Method Tester',
+            'nomor' => '081999888777',
+            'email' => 'switch@test.com',
+            'alamat' => 'Alamat Switch',
+            'total' => 150000,
+            'metode' => 'qris',
+            'status' => 'menunggu_pembayaran',
+            'order_type' => 'kaos',
+            'design_id' => $design->id,
+            'ukuran' => 'L',
+            'jumlah' => 1,
+            'harga_satuan' => 150000,
+        ]);
+
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $response = $this->post(route('checkout.bayar.store', $order), [
+            'bukti' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'metode' => 'transfer',
+        ]);
+
+        $response->assertRedirect(route('checkout.menunggu', $order));
+        $this->assertSame('transfer', $order->fresh()->metode);
+    }
 }
+

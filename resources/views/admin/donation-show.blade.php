@@ -116,10 +116,22 @@
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-3">
-                            <button type="submit" name="aksi" value="verifikasi" class="btn btn-primary">Periksa pembayaran</button>
+                            @if (!empty($donation->bukti_path))
+                                <button type="submit" name="aksi" value="verifikasi" class="btn btn-primary">Periksa pembayaran</button>
+                            @else
+                                <button type="button" disabled class="btn bg-stone-200 text-stone-400 cursor-not-allowed select-none" title="Donatur belum mengunggah bukti pembayaran">Periksa pembayaran (Belum aktif)</button>
+                            @endif
                             <button type="submit" name="aksi" value="tolak" class="btn btn-outline !border-red-300 !text-red-600 hover:!border-red-500 hover:!bg-red-50" onclick="return confirm('Tolak donasi ini?')">Tolak donasi</button>
                             <button type="submit" name="aksi" value="bukti_ulang" class="btn btn-outline" onclick="return confirm('Minta donatur mengunggah ulang bukti?')">Minta bukti ulang</button>
                         </div>
+                        @if (empty($donation->bukti_path))
+                            <p class="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                </svg>
+                                <span><strong>Catatan:</strong> Tombol verifikasi pembayaran belum diaktifkan karena donatur belum mengirim/mengunggah bukti pembayaran. Tombol akan aktif secara otomatis setelah bukti diunggah.</span>
+                            </p>
+                        @endif
                     </form>
                 @endif
             </div>

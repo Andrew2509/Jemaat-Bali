@@ -411,14 +411,6 @@
                     <p class="mt-1 font-serif text-2xl font-bold text-stone-900 leading-tight">Rp{{ number_format($saldoPembangunan, 0, ',', '.') }}</p>
                 </div>
             </div>
-
-            <!-- Caution note -->
-            <div class="flex items-start gap-2 rounded-xl bg-[#fbf7ee] border border-[#f3ecd8] p-3 text-xs text-stone-600">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4 text-stone-500 shrink-0 mt-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-                </svg>
-                <p class="leading-relaxed">Ongkir Rp80.000 dibukukan sebagai pengiriman prabayar. Tidak dihitung sebagai dana pembangunan.</p>
-            </div>
         </div>
     </div>
 

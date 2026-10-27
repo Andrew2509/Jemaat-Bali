@@ -69,4 +69,13 @@ class Donation extends Model
     {
         return $query->where('status', 'terverifikasi');
     }
+
+    public function metodeLabel(): string
+    {
+        if (empty($this->metode)) {
+            return 'Transfer Bank';
+        }
+
+        return strtolower($this->metode) === 'qris' ? 'QRIS' : 'Transfer Bank';
+    }
 }

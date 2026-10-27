@@ -166,53 +166,75 @@ class RoleAndPermissionSeeder extends Seeder
         // 1. Simpan semua permission
         $allPermissionIds = [];
         foreach ($permissionsData as $perm) {
-            $permission = Permission::updateOrCreate(
-                ['name' => $perm['name']],
-                [
-                    'display_name' => $perm['display_name'],
-                    'group' => $perm['group'],
-                    'description' => $perm['description'],
-                ]
-            );
-            $allPermissionIds[$perm['name']] = $permission->id;
+            try {
+                $permission = Permission::updateOrCreate(
+                    ['name' => $perm['name']],
+                    [
+                        'display_name' => $perm['display_name'],
+                        'group' => $perm['group'],
+                        'description' => $perm['description'],
+                    ]
+                );
+            } catch (\Throwable $e) {
+                $permission = Permission::where('name', $perm['name'])->first();
+            }
+            if ($permission) {
+                $allPermissionIds[$perm['name']] = $permission->id;
+            }
         }
 
         // 2. Buat atau perbarui Peran (Roles)
         // A. Super Admin (semua hak akses)
-        $superAdminRole = Role::updateOrCreate(
-            ['name' => 'super_admin'],
-            [
-                'display_name' => 'Super Admin',
-                'description' => 'Pemegang wewenang penuh tanpa batas atas seluruh sistem, modul, dan manajemen pengguna.',
-                'is_system' => true,
-            ]
-        );
-        $superAdminRole->permissions()->sync(array_values($allPermissionIds));
+        try {
+            $superAdminRole = Role::updateOrCreate(
+                ['name' => 'super_admin'],
+                [
+                    'display_name' => 'Super Admin',
+                    'description' => 'Pemegang wewenang penuh tanpa batas atas seluruh sistem, modul, dan manajemen pengguna.',
+                    'is_system' => true,
+                ]
+            );
+        } catch (\Throwable $e) {
+            $superAdminRole = Role::where('name', 'super_admin')->first();
+        }
+        if ($superAdminRole) {
+            $superAdminRole->permissions()->sync(array_values($allPermissionIds));
+        }
 
         // B. Administrator (operasional harian lengkap)
-        $adminRole = Role::updateOrCreate(
-            ['name' => 'admin'],
-            [
-                'display_name' => 'Administrator',
-                'description' => 'Mengelola operasional harian: pesanan, verifikasi donasi, pengeluaran, konten, dan laporan.',
-                'is_system' => true,
-            ]
-        );
+        try {
+            $adminRole = Role::updateOrCreate(
+                ['name' => 'admin'],
+                [
+                    'display_name' => 'Administrator',
+                    'description' => 'Mengelola operasional harian: pesanan, verifikasi donasi, pengeluaran, konten, dan laporan.',
+                    'is_system' => true,
+                ]
+            );
+        } catch (\Throwable $e) {
+            $adminRole = Role::where('name', 'admin')->first();
+        }
         $adminPermissions = array_diff_key($allPermissionIds, array_flip([
             'roles.manage',
             'permissions.manage',
         ]));
-        $adminRole->permissions()->sync(array_values($adminPermissions));
+        if ($adminRole) {
+            $adminRole->permissions()->sync(array_values($adminPermissions));
+        }
 
         // C. Bendahara Keuangan
-        $bendaharaRole = Role::updateOrCreate(
-            ['name' => 'bendahara'],
-            [
-                'display_name' => 'Bendahara Keuangan',
-                'description' => 'Fokus pada verifikasi pembayaran, pembukuan donasi, pencatatan pengeluaran, dan ekspor laporan keuangan.',
-                'is_system' => false,
-            ]
-        );
+        try {
+            $bendaharaRole = Role::updateOrCreate(
+                ['name' => 'bendahara'],
+                [
+                    'display_name' => 'Bendahara Keuangan',
+                    'description' => 'Fokus pada verifikasi pembayaran, pembukuan donasi, pencatatan pengeluaran, dan ekspor laporan keuangan.',
+                    'is_system' => false,
+                ]
+            );
+        } catch (\Throwable $e) {
+            $bendaharaRole = Role::where('name', 'bendahara')->first();
+        }
         $bendaharaPerms = array_intersect_key($allPermissionIds, array_flip([
             'dashboard.view',
             'verification.view',
@@ -224,17 +246,23 @@ class RoleAndPermissionSeeder extends Seeder
             'reports.view',
             'reports.export',
         ]));
-        $bendaharaRole->permissions()->sync(array_values($bendaharaPerms));
+        if ($bendaharaRole) {
+            $bendaharaRole->permissions()->sync(array_values($bendaharaPerms));
+        }
 
         // D. Operator Toko & Konten
-        $operatorRole = Role::updateOrCreate(
-            ['name' => 'operator'],
-            [
-                'display_name' => 'Operator Toko & Konten',
-                'description' => 'Mengelola pesanan kaos jemaat, penginputan nomor resi, koleksi desain kaos, serta dokumentasi progres pembangunan.',
-                'is_system' => false,
-            ]
-        );
+        try {
+            $operatorRole = Role::updateOrCreate(
+                ['name' => 'operator'],
+                [
+                    'display_name' => 'Operator Toko & Konten',
+                    'description' => 'Mengelola pesanan kaos jemaat, penginputan nomor resi, koleksi desain kaos, serta dokumentasi progres pembangunan.',
+                    'is_system' => false,
+                ]
+            );
+        } catch (\Throwable $e) {
+            $operatorRole = Role::where('name', 'operator')->first();
+        }
         $operatorPerms = array_intersect_key($allPermissionIds, array_flip([
             'dashboard.view',
             'orders.view',

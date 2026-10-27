@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-CfprcAq_.css",
+    "file": "assets/app-BQbiCR6g.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,14 +9,21 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-9Q-5-VfI.js",
+    "file": "assets/app-DQa8Ysuq.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/components/QrisRenderer.js",
-      "resources/js/components/Product360Viewer.js"
+      "resources/js/components/Product360Viewer.js",
+      "resources/js/components/KaosSelector.js"
     ]
+  },
+  "resources/js/components/KaosSelector.js": {
+    "file": "assets/KaosSelector-CI1q_nNh.js",
+    "name": "KaosSelector",
+    "src": "resources/js/components/KaosSelector.js",
+    "isDynamicEntry": true
   },
   "resources/js/components/Product360Viewer.js": {
     "file": "assets/Product360Viewer-xUeFahCq.js",

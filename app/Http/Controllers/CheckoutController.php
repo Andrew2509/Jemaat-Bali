@@ -17,8 +17,8 @@ use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
 {
-    /** Langkah 1: data pemesan. */
-    public function create(Request $request)
+    /** Langkah 1 & 2: Pemilihan Kaos & Data + Alamat Pengiriman. */
+    public function create(Request $request, RajaOngkirService $rajaOngkir)
     {
         $data = $request->session()->get('checkout.data', []);
         $designs = Design::where('aktif', true)->orderBy('harga')->get();
@@ -28,8 +28,14 @@ class CheckoutController extends Controller
             abort(404, 'Desain kaos belum tersedia.');
         }
 
+        $heroShirts = $designs->take(2)->values();
+
         return view('checkout.data.pemesan', [
+            'designs' => $designs,
             'selected' => $selected,
+            'heroShirts' => $heroShirts,
+            'provinsi' => $rajaOngkir->getProvinces(),
+            'isRajaOngkirLive' => $rajaOngkir->isConfigured(),
             'ukuran' => ['S', 'M', 'L', 'XL', 'XXL'],
             'draft' => array_merge([
                 'design_id' => $selected->id,
@@ -40,24 +46,95 @@ class CheckoutController extends Controller
         ]);
     }
 
-    /** Simpan langkah 1 ke session. */
+    /** Simpan langkah 1 & 2 atau lanjut ke pembayaran langsung. */
     public function dataStore(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        $rules = [
             'nama' => ['required', 'string', 'max:120'],
             'nomor' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{6,}$/'],
-            'email' => ['nullable', 'email', 'max:150'],
-            'design_id' => ['required', 'integer', 'exists:designs,id'],
+            'email' => ['required', 'email', 'max:150'],
+            'design_id' => ['required_without:items', 'integer', 'exists:designs,id'],
+            'ukuran' => ['nullable', 'string', 'in:S,M,L,XL,XXL'],
+            'jumlah' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'items' => ['nullable', 'array'],
+            'items.*.design_id' => ['required_with:items', 'integer', 'exists:designs,id'],
+            'items.*.ukuran' => ['required_with:items', 'string', 'in:S,M,L,XL,XXL'],
+            'items.*.jumlah' => ['required_with:items', 'integer', 'min:1', 'max:100'],
+            'items.*.gender' => ['nullable', 'string', 'in:pria,wanita'],
             'tipe' => ['nullable', 'in:kaos_saja,kaos_donasi'],
-        ], [
+            'metode' => ['nullable', 'string', 'in:qris,transfer'],
+        ];
+
+        // Jika alamat terisi (alur baru Data & Alamat jadi 1 step), sertakan validasi alamat
+        if ($request->filled('alamat') || $request->filled('provinsi')) {
+            $rules = array_merge($rules, [
+                'alamat' => ['required', 'string', 'max:255'],
+                'provinsi' => ['required', 'string', 'max:120', function ($attribute, $value, $fail) {
+                    if (! in_array(strtoupper(trim((string) $value)), array_map('strtoupper', Provinsi::all()), true)) {
+                        $fail('Provinsi yang dipilih tidak valid.');
+                    }
+                }],
+                'kabupaten' => ['required', 'string', 'max:120'],
+                'kecamatan' => ['required', 'string', 'max:120'],
+                'kelurahan' => ['nullable', 'string', 'max:120'],
+                'kode_pos' => ['required', 'string', 'max:10'],
+                'catatan' => ['nullable', 'string', 'max:500'],
+            ]);
+        }
+
+        $data = $request->validate($rules, [
             'nomor.regex' => 'Nomor HP tidak valid. Gunakan angka saja, contoh 08123456789.',
+            'provinsi.required' => 'Pilih provinsi.',
+            'kabupaten.required' => 'Pilih kota / kabupaten.',
+            'kecamatan.required' => 'Pilih kecamatan.',
+            'kode_pos.required' => 'Kode pos wajib diisi.',
+            'alamat.required' => 'Alamat lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi untuk pengiriman bukti dan konfirmasi.',
         ]);
 
-        $this->activeDesign($data['design_id']);
-        $request->session()->put('checkout.data', array_merge(
-            $request->session()->get('checkout.data', []),
-            $data,
-        ));
+        $session = $request->session()->get('checkout.data', []);
+        $session['nama'] = $data['nama'];
+        $session['nomor'] = $data['nomor'];
+        $session['email'] = $data['email'] ?? '';
+        $session['tipe'] = $data['tipe'] ?? 'kaos_saja';
+        $session['metode'] = in_array($request->input('metode'), ['transfer', 'qris'], true) ? $request->input('metode') : 'qris';
+
+        if (!empty($data['items'])) {
+            $session['items'] = $data['items'];
+            $session['design_id'] = $data['items'][0]['design_id'];
+        } else {
+            $session['items'] = [[
+                'design_id' => (int) $data['design_id'],
+                'ukuran' => $data['ukuran'] ?? 'M',
+                'gender' => 'pria',
+                'jumlah' => (int) ($data['jumlah'] ?? 1),
+            ]];
+            $session['design_id'] = (int) $data['design_id'];
+        }
+
+        $this->activeDesign($session['design_id']);
+
+        // Jika alamat terisi, langsung buat pesanan dan ke halaman pembayaran
+        if (!empty($data['alamat'])) {
+            $orderData = array_merge($session, [
+                'alamat' => $data['alamat'],
+                'provinsi' => $data['provinsi'],
+                'kabupaten' => $data['kabupaten'],
+                'kecamatan' => $data['kecamatan'],
+                'kelurahan' => $data['kelurahan'] ?? null,
+                'kode_pos' => $data['kode_pos'],
+                'catatan' => $data['catatan'] ?? null,
+                'donasi' => 0,
+                'metode' => in_array($request->input('metode'), ['transfer', 'qris'], true) ? $request->input('metode') : 'qris',
+            ]);
+
+            $order = $this->createOrder($orderData);
+            $request->session()->forget('checkout.data');
+
+            return redirect()->route('checkout.bayar', $order);
+        }
+
+        $request->session()->put('checkout.data', $session);
 
         return redirect()->route('checkout.pengiriman');
     }
@@ -87,6 +164,7 @@ class CheckoutController extends Controller
                 'jumlah' => $draft['jumlah'] ?? 1,
             ]]),
             'provinsi' => $rajaOngkir->getProvinces(),
+            'isRajaOngkirLive' => $rajaOngkir->isConfigured(),
             'ukuran' => ['S', 'M', 'L', 'XL', 'XXL'],
             'draft' => $draft,
             'tipe' => $draft['tipe'] ?? 'kaos_saja',
@@ -104,7 +182,10 @@ class CheckoutController extends Controller
         $data = $request->validate($this->shippingRules(), [
             'provinsi.required' => 'Pilih provinsi.',
         ]);
-        $data = array_merge($identity, $data, ['metode' => 'qris']);
+        $metode = in_array($request->input('metode', $identity['metode'] ?? 'qris'), ['transfer', 'qris'], true)
+            ? $request->input('metode', $identity['metode'] ?? 'qris')
+            : 'qris';
+        $data = array_merge($identity, $data, ['metode' => $metode]);
 
         $order = $this->createOrder($data);
         $request->session()->forget('checkout.data');
@@ -180,6 +261,10 @@ class CheckoutController extends Controller
             Storage::disk('public')->delete($order->bukti_path);
         }
 
+        if ($request->filled('metode') && in_array($request->input('metode'), ['qris', 'transfer'], true)) {
+            $order->metode = $request->input('metode');
+        }
+
         $order->bukti_path = $request->file('bukti')->store('bukti-pembayaran', 'public');
         $order->status_pembayaran = 'menunggu_verifikasi';
         $order->save();
@@ -238,6 +323,7 @@ class CheckoutController extends Controller
             'items.*.jumlah' => ['required', 'integer', 'min:1', 'max:100'],
             'donasi' => ['nullable', 'integer', 'min:0', 'max:100000000'],
             'catatan' => ['nullable', 'string', 'max:500'],
+            'metode' => ['nullable', 'string', 'in:qris,transfer'],
         ];
     }
 
